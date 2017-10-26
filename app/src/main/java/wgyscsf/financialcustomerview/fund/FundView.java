@@ -18,6 +18,8 @@ import java.util.List;
 
 import wgyscsf.financialcustomerview.R;
 
+import static android.view.View.MeasureSpec.AT_MOST;
+
 /**
  * ============================================================
  * 作 者 :    wgyscsf@163.com
@@ -28,6 +30,10 @@ import wgyscsf.financialcustomerview.R;
 public class FundView extends View {
 
     private static final String TAG = "FundView";
+    //控件默认宽高
+    private static final float DEF_WIDTH = 650;
+    private static final float DEF_HIGHT = 400;
+
     //数据源
     List<FundMode> mFundModeList;
     //控件宽高
@@ -90,6 +96,19 @@ public class FundView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSpecSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
+        if (widthSpecMode == AT_MOST && heightSpecMode == AT_MOST) {
+            setMeasuredDimension((int) DEF_WIDTH, (int) DEF_HIGHT);
+        } else if (widthSpecMode == AT_MOST) {
+            setMeasuredDimension((int) DEF_WIDTH, heightSpecSize);
+        } else if (heightSpecMode == AT_MOST) {
+            setMeasuredDimension(widthSpecSize, (int) DEF_HIGHT);
+        } else {
+            setMeasuredDimension(widthSpecSize, heightSpecSize);
+        }
         mWidth = getMeasuredWidth();
         mHeight = getMeasuredHeight();
     }
