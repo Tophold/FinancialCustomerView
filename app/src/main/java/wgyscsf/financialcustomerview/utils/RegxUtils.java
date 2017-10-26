@@ -11,15 +11,15 @@ import java.util.regex.Pattern;
  * ============================================================
  **/
 public class RegxUtils {
-    public static double getPureDouble(String str) {
+    public static float getPureDouble(String str) {
         if (str == null || str.length() == 0) return 0;
-        double result = 0;
+        float result = 0;
         try {
             Pattern compile = Pattern.compile("(\\d+\\.\\d+)|(\\d+)");
             Matcher matcher = compile.matcher(str);
             matcher.find();
             String string = matcher.group();//提取匹配到的结果
-            result = Double.parseDouble(string);
+            result = Float.parseFloat(string);
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }

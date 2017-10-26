@@ -72,6 +72,7 @@ public class FundActivity extends BaseActivity {
         for (OriginFundMode originFundMode : originFundModeList) {
             FundMode fundMode = new FundMode(originFundMode.timestamp, originFundMode.actual);
             fundModeList.add(fundMode);
+            Log.e(TAG, "adapterData: 适配之前："+originFundMode.actual+"----->>"+fundMode.dataY );
         }
         return fundModeList;
     }

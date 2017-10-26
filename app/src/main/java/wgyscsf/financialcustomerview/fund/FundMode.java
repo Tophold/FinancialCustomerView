@@ -12,7 +12,7 @@ import wgyscsf.financialcustomerview.utils.RegxUtils;
 public class FundMode {
     //x轴原始时间数据，ms
     public long datetime;
-    public double dataY;
+    public float dataY;
     public String originDataY;
 
     public FundMode(long timestamp, String actual) {
