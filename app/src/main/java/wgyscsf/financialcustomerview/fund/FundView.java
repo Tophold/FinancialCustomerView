@@ -6,14 +6,13 @@ import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathEffect;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import wgyscsf.financialcustomerview.R;
@@ -47,8 +46,8 @@ public class FundView extends View {
 
     //正在加载中
     Paint mLoadingPaint;
-    final float mLoadingTextSize = 16;
-    final String mLoadingText = "正在加载中...";
+    final float mLoadingTextSize = 20;
+    final String mLoadingText = "数据加载，请稍后";
 
 
     //外围X、Y轴线文字
@@ -124,11 +123,97 @@ public class FundView extends View {
         //默认加载loading界面
         showLoadingPaint(canvas);
         if (mFundModeList == null || mFundModeList.size() == 0) return;
-        //hiddenLoadingPaint(canvas);
-
         drawInnerXPaint(canvas);
         drawBrokenPaint(canvas);
         drawXYPaint(canvas);
+
+    }
+
+    private void initAttrs() {
+        initLoadingPaint();
+        initInnerXPaint();
+        initXYPaint();
+        initBrokenPaint();
+    }
+
+    private void initLoadingPaint() {
+        mLoadingPaint = new Paint();
+        mLoadingPaint.setColor(getColor(R.color.color_fundView_xyTxtColor));
+        mLoadingPaint.setTextSize(mLoadingTextSize);
+        mLoadingPaint.setAntiAlias(true);
+    }
+
+    private void initInnerXPaint() {
+        mInnerXPaint = new Paint();
+        mInnerXPaint.setColor(getColor(R.color.color_fundView_xLineColor));
+        mInnerXPaint.setStrokeWidth(convertDp2Px(mInnerXStrokeWidth));
+        mInnerXPaint.setStyle(Paint.Style.STROKE);
+        setLayerType(LAYER_TYPE_SOFTWARE, null);//禁用硬件加速
+        PathEffect effects = new DashPathEffect(new float[]{5, 5, 5, 5}, 1);
+        mInnerXPaint.setPathEffect(effects);
+    }
+
+    private void initXYPaint() {
+        mXYPaint = new Paint();
+        mXYPaint.setColor(getColor(R.color.color_fundView_xyTxtColor));
+        mXYPaint.setTextSize(mXYTextSize);
+        mXYPaint.setAntiAlias(true);
+    }
+
+    private void initBrokenPaint() {
+        mBrokenPaint = new Paint();
+        mBrokenPaint.setColor(getColor(R.color.color_fundView_brokenLineColor));
+        mBrokenPaint.setStyle(Paint.Style.STROKE);
+        mBrokenPaint.setAntiAlias(true);
+        mBrokenPaint.setStrokeWidth(convertDp2Px(mBrokenStrokeWidth));
+    }
+
+    private void showLoadingPaint(Canvas canvas) {
+        //这里特别注意，x轴的起始点要减去文字宽度的一半
+        canvas.drawText(mLoadingText, mWidth / 2 - mLoadingPaint.measureText(mLoadingText) / 2, mHeight / 2, mLoadingPaint);
+    }
+
+    // 只需要把画笔颜色置为透明即可
+    private void hiddenLoadingPaint() {
+        mLoadingPaint.setColor(0x00000000);
+    }
+
+    private void drawInnerXPaint(Canvas canvas) {
+        //画5条横轴的虚线
+        //首先确定最大值和最小值的位置
+
+        float perHight = (mHeight - mPaddingBottom - mPaddingTop) / 4;
+
+        canvas.drawLine(0 + mPaddingLeft, mPaddingTop,
+                mWidth - mPaddingRight, mPaddingTop, mInnerXPaint);//最上面的那一条
+
+        canvas.drawLine(0 + mPaddingLeft, mPaddingTop + perHight * 1,
+                mWidth - mPaddingRight, mPaddingTop + perHight * 1, mInnerXPaint);//2
+
+        canvas.drawLine(0 + mPaddingLeft, mPaddingTop + perHight * 2,
+                mWidth - mPaddingRight, mPaddingTop + perHight * 2, mInnerXPaint);//3
+
+        canvas.drawLine(0 + mPaddingLeft, mPaddingTop + perHight * 3,
+                mWidth - mPaddingRight, mPaddingTop + perHight * 3, mInnerXPaint);//4
+
+        canvas.drawLine(0 + mPaddingLeft, mHeight - mPaddingBottom,
+                mWidth - mPaddingRight, mHeight - mPaddingBottom, mInnerXPaint);//最下面的那一条
+
+    }
+
+    private void drawBrokenPaint(Canvas canvas) {
+        //先画第一个点
+        FundMode fundMode = mFundModeList.get(0);
+        Path path = new Path();
+        //这里需要说明一下，x周的起始点，其实需要加上mPerX，但是加上之后不是从起始位置开始，不好看。
+        // 同理，for循环内x周其实需要(i+1)。现在这样处理，最后会留一点空隙，其实挺好看的。
+        path.moveTo(mPaddingLeft, (mHeight - mPaddingBottom - mPerY * (fundMode.dataY - mMinFundMode.dataY)));
+        for (int i = 1; i < mFundModeList.size(); i++) {
+            path.lineTo(mPaddingLeft + mPerX * i, (mHeight - mPaddingBottom - mPerY * (mFundModeList.get(i).dataY - mMinFundMode.dataY)));
+            Log.e(TAG, "drawBrokenPaint: " + mPaddingLeft + mPerX * i + "-----" + (mHeight - mPerY * (mFundModeList.get(i).dataY - mMinFundMode.dataY) - mPaddingBottom));
+        }
+
+        canvas.drawPath(path, mBrokenPaint);
     }
 
     private void drawXYPaint(Canvas canvas) {
@@ -165,11 +250,6 @@ public class FundView extends View {
 
     }
 
-    // TODO: 2017/10/26 完成时间格式化
-    private String processDateTime(long beginTime) {
-        return "10-26";
-    }
-
     private void drawYPaint(Canvas canvas) {
         //现将最小值、最大值画好
         //draw min
@@ -192,96 +272,11 @@ public class FundView extends View {
         }
     }
 
-    private void drawBrokenPaint(Canvas canvas) {
-        //先画第一个点
-        FundMode fundMode = mFundModeList.get(0);
-        Path path = new Path();
-        //这里需要说明一下，x周的起始点，其实需要加上mPerX，但是加上之后不是从起始位置开始，不好看。
-        // 同理，for循环内x周其实需要(i+1)。现在这样处理，最后会留一点空隙，其实挺好看的。
-        path.moveTo(mPaddingLeft, (mHeight - mPaddingBottom - mPerY * (fundMode.dataY - mMinFundMode.dataY)));
-        for (int i = 1; i < mFundModeList.size(); i++) {
-            path.lineTo(mPaddingLeft + mPerX * i, (mHeight - mPaddingBottom - mPerY * (mFundModeList.get(i).dataY - mMinFundMode.dataY)));
-            Log.e(TAG, "drawBrokenPaint: " + mPaddingLeft + mPerX * i + "-----" + (mHeight - mPerY * (mFundModeList.get(i).dataY - mMinFundMode.dataY) - mPaddingBottom));
-        }
-
-        canvas.drawPath(path, mBrokenPaint);
+    private String processDateTime(long beginTime) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(beginTime);
     }
 
-    private void showLoadingPaint(Canvas canvas) {
-        canvas.drawText(mLoadingText, mPaddingLeft +
-                        (mWidth - mPaddingLeft - mPaddingRight) / 2,
-                mPaddingTop + (mHeight - mPaddingTop - mPaddingBottom) / 2,
-                mLoadingPaint);
-    }
-
-    private void hiddenLoadingPaint(Canvas canvas) {
-        mLoadingPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        canvas.drawPaint(mLoadingPaint);
-    }
-
-    private void drawInnerXPaint(Canvas canvas) {
-        //画5条横轴的虚线
-        //首先确定最大值和最小值的位置
-
-        float perHight = (mHeight - mPaddingBottom - mPaddingTop) / 4;
-
-        canvas.drawLine(0 + mPaddingLeft, mPaddingTop,
-                mWidth - mPaddingRight, mPaddingTop, mInnerXPaint);//最上面的那一条
-
-        canvas.drawLine(0 + mPaddingLeft, mPaddingTop + perHight * 1,
-                mWidth - mPaddingRight, mPaddingTop + perHight * 1, mInnerXPaint);//2
-
-        canvas.drawLine(0 + mPaddingLeft, mPaddingTop + perHight * 2,
-                mWidth - mPaddingRight, mPaddingTop + perHight * 2, mInnerXPaint);//3
-
-        canvas.drawLine(0 + mPaddingLeft, mPaddingTop + perHight * 3,
-                mWidth - mPaddingRight, mPaddingTop + perHight * 3, mInnerXPaint);//4
-
-        canvas.drawLine(0 + mPaddingLeft, mHeight - mPaddingBottom,
-                mWidth - mPaddingRight, mHeight - mPaddingBottom, mInnerXPaint);//最下面的那一条
-
-    }
-
-    private void initAttrs() {
-        initLoadingPaint();
-        initInnerXPaint();
-        initXYPaint();
-        initBrokenPaint();
-    }
-
-    private void initLoadingPaint() {
-        mLoadingPaint = new Paint();
-        mLoadingPaint.setColor(getColor(R.color.color_fundView_xyTxtColor));
-        mLoadingPaint.setTextSize(mLoadingTextSize);
-        mLoadingPaint.setAntiAlias(true);
-    }
-
-    private void initXYPaint() {
-        mXYPaint = new Paint();
-        mXYPaint.setColor(getColor(R.color.color_fundView_xyTxtColor));
-        mXYPaint.setTextSize(mXYTextSize);
-        mXYPaint.setAntiAlias(true);
-    }
-
-
-    private void initInnerXPaint() {
-        mInnerXPaint = new Paint();
-        mInnerXPaint.setColor(getColor(R.color.color_fundView_xLineColor));
-        mInnerXPaint.setStrokeWidth(convertDp2Px(mInnerXStrokeWidth));
-        mInnerXPaint.setStyle(Paint.Style.STROKE);
-        setLayerType(LAYER_TYPE_SOFTWARE, null);//禁用硬件加速
-        PathEffect effects = new DashPathEffect(new float[]{5, 5, 5, 5}, 1);
-        mInnerXPaint.setPathEffect(effects);
-    }
-
-
-    private void initBrokenPaint() {
-        mBrokenPaint = new Paint();
-        mBrokenPaint.setColor(getColor(R.color.color_fundView_brokenLineColor));
-        mBrokenPaint.setStyle(Paint.Style.STROKE);
-        mBrokenPaint.setAntiAlias(true);
-        mBrokenPaint.setStrokeWidth(convertDp2Px(mBrokenStrokeWidth));
-    }
 
     private int getColor(@ColorRes int colorId) {
         return getResources().getColor(colorId);
@@ -303,12 +298,11 @@ public class FundView extends View {
         mMinFundMode = mFundModeList.get(0);
         mMaxFundMode = mFundModeList.get(0);
         for (FundMode fundMode : mFundModeList) {
-            FundMode temp = fundMode;
-            if (temp.dataY < mMinFundMode.dataY) {
-                mMinFundMode = temp;
+            if (fundMode.dataY < mMinFundMode.dataY) {
+                mMinFundMode = fundMode;
             }
-            if (temp.dataY > mMaxFundMode.dataY) {
-                mMaxFundMode = temp;
+            if (fundMode.dataY > mMaxFundMode.dataY) {
+                mMaxFundMode = fundMode;
             }
         }
         //获取单个数据X轴的大小
@@ -316,6 +310,8 @@ public class FundView extends View {
         mPerY = ((mHeight - mPaddingTop - mPaddingBottom) / (mMaxFundMode.dataY - mMinFundMode.dataY));
         Log.e(TAG, "setDataList: " + mMinFundMode + "," + mMaxFundMode + "..." + mPerX + "," + mPerY);
 
+        //数据过来，隐藏加载更多
+        hiddenLoadingPaint();
 
         //刷新界面
         postInvalidate();

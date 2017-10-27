@@ -70,7 +70,7 @@ public class FundActivity extends BaseActivity {
     private List<FundMode> adapterData(List<OriginFundMode> originFundModeList) {
         List<FundMode> fundModeList = new ArrayList<>();//适配后的数据
         for (OriginFundMode originFundMode : originFundModeList) {
-            FundMode fundMode = new FundMode(originFundMode.timestamp, originFundMode.actual);
+            FundMode fundMode = new FundMode(originFundMode.timestamp*1000, originFundMode.actual);
             fundModeList.add(fundMode);
             Log.e(TAG, "adapterData: 适配之前："+originFundMode.actual+"----->>"+fundMode.dataY );
         }
