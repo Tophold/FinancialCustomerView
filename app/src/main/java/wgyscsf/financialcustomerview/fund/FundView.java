@@ -10,6 +10,7 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.text.SimpleDateFormat;
@@ -69,6 +70,10 @@ public class FundView extends View {
     //单位：dp
     float mBrokenStrokeWidth = 1;
 
+    //长按的十字线
+    Paint mCrossPaint;
+    float mCrossStrokeWidth = 1;
+
 
     //X、Y轴每一个data对应的大小
     float mPerX;
@@ -77,6 +82,13 @@ public class FundView extends View {
     //Y轴对应的最大值和最小值,注意，这里存的是对象
     FundMode mMinFundMode;
     FundMode mMaxFundMode;
+
+    //长按处理
+    long mPressTime;
+    //默认多长时间算长按
+    final long DEF_LONGPRESS_LENGTH = 1000;
+    float mPressX;
+    float mPressY;
 
 
     public FundView(Context context) {
@@ -129,11 +141,44 @@ public class FundView extends View {
 
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mPressTime = event.getDownTime();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (event.getEventTime() - mPressTime > DEF_LONGPRESS_LENGTH) {
+                    Log.e(TAG, "onTouchEvent: 长按了。。。");
+                    mPressX = event.getX();
+                    mPressY = event.getY();
+                    showCrossView();
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                hiddenCrossView();
+                break;
+            default:
+                break;
+        }
+
+        return true;
+    }
+
+    private void showCrossView() {
+
+    }
+
+    private void hiddenCrossView() {
+
+    }
+
     private void initAttrs() {
         initLoadingPaint();
         initInnerXPaint();
         initXYPaint();
         initBrokenPaint();
+        initCrossPaint();
     }
 
     private void initLoadingPaint() {
@@ -166,6 +211,14 @@ public class FundView extends View {
         mBrokenPaint.setStyle(Paint.Style.STROKE);
         mBrokenPaint.setAntiAlias(true);
         mBrokenPaint.setStrokeWidth(convertDp2Px(mBrokenStrokeWidth));
+    }
+
+    private void initCrossPaint() {
+        mCrossPaint = new Paint();
+        mCrossPaint.setColor(getColor(R.color.color_fundView_crossLineColor));
+        mCrossPaint.setStyle(Paint.Style.STROKE);
+        mCrossPaint.setAntiAlias(true);
+        mCrossPaint.setStrokeWidth(convertDp2Px(mCrossStrokeWidth));
     }
 
     private void showLoadingPaint(Canvas canvas) {

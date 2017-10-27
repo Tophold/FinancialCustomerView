@@ -8,4 +8,5 @@
     <color name="color_fundView_xyTxtColor">#787274</color>
     <color name="color_fundView_xLineColor">#c1bdbe</color>
     <color name="color_fundView_brokenLineColor">#3785d9</color>
+    <color name="color_fundView_crossLineColor">#ec210f</color>
 </resources>
