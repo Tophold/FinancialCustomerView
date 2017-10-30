@@ -15,7 +15,7 @@ public class RegxUtils {
         if (str == null || str.length() == 0) return 0;
         float result = 0;
         try {
-            Pattern compile = Pattern.compile("(\\d+\\.\\d+)|(\\d+)");
+            Pattern compile = Pattern.compile("(\\d+\\.\\d+)|(\\d+)");//如何提取带负数d ???
             Matcher matcher = compile.matcher(str);
             matcher.find();
             String string = matcher.group();//提取匹配到的结果
