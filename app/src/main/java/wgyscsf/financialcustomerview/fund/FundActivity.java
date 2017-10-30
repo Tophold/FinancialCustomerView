@@ -62,7 +62,7 @@ public class FundActivity extends BaseActivity {
                     Log.e(TAG, "run: 数据适配失败、、、、");
                 }
             }
-        }, 5000);
+        }, 1000);
 
 
     }

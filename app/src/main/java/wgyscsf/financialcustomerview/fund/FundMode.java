@@ -14,10 +14,24 @@ public class FundMode {
     public long datetime;
     public float dataY;
     public String originDataY;
+    //在自定义view:FundView中的位置坐标
+    public float floatX;
+    public float floatY;
 
     public FundMode(long timestamp, String actual) {
         this.datetime = timestamp;
         this.originDataY = actual;
         this.dataY = RegxUtils.getPureDouble(originDataY);
+    }
+
+    @Override
+    public String toString() {
+        return "FundMode{" +
+                "datetime=" + datetime +
+                ", dataY=" + dataY +
+                ", originDataY='" + originDataY + '\'' +
+                ", floatX=" + floatX +
+                ", floatY=" + floatY +
+                '}';
     }
 }

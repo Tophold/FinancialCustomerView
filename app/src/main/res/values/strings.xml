@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">FinancialCustomerView</string>
+    <string name="string_fundView_defHintTxt">累计收益:</string>
+    <string name="string_fundView_pressHintTxt">累计盈亏:</string>
 </resources>

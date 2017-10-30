@@ -40,15 +40,24 @@ public class FundView extends View {
     int mWidth;
     int mHeight;
     //上下左右padding
-    float mPaddingTop = 50;
+    float mPaddingTop = 100;
     float mPaddingBottom = 70;
     float mPaddingLeft = 50;
     float mPaddingRight = 50;
+
+    //Y轴对应的最大值和最小值,注意，这里存的是对象
+    FundMode mMinFundMode;
+    FundMode mMaxFundMode;
+
+    //X、Y轴每一个data对应的大小
+    float mPerX;
+    float mPerY;
 
     //正在加载中
     Paint mLoadingPaint;
     final float mLoadingTextSize = 20;
     final String mLoadingText = "数据加载，请稍后";
+    boolean mDrawLoadingPaint = true;
 
 
     //外围X、Y轴线文字
@@ -59,36 +68,38 @@ public class FundView extends View {
     final float mLeftTxtPadding = 16;
     //底部文字距离底部线的距离
     final float mBottomTxtPadding = 20;
+    boolean mDrawXYPaint = false;
 
 
     //内部X轴虚线
     Paint mInnerXPaint;
     float mInnerXStrokeWidth = 1;
+    boolean mDrawInnerXPaint = false;
 
     //折线
     Paint mBrokenPaint;
     //单位：dp
     float mBrokenStrokeWidth = 1;
+    boolean mDrawBrokenPaint = false;
 
     //长按的十字线
-    Paint mCrossPaint;
-    float mCrossStrokeWidth = 1;
-
-
-    //X、Y轴每一个data对应的大小
-    float mPerX;
-    float mPerY;
-
-    //Y轴对应的最大值和最小值,注意，这里存的是对象
-    FundMode mMinFundMode;
-    FundMode mMaxFundMode;
-
+    Paint mLongPressPaint;
+    boolean mDrawLongPressPaint = false;
     //长按处理
     long mPressTime;
     //默认多长时间算长按
-    final long DEF_LONGPRESS_LENGTH = 1000;
+    final long DEF_LONGPRESS_LENGTH = 700;
     float mPressX;
     float mPressY;
+
+    //最上面默认显示累计收益金额
+    Paint mDefAllIncomePaint;
+    final float mDefAllIncomeTextSize = 20;
+
+
+    //长按情况下x轴和y轴要显示的文字
+    Paint mLongPressTxtPaint;
+    final float mLongPressTextSize = 20;
 
 
     public FundView(Context context) {
@@ -135,9 +146,116 @@ public class FundView extends View {
         //默认加载loading界面
         showLoadingPaint(canvas);
         if (mFundModeList == null || mFundModeList.size() == 0) return;
+
+        //加载三个核心Paint
         drawInnerXPaint(canvas);
         drawBrokenPaint(canvas);
         drawXYPaint(canvas);
+        drawTopTxtPaint(canvas);
+        //加载完毕之后reset三只画笔的状态，下次invalidate();不再重绘
+        resetCorePaintStatus();
+
+        drawLongPress(canvas);
+    }
+
+    private void drawTopTxtPaint(Canvas canvas) {
+        //先画默认情况下的top文字
+        drawDefTopTxtpaint(canvas);
+        //按下的文字信息在按下之后处理，see:drawLongPress(Canvas canvas)
+    }
+
+    private void drawDefTopTxtpaint(Canvas canvas) {
+        //画默认情况下前面的蓝色小圆点
+        Paint buleDotPaint = new Paint();
+        buleDotPaint.setColor(getColor(R.color.color_fundView_brokenLineColor));
+        buleDotPaint.setAntiAlias(true);
+        float r = 6;
+        buleDotPaint.setStyle(Paint.Style.FILL);
+        canvas.drawCircle(mPaddingLeft + r / 2, mPaddingTop / 2 + r, r, buleDotPaint);
+
+        float txtHight = getFontHeight(mDefAllIncomeTextSize, mDefAllIncomePaint);
+
+        //先画hint文字
+        Paint hintPaint = new Paint();
+        hintPaint.setColor(getColor(R.color.color_fundView_xyTxtColor));
+        hintPaint.setAntiAlias(true);
+        hintPaint.setTextSize(mDefAllIncomeTextSize);
+        String hintTxt = getString(R.string.string_fundView_defHintTxt);
+        canvas.drawText(hintTxt, mPaddingLeft + r + 10, mPaddingTop / 2 + txtHight / 2,
+                mDefAllIncomePaint);
+
+
+        if (mFundModeList == null || mFundModeList.isEmpty()) return;
+        canvas.drawText(mFundModeList.get(mFundModeList.size() - 1).dataY + "",
+                mPaddingLeft + r + 10 + hintPaint.measureText(getString(R.string.string_fundView_defHintTxt)) + 5,
+                mPaddingTop / 2 + txtHight / 2, mDefAllIncomePaint);
+    }
+
+    private void resetCorePaintStatus() {
+        //        mDrawXYPaint = false;
+        //        mDrawBrokenPaint = false;
+        //        mDrawInnerXPaint = false;
+    }
+
+    /**
+     * 这里处理画十字的逻辑:这里的十字不是手指按下的位置，这样没有意义。
+     * 而是当前按下的距离x轴最近的时间（注意：并不一定按下对应的x轴就是有时间的，如果没有取最近的）。
+     * 当取到x轴的值，之后算出来对应的y轴的值，这个才是十字对应的位置坐标。
+     * 如何获取x轴最近的时间？我们可以在FundMode中定义x\y的位置参数，遍历对比找到最小即可。
+     * (see: drawBrokenPaint(canvas);)
+     *
+     * @param canvas
+     */
+    private void drawLongPress(Canvas canvas) {
+        if (!mDrawLongPressPaint) return;
+
+        //获取距离最近按下的位置的model
+        float pressX = mPressX;
+        //循环遍历，找到距离最短的x轴的mode
+        FundMode finalFundMode = mFundModeList.get(0);
+        float minXLen = Integer.MAX_VALUE;
+        for (int i = 0; i < mFundModeList.size(); i++) {
+            FundMode currFunMode = mFundModeList.get(i);
+            float abs = Math.abs(pressX - currFunMode.floatX);
+            if (abs < minXLen) {
+                finalFundMode = currFunMode;
+                minXLen = abs;
+            }
+        }
+
+        //x
+        canvas.drawLine(mPaddingLeft, finalFundMode.floatY, mWidth - mPaddingRight, finalFundMode.floatY, mLongPressPaint);
+        //y
+        canvas.drawLine(finalFundMode.floatX, mPaddingTop, finalFundMode.floatX, mWidth - mPaddingBottom, mLongPressPaint);
+
+        //开始处理按下之后top的文字信息
+        //先画背景
+        float hight = mPaddingTop - 30;
+        Paint bgColor = new Paint(Paint.ANTI_ALIAS_FLAG);
+        bgColor.setColor(getColor(R.color.color_fundView_pressIncomeTxtBg));
+        canvas.drawRect(0, 0, mWidth, hight, bgColor);
+
+        //开始画按下之后左边的日期文字
+        Paint timePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        timePaint.setTextSize(mLongPressTextSize);
+        timePaint.setColor(getColor(R.color.color_fundView_xyTxtColor));
+        canvas.drawText(processDateTime(finalFundMode.datetime) + "",
+                10, hight / 2 + getFontHeight(mLoadingTextSize, timePaint) / 2, timePaint);
+
+        //右边红色收益文字
+        canvas.drawText(finalFundMode.dataY + "",
+                mWidth-mPaddingRight-mLongPressPaint.measureText(finalFundMode.dataY + ""),
+                hight / 2 + getFontHeight(mLoadingTextSize, timePaint) / 2,mLongPressPaint );
+
+        //右边的左边的提示文字
+        Paint hintPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        hintPaint.setTextSize(mLongPressTextSize);
+        hintPaint.setColor(getColor(R.color.color_fundView_xyTxtColor));
+        canvas.drawText(getString(R.string.string_fundView_pressHintTxt) ,
+                mWidth-mPaddingRight-mLongPressPaint.measureText(finalFundMode.dataY + "")
+                        -hintPaint.measureText(getString(R.string.string_fundView_pressHintTxt)),
+                hight / 2 + getFontHeight(mLoadingTextSize, timePaint) / 2, hintPaint);
+
 
     }
 
@@ -152,11 +270,11 @@ public class FundView extends View {
                     Log.e(TAG, "onTouchEvent: 长按了。。。");
                     mPressX = event.getX();
                     mPressY = event.getY();
-                    showCrossView();
+                    showLongPressView();
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                hiddenCrossView();
+                hiddenLongPressView();
                 break;
             default:
                 break;
@@ -165,12 +283,13 @@ public class FundView extends View {
         return true;
     }
 
-    private void showCrossView() {
-
+    private void showLongPressView() {
+        mDrawLongPressPaint = true;
+        invalidate();
     }
 
-    private void hiddenCrossView() {
-
+    private void hiddenLongPressView() {
+        mDrawLongPressPaint = false;
     }
 
     private void initAttrs() {
@@ -178,7 +297,21 @@ public class FundView extends View {
         initInnerXPaint();
         initXYPaint();
         initBrokenPaint();
-        initCrossPaint();
+        initLongPressPaint();
+        initTopTxt();
+    }
+
+    //折线上面显示文字信息
+    private void initTopTxt() {
+        mDefAllIncomePaint = new Paint();
+        mDefAllIncomePaint.setColor(getColor(R.color.color_fundView_defIncomeTxt));
+        mDefAllIncomePaint.setTextSize(mLongPressTextSize);
+        mDefAllIncomePaint.setAntiAlias(true);
+
+        mLongPressTxtPaint = new Paint();
+        mLongPressTxtPaint.setColor(getColor(R.color.color_fundView_longPressLineColor));
+        mLongPressTxtPaint.setTextSize(mLongPressTextSize);
+        mLongPressTxtPaint.setAntiAlias(true);
     }
 
     private void initLoadingPaint() {
@@ -213,15 +346,16 @@ public class FundView extends View {
         mBrokenPaint.setStrokeWidth(convertDp2Px(mBrokenStrokeWidth));
     }
 
-    private void initCrossPaint() {
-        mCrossPaint = new Paint();
-        mCrossPaint.setColor(getColor(R.color.color_fundView_crossLineColor));
-        mCrossPaint.setStyle(Paint.Style.STROKE);
-        mCrossPaint.setAntiAlias(true);
-        mCrossPaint.setStrokeWidth(convertDp2Px(mCrossStrokeWidth));
+    private void initLongPressPaint() {
+        mLongPressPaint = new Paint();
+        mLongPressPaint.setColor(getColor(R.color.color_fundView_longPressLineColor));
+        mLongPressPaint.setStyle(Paint.Style.FILL);
+        mLongPressPaint.setAntiAlias(true);
+        mLongPressPaint.setTextSize(mLongPressTextSize);
     }
 
     private void showLoadingPaint(Canvas canvas) {
+        if (!mDrawLoadingPaint) return;
         //这里特别注意，x轴的起始点要减去文字宽度的一半
         canvas.drawText(mLoadingText, mWidth / 2 - mLoadingPaint.measureText(mLoadingText) / 2, mHeight / 2, mLoadingPaint);
     }
@@ -229,9 +363,11 @@ public class FundView extends View {
     // 只需要把画笔颜色置为透明即可
     private void hiddenLoadingPaint() {
         mLoadingPaint.setColor(0x00000000);
+        mDrawLoadingPaint = false;
     }
 
     private void drawInnerXPaint(Canvas canvas) {
+        if (!mDrawInnerXPaint) return;
         //画5条横轴的虚线
         //首先确定最大值和最小值的位置
 
@@ -255,27 +391,39 @@ public class FundView extends View {
     }
 
     private void drawBrokenPaint(Canvas canvas) {
+        if (!mDrawBrokenPaint) return;
         //先画第一个点
         FundMode fundMode = mFundModeList.get(0);
         Path path = new Path();
-        //这里需要说明一下，x周的起始点，其实需要加上mPerX，但是加上之后不是从起始位置开始，不好看。
-        // 同理，for循环内x周其实需要(i+1)。现在这样处理，最后会留一点空隙，其实挺好看的。
-        path.moveTo(mPaddingLeft, (mHeight - mPaddingBottom - mPerY * (fundMode.dataY - mMinFundMode.dataY)));
+        //这里需要说明一下，x轴的起始点，其实需要加上mPerX，但是加上之后不是从起始位置开始，不好看。
+        // 同理，for循环内x轴其实需要(i+1)。现在这样处理，最后会留一点空隙，其实挺好看的。
+        float floatY = mHeight - mPaddingBottom - mPerY * (fundMode.dataY - mMinFundMode.dataY);
+        fundMode.floatX = mPaddingLeft;
+        fundMode.floatY = floatY;
+        path.moveTo(mPaddingLeft, floatY);
         for (int i = 1; i < mFundModeList.size(); i++) {
-            path.lineTo(mPaddingLeft + mPerX * i, (mHeight - mPaddingBottom - mPerY * (mFundModeList.get(i).dataY - mMinFundMode.dataY)));
-            Log.e(TAG, "drawBrokenPaint: " + mPaddingLeft + mPerX * i + "-----" + (mHeight - mPerY * (mFundModeList.get(i).dataY - mMinFundMode.dataY) - mPaddingBottom));
+            FundMode fm = mFundModeList.get(i);
+            float floatX2 = mPaddingLeft + mPerX * i;
+            float floatY2 = mHeight - mPaddingBottom - mPerY * (fm.dataY - mMinFundMode.dataY);
+            fm.floatX = floatX2;
+            fm.floatY = floatY2;
+            path.lineTo(floatX2, floatY2);
+            //Log.e(TAG, "drawBrokenPaint: " + mPaddingLeft + mPerX * i + "-----" + (mHeight - mPerY * (mFundModeList.get(i).dataY - mMinFundMode.dataY) - mPaddingBottom));
         }
 
         canvas.drawPath(path, mBrokenPaint);
+
+
     }
 
     private void drawXYPaint(Canvas canvas) {
+        if (!mDrawXYPaint) return;
+
         //先处理y轴方向文字
         drawYPaint(canvas);
 
         //处理x轴方向文字
         drawXPaint(canvas);
-
     }
 
     //找到最大时间、最小时间和中间时间显示即可
@@ -366,9 +514,26 @@ public class FundView extends View {
         //数据过来，隐藏加载更多
         hiddenLoadingPaint();
 
+        //显示加载数据
+        showDataPaint();
+
         //刷新界面
-        postInvalidate();
+        invalidate();
     }
 
+    private void showDataPaint() {
+        mDrawXYPaint = true;
+        mDrawBrokenPaint = true;
+        mDrawInnerXPaint = true;
+    }
 
+    public float getFontHeight(float fontSize, Paint paint) {
+        paint.setTextSize(fontSize);
+        Paint.FontMetrics fm = paint.getFontMetrics();
+        return (float) (Math.ceil(fm.descent - fm.top) + 2);
+    }
+
+    private String getString(int string_fundView_defHintTxt) {
+        return getResources().getString(R.string.string_fundView_defHintTxt);
+    }
 }
