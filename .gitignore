@@ -1,9 +1,63 @@
+#---------以下为通用配置BEGIN------
+
+# 操作系统忽略文件
+# OSX
+*.DS_Store
+# Windows thumbnail db
+Thumbs.db
+
+## AndroidStudio IDE忽略文件
+# Intellij
 *.iml
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
-.DS_Store
-/build
-/captures
-.externalNativeBuild
+.idea/
+# Android Studio captures folder
+captures/
+# Android Studio Navigation editor temp files
+.navigation/
+
+## gradle忽略文件
+# Gradle files
+.gradle/
+gradle/
+gradlew
+gradlew.bat
+
+## sdk配置文件
+# Local configuration file (sdk path, etc)
+local.properties
+
+## 编译生成的文件
+# Generated files
+bin/
+gen/
+out/
+build/
+*.dex
+*.apk
+*.ap_
+*.class
+
+## 日志文件
+# Log Files
+*.log
+#---------以上为通用配置END--------
+
+
+#--------- 根据需求个性化配置---------
+
+# Keystore files
+# *.jks
+
+
+## 第三方
+
+# bugly
+*.txt
+
+
+
+# note
+# .ignore不起作用解决方案
+# git rm -r --cached .
+# git add .
+# git commit -m "update .ignore"
