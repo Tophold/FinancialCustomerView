@@ -165,10 +165,12 @@ public class FundView extends View {
                     Log.e(TAG, "onTouchEvent: 长按了。。。");
                     mPressX = event.getX();
                     mPressY = event.getY();
+                    //处理长按后的逻辑
                     showLongPressView();
                 }
                 break;
             case MotionEvent.ACTION_UP:
+                //处理松手后的逻辑
                 hiddenLongPressView();
                 break;
             default:
@@ -194,6 +196,7 @@ public class FundView extends View {
         mLoadingPaint.setAntiAlias(true);
     }
 
+    //初始化绘制虚线的画笔
     private void initInnerXPaint() {
         mInnerXPaint = new Paint();
         mInnerXPaint.setColor(getColor(R.color.color_fundView_xLineColor));
@@ -250,7 +253,6 @@ public class FundView extends View {
     private void drawInnerXPaint(Canvas canvas) {
         //画5条横轴的虚线
         //首先确定最大值和最小值的位置
-
         float perHight = (mHeight - mPaddingBottom - mPaddingTop) / 4;
 
         canvas.drawLine(0 + mPaddingLeft, mPaddingTop,
@@ -380,6 +382,7 @@ public class FundView extends View {
         String mid = processDateTime(midTime);
         String end = processDateTime(endTime);
 
+        //x轴文字的高度
         float hight = mHeight - mPaddingBottom + mBottomTxtPadding;
 
         canvas.drawText(bengin,
@@ -392,7 +395,7 @@ public class FundView extends View {
 
         canvas.drawText(end,
                 mWidth - mPaddingRight - mXYPaint.measureText(end),
-                hight, mXYPaint);
+                hight, mXYPaint);//特别注意x轴的处理：- mXYPaint.measureText(end)
 
     }
 
@@ -510,7 +513,7 @@ public class FundView extends View {
                 mMaxFundMode = fundMode;
             }
         }
-        //获取单个数据X轴的大小
+        //获取单个数据X/y轴的大小
         mPerX = (mWidth - mPaddingLeft - mPaddingRight) / mFundModeList.size();
         mPerY = ((mHeight - mPaddingTop - mPaddingBottom) / (mMaxFundMode.dataY - mMinFundMode.dataY));
         Log.e(TAG, "setDataList: " + mMinFundMode + "," + mMaxFundMode + "..." + mPerX + "," + mPerY);

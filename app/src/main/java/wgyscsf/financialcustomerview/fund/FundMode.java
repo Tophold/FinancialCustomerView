@@ -21,7 +21,7 @@ public class FundMode {
     public FundMode(long timestamp, String actual) {
         this.datetime = timestamp;
         this.originDataY = actual;
-        this.dataY = RegxUtils.getPureDouble(originDataY);
+        this.dataY = RegxUtils.getPureDouble(originDataY);//提取后的Y周的值
     }
 
     @Override
