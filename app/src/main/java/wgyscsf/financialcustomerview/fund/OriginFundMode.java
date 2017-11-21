@@ -1,5 +1,7 @@
 package wgyscsf.financialcustomerview.fund;
 
+import wgyscsf.financialcustomerview.BaseModel;
+
 /**
  * ============================================================
  * 作 者 :    wgyscsf@163.com
@@ -7,7 +9,7 @@ package wgyscsf.financialcustomerview.fund;
  * 描 述 ：
  * ============================================================
  **/
-public class OriginFundMode {
+public class OriginFundMode extends BaseModel {
     /**
      * actual : 103
      * createTime : Apr 10, 2017 12:04:14 AM
