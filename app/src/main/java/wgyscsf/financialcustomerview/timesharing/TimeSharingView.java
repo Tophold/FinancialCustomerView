@@ -194,6 +194,7 @@ public class TimeSharingView extends View {
         mInnerXyPaint.setColor(mInnerXyLineColor);
         mInnerXyPaint.setStrokeWidth(mInnerXyLineWidth);
         mInnerXyPaint.setStyle(Paint.Style.STROKE);
+        setLayerType(LAYER_TYPE_SOFTWARE, null);
         mInnerXyPaint.setPathEffect(new DashPathEffect(new float[]{5, 5}, 0));
     }
 
