@@ -6,19 +6,11 @@
     android:gravity="center"
     android:orientation="vertical">
 
-    <Button
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="goFundView"
-        android:text="去自定义基金页面"
-        />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="goTimeShring"
-        android:text="去分时图页面"
+        android:text="Hello World!"
         />
 
 
-</LinearLayout>  
+</LinearLayout>
