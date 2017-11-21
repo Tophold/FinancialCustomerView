@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import wgyscsf.financialcustomerview.fund.FundActivity;
+import wgyscsf.financialcustomerview.timesharing.TimeSharingActivity;
 
 public class MainActivity extends BaseActivity {
 
@@ -16,5 +17,9 @@ public class MainActivity extends BaseActivity {
     public void goFundView(View view) {
         go(FundActivity.class);
 
+    }
+
+    public void goTimeShring(View view) {
+        go(TimeSharingActivity.class);
     }
 }

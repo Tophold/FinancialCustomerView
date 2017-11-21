@@ -5,7 +5,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
+
+import wgyscsf.financialcustomerview.timesharing.OriginQuotes;
 
 /**
  * <p>GSON工具类</p>
@@ -71,4 +74,5 @@ public class GsonUtil {
     public static <T> T fromJson2Object(String src, Type typeOfT) {
         return gson.fromJson(src, typeOfT);
     }
+
 }
