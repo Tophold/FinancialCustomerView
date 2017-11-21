@@ -14,3 +14,7 @@
 ![https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/v1.1_img_nopress.png?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/v1.1_img_nopress.png?raw=true)
 
 ![https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/v1.1_img_press.png?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/v1.1_img_press.png?raw=true)
+
+* timesharing分支（分时图，正在完善）
+
+![https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/v1.2_%E5%88%86%E6%97%B6%E5%9B%BE_%E6%8A%98%E7%BA%BF%E5%9B%BE%E9%9B%8F%E5%BD%A2.png?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/v1.2_%E5%88%86%E6%97%B6%E5%9B%BE_%E6%8A%98%E7%BA%BF%E5%9B%BE%E9%9B%8F%E5%BD%A2.png?raw=true)
