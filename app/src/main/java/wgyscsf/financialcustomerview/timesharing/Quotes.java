@@ -15,10 +15,10 @@ import wgyscsf.financialcustomerview.utils.TimeUtils;
 public class Quotes extends BaseModel {
 
     Quotes(String o, String h, String l, String c, String t) {
-        this.o = o;
-        this.h = h;
-        this.l = l;
-        this.c = c;
+        this.o = Double.parseDouble(o);
+        this.h = Double.parseDouble(h);
+        this.l = Double.parseDouble(l);
+        this.c = Double.parseDouble(c);
         this.t = TimeUtils.date2Millis(new Date(t));
         this.showTime = TimeUtils.millis2String(this.t);
     }
@@ -27,8 +27,20 @@ public class Quotes extends BaseModel {
     public String showTime;
     //标准时间戳（ms）
     public long t;
-    public String o;
-    public String h;
-    public String l;
-    public String c;
+    public double o;
+    public double h;
+    public double l;
+    public double c;
+
+    @Override
+    public String toString() {
+        return "Quotes{" +
+                "showTime='" + showTime + '\'' +
+                ", t=" + t +
+                ", o=" + o +
+                ", h=" + h +
+                ", l=" + l +
+                ", c=" + c +
+                '}';
+    }
 }

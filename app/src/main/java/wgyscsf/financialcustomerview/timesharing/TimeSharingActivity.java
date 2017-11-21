@@ -14,11 +14,13 @@ import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.utils.GsonUtil;
 
 public class TimeSharingActivity extends BaseActivity {
+    TimeSharingView tsv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_time_sharing);
+        tsv = (TimeSharingView) findViewById(R.id.tsv);
         loadData();
     }
 
@@ -43,7 +45,7 @@ public class TimeSharingActivity extends BaseActivity {
                 //开始适配图表数据
                 List<Quotes> quotesList = adapterData(OriginFundModeList);
                 if (quotesList != null) {
-                    Log.e(TAG, "TimeSharingActivity:" + quotesList);
+                    tsv.setTimeSharingData(quotesList);
                 } else {
                     Log.e(TAG, "run: 数据适配失败、、、、");
                 }

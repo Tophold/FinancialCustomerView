@@ -7,6 +7,7 @@
     android:orientation="vertical">
 
     <wgyscsf.financialcustomerview.timesharing.TimeSharingView
+        android:id="@+id/tsv"
         android:layout_width="match_parent"
         android:layout_height="400dp"
         android:background="#fff0ae"/>
