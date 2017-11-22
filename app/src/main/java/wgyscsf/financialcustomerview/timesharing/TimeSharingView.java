@@ -361,7 +361,7 @@ public class TimeSharingView extends View {
                 float leftDis = 8;
                 mTimingTxtPaint.setColor(mTimingTxtColor);
                 canvas.drawText(FormatUtil.formatBySubString(q.c, digits), mWidth - mPaddingRight + leftDis, floatY2 + txtHight / 4, mTimingTxtPaint);
-                //在这里把path圈起来，添加阴影
+                //在这里把path圈起来，添加阴影。特别注意，这里处理下方阴影和折线边框。采用两个画笔和两个Path处理的，貌似没有一个Paint可以同时绘制边框和填充色
                 path2.lineTo(floatX2, mHeight - mPaddingBottom);
                 path2.lineTo(mPaddingLeft, mHeight - mPaddingBottom);
                 path2.close();
