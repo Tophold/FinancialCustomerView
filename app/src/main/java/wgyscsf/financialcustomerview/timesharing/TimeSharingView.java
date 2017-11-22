@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Locale;
 
 import wgyscsf.financialcustomerview.R;
-import wgyscsf.financialcustomerview.fund.FundMode;
 import wgyscsf.financialcustomerview.utils.FormatUtil;
 import wgyscsf.financialcustomerview.utils.TimeUtils;
 
@@ -68,11 +67,18 @@ public class TimeSharingView extends View {
      * 折线图
      */
     Paint mBrokenLinePaint;
-    float mBrokenLineWidth = 1;
+    float mBrokenLineWidth = 2;
     int mBrokenLineColor;
     //是否是虚线
     boolean isBrokenLineDashed = false;
 
+    /**
+     * 折线图阴影
+     */
+    Paint mBrokenLineBgPaint;
+    //折线下面的浅蓝色
+    int mBrokenLineBgColor;
+    int mAlpha = 40;
     /**
      * 最后一个小圆点的半径
      */
@@ -93,7 +99,7 @@ public class TimeSharingView extends View {
      * 实时横线右侧的红色的框和实时数据
      */
     Paint mTimingTxtPaint;
-    float mTimingTxtWidth = 14;
+    float mTimingTxtWidth = 18;
     int mTimingTxtColor;
     int mTimingTxtBgColor;
 
@@ -111,8 +117,6 @@ public class TimeSharingView extends View {
      * 其它属性
      */
     Context mContext;
-    //折线下面的浅蓝色
-    int mblowBlueColor;
     //可见的显示的条数(屏幕上显示的并不是所有的数据，只是部分)
     int mShownMaxCount = 50;
     //开始位置，数据集合的起始位置
@@ -132,7 +136,7 @@ public class TimeSharingView extends View {
     //最小值和最大值对应的Model
     Quotes mMinQuotes;
     Quotes mMaxQuotes;
-    //x轴其实位置的时间和结束位置的时间
+    //x轴起始位置的时间和结束位置的时间
     Quotes mBeginQuotes;
     Quotes mEndQuotes;
 
@@ -203,11 +207,11 @@ public class TimeSharingView extends View {
         initInnerXyPaint();
         initXyTxtPaint();
         initBrokenLinePaint();
+        initBrokenLineBgPaint();
         initDotPaint();
         initTimingTxtPaint();
         initTimingLinePaint();
     }
-
 
     private void loadDefAttrs() {
         //数据源
@@ -218,9 +222,10 @@ public class TimeSharingView extends View {
         mBrokenLineColor = getColor(R.color.color_timeSharing_brokenLineColor);
         mDotColor = getColor(R.color.color_timeSharing_dotColor);
         mTimingLineColor = getColor(R.color.color_timeSharing_timingLineColor);
-        mblowBlueColor = getColor(R.color.color_timeSharing_blowBlueColor);
+        mBrokenLineBgColor = getColor(R.color.color_timeSharing_blowBlueColor);
         mTimingTxtColor = getColor(R.color.color_timeSharing_timingTxtColor);
         mTimingTxtBgColor = getColor(R.color.color_timeSharing_timingTxtBgColor);
+        mXYTxtColor = getColor(R.color.color_timeSharing_xYTxtColor);
     }
 
     private void initOuterPaint() {
@@ -241,7 +246,7 @@ public class TimeSharingView extends View {
 
     private void initXyTxtPaint() {
         mXYTxtPaint = new Paint();
-        mXYTxtPaint.setColor(getColor(R.color.color_timeSharing_xYTxtColor));
+        mXYTxtPaint.setColor(mXYTxtColor);
         mXYTxtPaint.setTextSize(mXYTxtSize);
         mXYTxtPaint.setAntiAlias(true);
     }
@@ -252,6 +257,14 @@ public class TimeSharingView extends View {
         mBrokenLinePaint.setStrokeWidth(mBrokenLineWidth);
         mBrokenLinePaint.setStyle(Paint.Style.STROKE);
         mBrokenLinePaint.setAntiAlias(true);
+    }
+
+    private void initBrokenLineBgPaint() {
+        mBrokenLineBgPaint = new Paint();
+        mBrokenLineBgPaint.setColor(mBrokenLineBgColor);
+        mBrokenLineBgPaint.setStyle(Paint.Style.FILL);
+        mBrokenLineBgPaint.setAntiAlias(true);
+        mBrokenLineBgPaint.setAlpha(mAlpha);
     }
 
     private void initDotPaint() {
@@ -322,15 +335,18 @@ public class TimeSharingView extends View {
         //先画第一个点
         Quotes quotes = mQuotesList.get(beginIndex);
         Path path = new Path();
+        Path path2 = new Path();
         //这里需要说明一下，x轴的起始点，其实需要加上mPerX，但是加上之后不是从起始位置开始，不好看。
         // 同理，for循环内x轴其实需要(i+1)。现在这样处理，最后会留一点空隙，其实挺好看的。
         float floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding - mPerY * (quotes.c - mMinQuotes.c));
         path.moveTo(mPaddingLeft, floatY);
+        path2.moveTo(mPaddingLeft, floatY);
         for (int i = beginIndex + 1; i < beginIndex + mShownMaxCount; i++) {
             Quotes q = mQuotesList.get(i);
             float floatX2 = mPaddingLeft + mPerX * (i - beginIndex);//注意这个 mPerX * (i-beginIndex)，而不是mPerX * (i)
             float floatY2 = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding - mPerY * (q.c - mMinQuotes.c));
             path.lineTo(floatX2, floatY2);
+            path2.lineTo(floatX2, floatY2);
             //最后一个点，话一个小圆点
             if (i == beginIndex + mShownMaxCount - 1) {
                 canvas.drawCircle(floatX2, floatY2, mDotRadius, mDotPaint);
@@ -345,10 +361,14 @@ public class TimeSharingView extends View {
                 float leftDis = 8;
                 mTimingTxtPaint.setColor(mTimingTxtColor);
                 canvas.drawText(FormatUtil.formatBySubString(q.c, digits), mWidth - mPaddingRight + leftDis, floatY2 + txtHight / 4, mTimingTxtPaint);
-
+                //在这里把path圈起来，添加阴影
+                path2.lineTo(floatX2, mHeight - mPaddingBottom);
+                path2.lineTo(mPaddingLeft, mHeight - mPaddingBottom);
+                path2.close();
             }
         }
         canvas.drawPath(path, mBrokenLinePaint);
+        canvas.drawPath(path2, mBrokenLineBgPaint);
     }
 
     /**
