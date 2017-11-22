@@ -20,9 +20,16 @@
     <color name="color_timeSharing_innerXyDashColor">#787274</color>
     <!--折线图-->
     <color name="color_timeSharing_brokenLineColor">#3785d9</color>
+    <!--折线图最后的小圆点的颜色-->
+    <color name="color_timeSharing_dotColor">#3785d9</color>
     <!--实时横线颜色-->
     <color name="color_timeSharing_timingLineColor">#ec210f</color>
     <!--折线下面的浅蓝色-->
     <color name="color_timeSharing_blowBlueColor">#74caf9</color>
+    <!--x、y轴文字的颜色-->
+    <color name="color_timeSharing_xYTxtColor">#787274</color>
+    <!--实时横线右侧的红色的框和实时数据颜色-->
+    <color name="color_timeSharing_timingTxtColor">#ffffff</color>
+    <color name="color_timeSharing_timingTxtBgColor">#ec210f</color>
 
 </resources>

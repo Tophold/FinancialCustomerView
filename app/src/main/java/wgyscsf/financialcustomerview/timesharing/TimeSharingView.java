@@ -14,11 +14,15 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.fund.FundMode;
+import wgyscsf.financialcustomerview.utils.FormatUtil;
+import wgyscsf.financialcustomerview.utils.TimeUtils;
 
 import static android.view.View.MeasureSpec.AT_MOST;
 
@@ -70,13 +74,38 @@ public class TimeSharingView extends View {
     boolean isBrokenLineDashed = false;
 
     /**
+     * 最后一个小圆点的半径
+     */
+    Paint mDotPaint;
+    float mDotRadius = 6;
+    int mDotColor;
+
+    /**
      * 实时横线
      */
     Paint mTimingLinePaint;
-    float mTimingLineWidth = 1;
+    float mTimingLineWidth = 2;
     int mTimingLineColor;
     //是否是虚线
     boolean isTimingLineDashed = true;
+
+    /**
+     * 实时横线右侧的红色的框和实时数据
+     */
+    Paint mTimingTxtPaint;
+    float mTimingTxtWidth = 14;
+    int mTimingTxtColor;
+    int mTimingTxtBgColor;
+
+    //外围X、Y轴线文字
+    Paint mXYTxtPaint;
+    //x、y轴指示文字字体的大小
+    final float mXYTxtSize = 14;
+    int mXYTxtColor;
+    //右侧文字距离右边线线的距离
+    final float mRightTxtPadding = 4;
+    //底部文字距离底部线的距离
+    final float mBottomTxtPadding = 20;
 
     /**
      * 其它属性
@@ -85,7 +114,7 @@ public class TimeSharingView extends View {
     //折线下面的浅蓝色
     int mblowBlueColor;
     //可见的显示的条数(屏幕上显示的并不是所有的数据，只是部分)
-    int mShownMaxCount = 100;
+    int mShownMaxCount = 50;
     //开始位置，数据集合的起始位置
     int beginIndex = 0;
     //数据集合
@@ -95,14 +124,17 @@ public class TimeSharingView extends View {
     //为了美观，容器内（边框内部的折线图距离外边框线的上下距离）上面有一定间距，下面也有一定的间距。
     float mInnerTopBlankPadding = 60;
     float mInnerBottomBlankPadding = 60;
-
-
+    //y轴数据的小数位数，这个本来数据产品属性，但是模拟数据中没有，就在这里定义了
+    int digits = 2;
     //每一个x、y轴的一个单元的的宽和高
     float mPerX;
     float mPerY;
     //最小值和最大值对应的Model
     Quotes mMinQuotes;
     Quotes mMaxQuotes;
+    //x轴其实位置的时间和结束位置的时间
+    Quotes mBeginQuotes;
+    Quotes mEndQuotes;
 
 
     public TimeSharingView(Context context) {
@@ -153,6 +185,7 @@ public class TimeSharingView extends View {
         }
         drawOuterLine(canvas);
         drawInnerXy(canvas);
+        drawXyTxt(canvas);
         drawBrokenLine(canvas);
     }
 
@@ -168,9 +201,13 @@ public class TimeSharingView extends View {
         //初始化画笔
         initOuterPaint();
         initInnerXyPaint();
+        initXyTxtPaint();
         initBrokenLinePaint();
+        initDotPaint();
+        initTimingTxtPaint();
         initTimingLinePaint();
     }
+
 
     private void loadDefAttrs() {
         //数据源
@@ -179,8 +216,11 @@ public class TimeSharingView extends View {
         mOuterLineColor = getColor(R.color.color_timeSharing_outerStrokeColor);
         mInnerXyLineColor = getColor(R.color.color_timeSharing_innerXyDashColor);
         mBrokenLineColor = getColor(R.color.color_timeSharing_brokenLineColor);
+        mDotColor = getColor(R.color.color_timeSharing_dotColor);
         mTimingLineColor = getColor(R.color.color_timeSharing_timingLineColor);
         mblowBlueColor = getColor(R.color.color_timeSharing_blowBlueColor);
+        mTimingTxtColor = getColor(R.color.color_timeSharing_timingTxtColor);
+        mTimingTxtBgColor = getColor(R.color.color_timeSharing_timingTxtBgColor);
     }
 
     private void initOuterPaint() {
@@ -194,8 +234,16 @@ public class TimeSharingView extends View {
         mInnerXyPaint.setColor(mInnerXyLineColor);
         mInnerXyPaint.setStrokeWidth(mInnerXyLineWidth);
         mInnerXyPaint.setStyle(Paint.Style.STROKE);
-        setLayerType(LAYER_TYPE_SOFTWARE, null);
+        if (isInnerXyLineDashed)
+            setLayerType(LAYER_TYPE_SOFTWARE, null);
         mInnerXyPaint.setPathEffect(new DashPathEffect(new float[]{5, 5}, 0));
+    }
+
+    private void initXyTxtPaint() {
+        mXYTxtPaint = new Paint();
+        mXYTxtPaint.setColor(getColor(R.color.color_timeSharing_xYTxtColor));
+        mXYTxtPaint.setTextSize(mXYTxtSize);
+        mXYTxtPaint.setAntiAlias(true);
     }
 
     private void initBrokenLinePaint() {
@@ -206,8 +254,29 @@ public class TimeSharingView extends View {
         mBrokenLinePaint.setAntiAlias(true);
     }
 
-    private void initTimingLinePaint() {
+    private void initDotPaint() {
+        mDotPaint = new Paint();
+        mDotPaint.setColor(mDotColor);
+        mDotPaint.setStyle(Paint.Style.FILL);
+        mDotPaint.setAntiAlias(true);
+    }
 
+    private void initTimingTxtPaint() {
+        mTimingTxtPaint = new Paint();
+        mTimingTxtPaint.setTextSize(mTimingTxtWidth);
+        mTimingTxtPaint.setColor(mTimingTxtBgColor);
+        mTimingTxtPaint.setAntiAlias(true);
+    }
+
+    private void initTimingLinePaint() {
+        mTimingLinePaint = new Paint();
+        mTimingLinePaint.setColor(mTimingLineColor);
+        mTimingLinePaint.setStrokeWidth(mTimingLineWidth);
+        mTimingLinePaint.setStyle(Paint.Style.STROKE);
+        mTimingLinePaint.setAntiAlias(true);
+        if (isTimingLineDashed)
+            setLayerType(LAYER_TYPE_SOFTWARE, null);
+        mTimingLinePaint.setPathEffect(new DashPathEffect(new float[]{8, 8}, 0));
     }
 
     private void drawOuterLine(Canvas canvas) {
@@ -241,6 +310,14 @@ public class TimeSharingView extends View {
         }
     }
 
+    private void drawXyTxt(Canvas canvas) {
+        //先处理y轴方向文字
+        drawYPaint(canvas);
+
+        //处理x轴方向文字
+        drawXPaint(canvas);
+    }
+
     private void drawBrokenLine(Canvas canvas) {
         //先画第一个点
         Quotes quotes = mQuotesList.get(beginIndex);
@@ -249,16 +326,111 @@ public class TimeSharingView extends View {
         // 同理，for循环内x轴其实需要(i+1)。现在这样处理，最后会留一点空隙，其实挺好看的。
         float floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding - mPerY * (quotes.c - mMinQuotes.c));
         path.moveTo(mPaddingLeft, floatY);
-        for (int i = beginIndex + 1; i < beginIndex + 1 + mShownMaxCount; i++) {
+        for (int i = beginIndex + 1; i < beginIndex + mShownMaxCount; i++) {
             Quotes q = mQuotesList.get(i);
-            float floatX2 = mPaddingLeft + mPerX * i;
+            float floatX2 = mPaddingLeft + mPerX * (i - beginIndex);//注意这个 mPerX * (i-beginIndex)，而不是mPerX * (i)
             float floatY2 = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding - mPerY * (q.c - mMinQuotes.c));
-            Log.e(TAG, "drawBrokenLine: floatX2:" + floatX2 + ",floatY2:" + floatY2 +
-                    ",q.c:" + q.c + ",mMinQuotes.c:" + mMinQuotes.c +
-                    ",---->mPerY * (q.c - mMinQuotes.c):" + mPerY * (q.c - mMinQuotes.c));
             path.lineTo(floatX2, floatY2);
+            //最后一个点，话一个小圆点
+            if (i == beginIndex + mShownMaxCount - 1) {
+                canvas.drawCircle(floatX2, floatY2, mDotRadius, mDotPaint);
+                //接着画实时横线
+                canvas.drawLine(mPaddingLeft, floatY2, mWidth - mPaddingRight, floatY2, mTimingLinePaint);
+                //接着绘制实时横线右侧的数据与背景
+                //绘制背景
+                //文字高度
+                float txtHight = getFontHeight(mTimingTxtWidth, mTimingTxtPaint);
+                canvas.drawRect(mWidth - mPaddingRight, floatY2 - txtHight / 2, mWidth, floatY2 + txtHight / 2, mTimingTxtPaint);
+                //距离左边的距离
+                float leftDis = 8;
+                mTimingTxtPaint.setColor(mTimingTxtColor);
+                canvas.drawText(FormatUtil.formatBySubString(q.c, digits), mWidth - mPaddingRight + leftDis, floatY2 + txtHight / 4, mTimingTxtPaint);
+
+            }
         }
         canvas.drawPath(path, mBrokenLinePaint);
+    }
+
+    /**
+     * 这里的均值如何处理：只知道最小值和最大值（mMinQuotes,mMaxQuotes）,但是不是容器的上border和下border。
+     * 这里的处理方式是根据mMinQuotes和mMaxQuotes的差值与y轴高度的距离计算单位距离对应的值。
+     * 然后根据mMinQuotes的值(A)和底部内边距的（折线底部距离底边线的距离mInnerBottomBlankPadding）（B）
+     * 和单位对应的值(D)就可以计算出最下面border对应的值：(A-B*D)。
+     * 同理，可以计算最高对应的值。最后，均分标记即可。
+     *
+     * @param canvas
+     */
+    private void drawYPaint(Canvas canvas) {
+        //细节处理，文字高度居中
+        float halfTxtHight;
+        double minBorderData;
+        double maxBorderData;
+        double dataDis = mMaxQuotes.c - mMinQuotes.c;
+        double yDis = (mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding - mInnerBottomBlankPadding);
+        double perY = dataDis / yDis;
+        minBorderData = mMinQuotes.c - mInnerBottomBlankPadding * perY;
+        maxBorderData = mMinQuotes.c + mInnerTopBlankPadding * perY;
+
+        halfTxtHight = getFontHeight(mXYTxtSize, mXYTxtPaint) / 4;//应该/2的，但是不准确，原因不明
+        //halfTxtHight = 0;
+
+        //现将最小值、最大值画好
+        float rightBorderPadding = mRightTxtPadding;
+        canvas.drawText(FormatUtil.formatBySubString(minBorderData, digits),
+                mWidth - mPaddingRight + rightBorderPadding,
+                mHeight - mPaddingBottom + halfTxtHight, mXYTxtPaint);
+        //draw max
+        canvas.drawText(FormatUtil.formatBySubString(maxBorderData, digits),
+                mWidth - mPaddingRight + rightBorderPadding,
+                mPaddingTop + halfTxtHight, mXYTxtPaint);
+        //因为横线是均分的，所以只要取到最大值最小值的差值，均分即可。
+        float perYValues = (float) ((maxBorderData - minBorderData) / 4);
+        float perYWidth = (mHeight - mPaddingBottom - mPaddingTop) / 4;
+        //从下到上依次画
+        for (int i = 1; i <= 3; i++) {
+            canvas.drawText(FormatUtil.formatBySubString(minBorderData + perYValues * i, digits),
+                    mWidth - mPaddingRight + rightBorderPadding,
+                    mHeight - mPaddingBottom - perYWidth * i + halfTxtHight, mXYTxtPaint);
+        }
+    }
+
+    /**
+     * 对于x轴文字的处理：其实位置已经知道，结束位置知道，x轴有效间距也知道，
+     * 计算均值即可，处理思路和y轴文字基本一致。特别注意：右边有一段间距。
+     * 这里测量直接使用最原始的时间（long类型更加方便）
+     *
+     * @param canvas
+     */
+    private void drawXPaint(Canvas canvas) {
+        //细节，让中间虚线对应的文字居中
+        float halfTxtWidth = mXYTxtPaint.measureText("00:00") / 2;
+
+        //单位间距，注意这里需要加上右边内边距
+        double perXWith = (mWidth - mPaddingLeft - mPaddingRight) / 4;
+        double xDis = (mWidth - mPaddingLeft - mPaddingRight - mRightBlankPadding);
+        long timeDis = mEndQuotes.t - mBeginQuotes.t;
+        long perXTime = (long) (timeDis / xDis);
+        String showTime;
+        float finalHalfTxtWidth;
+        for (int i = 0; i < 4; i++) {
+            if (i == 0) {
+                finalHalfTxtWidth = 0;
+                showTime = TimeUtils.millis2String((long) (mBeginQuotes.t + perXWith * perXTime * i));//不要忘了*perXWith
+            } else {
+                finalHalfTxtWidth = halfTxtWidth;
+                showTime = TimeUtils.millis2String((long) (mBeginQuotes.t + perXWith * perXTime * i),
+                        new SimpleDateFormat("HH:mm", Locale.getDefault()));
+            }
+            canvas.drawText(showTime,
+                    (float) (mPaddingLeft + perXWith * i - finalHalfTxtWidth),
+                    mHeight - mPaddingBottom + mBottomTxtPadding, mXYTxtPaint);
+        }
+    }
+
+    public float getFontHeight(float fontSize, Paint paint) {
+        paint.setTextSize(fontSize);
+        Paint.FontMetrics fm = paint.getFontMetrics();
+        return (float) (Math.ceil(fm.descent - fm.top) + 2);
     }
 
     private int getColor(@ColorRes int colorId) {
@@ -283,12 +455,22 @@ public class TimeSharingView extends View {
     }
 
     private void processData() {
+        digits = 4;
         //找到最大值和最小值
         double tempMinClosePrice = Double.MAX_VALUE;
         double tempMaxClosePrice = Double.MIN_VALUE;
 
+        //特别注意，最新的数据在最后面，所以数据范围应该是[size-mShownMaxCount~size)
+        int size = mQuotesList.size();
+        beginIndex = size - mShownMaxCount;
         for (int i = beginIndex; i < beginIndex + mShownMaxCount; i++) {
             Quotes quotes = mQuotesList.get(i);
+            if (i == beginIndex) {
+                mBeginQuotes = quotes;
+            }
+            if (i == beginIndex + mShownMaxCount - 1) {
+                mEndQuotes = quotes;
+            }
             if (quotes.c <= tempMinClosePrice) {
                 tempMinClosePrice = quotes.c;
                 mMinQuotes = quotes;
@@ -301,10 +483,7 @@ public class TimeSharingView extends View {
         mPerX = (mWidth - mPaddingLeft - mPaddingRight - mRightBlankPadding) / mShownMaxCount;
         //不要忘了减去内部的上下Padding
         mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding - mInnerBottomBlankPadding) / (mMaxQuotes.c - mMinQuotes.c));
-
+        Log.e(TAG, "processData: mPerX:" + mPerX + ",mPerY:" + mPerY);
         invalidate();
-
-        Log.e(TAG, "processData: " + mMinQuotes.toString());
-        Log.e(TAG, "processData: " + mMaxQuotes.toString());
     }
 }
