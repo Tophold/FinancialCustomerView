@@ -18,3 +18,9 @@
 * timesharing分支（分时图，正在完善）
 
 ![https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/v1.2_%E5%88%86%E6%97%B6%E5%9B%BE_%E6%8A%98%E7%BA%BF%E5%9B%BE%E9%9B%8F%E5%BD%A2.png?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/v1.2_%E5%88%86%E6%97%B6%E5%9B%BE_%E6%8A%98%E7%BA%BF%E5%9B%BE%E9%9B%8F%E5%BD%A2.png?raw=true)
+
+* timesharing分支（分时图，折线、x、y文字、实时横线和实时数据、下方透明阴影）
+
+![https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/timesharing/img/v1.2_%E5%88%86%E6%97%B6%E5%9B%BE_%E6%8A%98%E7%BA%BF%E5%9B%BE%E9%9B%8F%E5%BD%A2_%E5%AE%8C%E5%96%84.png](https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/timesharing/img/v1.2_%E5%88%86%E6%97%B6%E5%9B%BE_%E6%8A%98%E7%BA%BF%E5%9B%BE%E9%9B%8F%E5%BD%A2_%E5%AE%8C%E5%96%84.png)
+
+
