@@ -47,7 +47,7 @@ public class FormatUtil {
         return String.format(Locale.getDefault(), sb.toString(), converted);
     }
 
-    public static String numFormat(int digit, Object num) {
+    public static String numFormat(Object num, int digit) {
         return numFormat(false, digit, num);
     }
 

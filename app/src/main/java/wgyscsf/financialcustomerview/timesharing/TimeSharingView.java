@@ -98,7 +98,8 @@ public class TimeSharingView extends View {
     /**
      * 实时横线右侧的红色的框和实时数据
      */
-    Paint mTimingTxtPaint;
+    Paint mTimingTxtBgPaint;//实时数据的背景
+    Paint mTimingTxtPaint;//实时数据
     float mTimingTxtWidth = 18;
     int mTimingTxtColor;
     int mTimingTxtBgColor;
@@ -275,9 +276,13 @@ public class TimeSharingView extends View {
     }
 
     private void initTimingTxtPaint() {
+        mTimingTxtBgPaint = new Paint();
+        mTimingTxtBgPaint.setColor(mTimingTxtBgColor);
+        mTimingTxtBgPaint.setAntiAlias(true);
+
         mTimingTxtPaint = new Paint();
         mTimingTxtPaint.setTextSize(mTimingTxtWidth);
-        mTimingTxtPaint.setColor(mTimingTxtBgColor);
+        mTimingTxtPaint.setColor(mTimingTxtColor);
         mTimingTxtPaint.setAntiAlias(true);
     }
 
@@ -347,20 +352,25 @@ public class TimeSharingView extends View {
             float floatY2 = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding - mPerY * (q.c - mMinQuotes.c));
             path.lineTo(floatX2, floatY2);
             path2.lineTo(floatX2, floatY2);
-            //最后一个点，话一个小圆点
+            //最后一个点，画一个小圆点；实时横线；横线的右侧数据与背景；折线下方阴影
             if (i == beginIndex + mShownMaxCount - 1) {
+                //绘制小圆点
                 canvas.drawCircle(floatX2, floatY2, mDotRadius, mDotPaint);
+
                 //接着画实时横线
                 canvas.drawLine(mPaddingLeft, floatY2, mWidth - mPaddingRight, floatY2, mTimingLinePaint);
-                //接着绘制实时横线右侧的数据与背景
-                //绘制背景
+
+                //接着绘制实时横线的右侧数据与背景
                 //文字高度
-                float txtHight = getFontHeight(mTimingTxtWidth, mTimingTxtPaint);
-                canvas.drawRect(mWidth - mPaddingRight, floatY2 - txtHight / 2, mWidth, floatY2 + txtHight / 2, mTimingTxtPaint);
+                float txtHight = getFontHeight(mTimingTxtWidth, mTimingTxtBgPaint);
+                //绘制背景
+                canvas.drawRect(mWidth - mPaddingRight, floatY2 - txtHight / 2, mWidth, floatY2 + txtHight / 2, mTimingTxtBgPaint);
+
+                //绘制实时数据
                 //距离左边的距离
                 float leftDis = 8;
-                mTimingTxtPaint.setColor(mTimingTxtColor);
-                canvas.drawText(FormatUtil.formatBySubString(q.c, digits), mWidth - mPaddingRight + leftDis, floatY2 + txtHight / 4, mTimingTxtPaint);
+                canvas.drawText(FormatUtil.numFormat(q.c, digits), mWidth - mPaddingRight + leftDis, floatY2 + txtHight / 4, mTimingTxtPaint);
+
                 //在这里把path圈起来，添加阴影。特别注意，这里处理下方阴影和折线边框。采用两个画笔和两个Path处理的，貌似没有一个Paint可以同时绘制边框和填充色
                 path2.lineTo(floatX2, mHeight - mPaddingBottom);
                 path2.lineTo(mPaddingLeft, mHeight - mPaddingBottom);
@@ -396,11 +406,11 @@ public class TimeSharingView extends View {
 
         //现将最小值、最大值画好
         float rightBorderPadding = mRightTxtPadding;
-        canvas.drawText(FormatUtil.formatBySubString(minBorderData, digits),
+        canvas.drawText(FormatUtil.numFormat(minBorderData, digits),
                 mWidth - mPaddingRight + rightBorderPadding,
                 mHeight - mPaddingBottom + halfTxtHight, mXYTxtPaint);
         //draw max
-        canvas.drawText(FormatUtil.formatBySubString(maxBorderData, digits),
+        canvas.drawText(FormatUtil.numFormat(maxBorderData, digits),
                 mWidth - mPaddingRight + rightBorderPadding,
                 mPaddingTop + halfTxtHight, mXYTxtPaint);
         //因为横线是均分的，所以只要取到最大值最小值的差值，均分即可。
@@ -408,7 +418,7 @@ public class TimeSharingView extends View {
         float perYWidth = (mHeight - mPaddingBottom - mPaddingTop) / 4;
         //从下到上依次画
         for (int i = 1; i <= 3; i++) {
-            canvas.drawText(FormatUtil.formatBySubString(minBorderData + perYValues * i, digits),
+            canvas.drawText(FormatUtil.numFormat(minBorderData + perYValues * i, digits),
                     mWidth - mPaddingRight + rightBorderPadding,
                     mHeight - mPaddingBottom - perYWidth * i + halfTxtHight, mXYTxtPaint);
         }
@@ -461,6 +471,11 @@ public class TimeSharingView extends View {
         return getResources().getString(stringId);
     }
 
+    /**
+     * 数据设置入口
+     *
+     * @param quotesList
+     */
     public void setTimeSharingData(List<Quotes> quotesList) {
         if (quotesList == null || quotesList.isEmpty()) {
             Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
@@ -471,6 +486,21 @@ public class TimeSharingView extends View {
         mQuotesList = quotesList;
 
         //开始处理数据
+        processData();
+    }
+
+    /**
+     * 实时推送过来的数据，实时更新
+     *
+     * @param quotes
+     */
+    public void addTimeSharingData(Quotes quotes) {
+        if (quotes == null) {
+            Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "setTimeSharingData: 数据异常");
+            return;
+        }
+        mQuotesList.add(quotes);
         processData();
     }
 
@@ -505,5 +535,11 @@ public class TimeSharingView extends View {
         mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding - mInnerBottomBlankPadding) / (mMaxQuotes.c - mMinQuotes.c));
         Log.e(TAG, "processData: mPerX:" + mPerX + ",mPerY:" + mPerY);
         invalidate();
+    }
+
+    interface TimeSharingListener {
+        void success();
+
+        void error(Exception e);
     }
 }

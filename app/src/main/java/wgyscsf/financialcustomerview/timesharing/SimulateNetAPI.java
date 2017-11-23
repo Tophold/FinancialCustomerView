@@ -19,10 +19,10 @@ public class SimulateNetAPI {
      *
      * @return json data
      */
-    public static String getOriginalFundData(Context context) {
+    public static String getOriginalFundData(Context context, int index) {
         InputStream input = null;
         try {
-            input = context.getAssets().open("timesharing.json");
+            input = context.getAssets().open("timesharing" + 1 + ".json");
             String json = convertStreamToString(input);
             return json;
         } catch (Exception e) {
