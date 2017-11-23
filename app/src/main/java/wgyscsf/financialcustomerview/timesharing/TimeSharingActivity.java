@@ -1,7 +1,6 @@
 package wgyscsf.financialcustomerview.timesharing;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 
 import com.google.gson.reflect.TypeToken;
@@ -11,6 +10,7 @@ import java.util.List;
 
 import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -34,7 +34,7 @@ public class TimeSharingActivity extends BaseActivity {
 
     private void loadData() {
         //模拟网络环境
-        Observable.create(new Observable.OnSubscribe<List<Quotes>>() {
+        Subscription subscribeApi = Observable.create(new Observable.OnSubscribe<List<Quotes>>() {
             @Override
             public void call(Subscriber<? super List<Quotes>> subscriber) {
                 try {
@@ -72,6 +72,8 @@ public class TimeSharingActivity extends BaseActivity {
                         }
                     }
                 });
+        //及时回收，防止泄露
+        addGcManagerSubscription(subscribeApi);
     }
 
     private List<Quotes> adapterData(List<OriginQuotes> originFundModeList) {
@@ -86,7 +88,7 @@ public class TimeSharingActivity extends BaseActivity {
 
     //模拟推送实时数据
     private void pushData() {
-        Observable.create(new Observable.OnSubscribe<Quotes>() {
+        Subscription subscribeSocekt = Observable.create(new Observable.OnSubscribe<Quotes>() {
             @Override
             public void call(Subscriber<? super Quotes> subscriber) {
                 //5s后获取实时推送数据
@@ -136,5 +138,8 @@ public class TimeSharingActivity extends BaseActivity {
                         tsv.addTimeSharingData(o);
                     }
                 });
+
+        //及时回收，防止泄露
+        addGcManagerSubscription(subscribeSocekt);
     }
 }
