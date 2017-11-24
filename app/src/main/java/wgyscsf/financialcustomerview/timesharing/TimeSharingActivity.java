@@ -2,6 +2,7 @@ package wgyscsf.financialcustomerview.timesharing;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -29,6 +30,12 @@ public class TimeSharingActivity extends BaseActivity {
         tsv = (TimeSharingView) findViewById(R.id.tsv);
         loadData();
         pushData();
+        tsv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
     }
 
 

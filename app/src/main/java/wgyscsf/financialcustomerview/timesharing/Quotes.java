@@ -22,7 +22,9 @@ public class Quotes extends BaseModel {
         this.t = TimeUtils.date2Millis(new Date(t));
         this.showTime = TimeUtils.millis2String(this.t);
     }
-
+    //在自定义view:FundView中的位置坐标
+    public float floatX;
+    public float floatY;
     //实际中展示的时间
     public String showTime;
     //标准时间戳（ms）

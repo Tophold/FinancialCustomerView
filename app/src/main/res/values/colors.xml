@@ -31,5 +31,10 @@
     <!--实时横线右侧的红色的框和实时数据颜色-->
     <color name="color_timeSharing_timingTxtColor">#ffffff</color>
     <color name="color_timeSharing_timingTxtBgColor">#ec210f</color>
+    <!--长按十字线的颜色-->
+    <color name="color_timeSharing_longPressLineColor">#7b797b</color>
+    <!--长按十字时间、数据的框和文字颜色-->
+    <color name="color_timeSharing_longPressTxtColor">#ffffff</color>
+    <color name="color_timeSharing_longPressTxtBgColor">#7b797b</color>
 
 </resources>

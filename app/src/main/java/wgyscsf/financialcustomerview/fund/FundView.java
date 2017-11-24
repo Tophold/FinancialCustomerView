@@ -338,7 +338,7 @@ public class FundView extends View {
         //x
         canvas.drawLine(mPaddingLeft, finalFundMode.floatY, mWidth - mPaddingRight, finalFundMode.floatY, mLongPressPaint);
         //y
-        canvas.drawLine(finalFundMode.floatX, mPaddingTop, finalFundMode.floatX, mWidth - mPaddingBottom, mLongPressPaint);
+        canvas.drawLine(finalFundMode.floatX, mPaddingTop, finalFundMode.floatX, mHeight - mPaddingBottom, mLongPressPaint);
 
         //开始处理按下之后top的文字信息
         //先画背景

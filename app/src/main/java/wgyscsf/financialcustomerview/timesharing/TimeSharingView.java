@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 
 import wgyscsf.financialcustomerview.R;
+import wgyscsf.financialcustomerview.fund.FundMode;
 import wgyscsf.financialcustomerview.utils.FormatUtil;
 import wgyscsf.financialcustomerview.utils.TimeUtils;
 
@@ -114,6 +115,27 @@ public class TimeSharingView extends View {
     //底部文字距离底部线的距离
     final float mBottomTxtPadding = 20;
 
+    //长按相关处理
+    //按下的时间
+    long mPressTime;
+    //默认多长时间算长按
+    final long DEF_LONGPRESS_LENGTH = 700;
+    float mPressX;
+    float mPressY;
+    boolean mDrawLongPressPaint = false;
+    //长按的十字线
+    Paint mLongPressPaint;
+    int mLongPressColor;
+    float mLongPressLineWidth = 1.5f;
+
+    //长按十字的上方的时间框、右侧的数据框，这里我们尝试用一个画笔解决背景和文字，处理好切换颜色即可
+    Paint mLongPressTxtPaint;
+    Paint mLongPressTxtBgPaint;
+    int mLongPressTxtColor;
+    float mLongPressTxtSize = 18;
+    int mLongPressTxtBgColor;
+
+
     /**
      * 其它属性
      */
@@ -192,11 +214,45 @@ public class TimeSharingView extends View {
         drawInnerXy(canvas);
         drawXyTxt(canvas);
         drawBrokenLine(canvas);
+        //长按处理，注意要不要处理在内部判断
+        drawLongPress(canvas);
+        //长按情况下的时间和数据框
+        drawLongPressTxt(canvas);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                //按下的时候，如果存在十字，取消掉
+                hiddenLongPressView();
+                mPressTime = event.getDownTime();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (event.getEventTime() - mPressTime > DEF_LONGPRESS_LENGTH) {
+                    Log.e(TAG, "onTouchEvent: 长按了。。。");
+                    mPressX = event.getX();
+                    mPressY = event.getY();
+                    showLongPressView();
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                break;
+            default:
+                break;
+        }
+        //不要拦截事件，不然点击事件无法响应
         return super.onTouchEvent(event);
+    }
+
+    private void showLongPressView() {
+        mDrawLongPressPaint = true;
+        invalidate();
+    }
+
+    private void hiddenLongPressView() {
+        mDrawLongPressPaint = false;
+        invalidate();
     }
 
     private void initAttrs() {
@@ -212,6 +268,8 @@ public class TimeSharingView extends View {
         initDotPaint();
         initTimingTxtPaint();
         initTimingLinePaint();
+        initLongPressPaint();
+        initLongPressTxtPaint();
     }
 
     private void loadDefAttrs() {
@@ -227,6 +285,9 @@ public class TimeSharingView extends View {
         mTimingTxtColor = getColor(R.color.color_timeSharing_timingTxtColor);
         mTimingTxtBgColor = getColor(R.color.color_timeSharing_timingTxtBgColor);
         mXYTxtColor = getColor(R.color.color_timeSharing_xYTxtColor);
+        mLongPressColor = getColor(R.color.color_timeSharing_longPressLineColor);
+        mLongPressTxtColor = getColor(R.color.color_timeSharing_longPressTxtColor);
+        mLongPressTxtBgColor = getColor(R.color.color_timeSharing_longPressTxtBgColor);
     }
 
     private void initOuterPaint() {
@@ -297,6 +358,22 @@ public class TimeSharingView extends View {
         mTimingLinePaint.setPathEffect(new DashPathEffect(new float[]{8, 8}, 0));
     }
 
+    private void initLongPressPaint() {
+        mLongPressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mLongPressPaint.setColor(mLongPressColor);
+        mLongPressPaint.setStrokeWidth(mLongPressLineWidth);
+        mLongPressPaint.setStyle(Paint.Style.STROKE);
+    }
+
+    private void initLongPressTxtPaint() {
+        mLongPressTxtPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mLongPressTxtPaint.setTextSize(mLongPressTxtSize);
+        mLongPressTxtPaint.setColor(mLongPressTxtColor);
+
+        mLongPressTxtBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mLongPressTxtBgPaint.setColor(mLongPressTxtBgColor);
+    }
+
     private void drawOuterLine(Canvas canvas) {
         //先绘制x轴
         canvas.drawLine(mPaddingLeft, mPaddingTop,
@@ -344,12 +421,19 @@ public class TimeSharingView extends View {
         //这里需要说明一下，x轴的起始点，其实需要加上mPerX，但是加上之后不是从起始位置开始，不好看。
         // 同理，for循环内x轴其实需要(i+1)。现在这样处理，最后会留一点空隙，其实挺好看的。
         float floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding - mPerY * (quotes.c - mMinQuotes.c));
+        //在自定义view:FundView中的位置坐标
+        //记录下位置信息
+        quotes.floatX = mPaddingLeft;
+        quotes.floatY = floatY;
         path.moveTo(mPaddingLeft, floatY);
         path2.moveTo(mPaddingLeft, floatY);
         for (int i = beginIndex + 1; i < beginIndex + mShownMaxCount; i++) {
             Quotes q = mQuotesList.get(i);
             float floatX2 = mPaddingLeft + mPerX * (i - beginIndex);//注意这个 mPerX * (i-beginIndex)，而不是mPerX * (i)
             float floatY2 = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding - mPerY * (q.c - mMinQuotes.c));
+            //记录下位置信息
+            q.floatX = floatX2;
+            q.floatY = floatY2;
             path.lineTo(floatX2, floatY2);
             path2.lineTo(floatX2, floatY2);
             //最后一个点，画一个小圆点；实时横线；横线的右侧数据与背景；折线下方阴影
@@ -379,6 +463,64 @@ public class TimeSharingView extends View {
         }
         canvas.drawPath(path, mBrokenLinePaint);
         canvas.drawPath(path2, mBrokenLineBgPaint);
+    }
+
+    private void drawLongPress(Canvas canvas) {
+        if (!mDrawLongPressPaint) return;
+
+        //获取距离最近按下的位置的model
+        float pressX = mPressX;
+        //循环遍历，找到距离最短的x轴的mode
+        Quotes finalFundMode = mQuotesList.get(beginIndex);
+        float minXLen = Integer.MAX_VALUE;
+        for (int i = beginIndex; i < beginIndex + mShownMaxCount; i++) {
+            Quotes currFunMode = mQuotesList.get(i);
+            float abs = Math.abs(pressX - currFunMode.floatX);
+            if (abs < minXLen) {
+                finalFundMode = currFunMode;
+                minXLen = abs;
+            }
+        }
+
+        //x轴线
+        canvas.drawLine(mPaddingLeft, finalFundMode.floatY, mWidth - mPaddingRight, finalFundMode.floatY, mLongPressPaint);
+        //y轴线
+        canvas.drawLine(finalFundMode.floatX, mPaddingTop, finalFundMode.floatX, mHeight - mPaddingBottom, mLongPressPaint);
+
+
+        //接着绘制长按上方和右侧文字信息背景
+        float txtBgHight = getFontHeight(mLongPressTxtSize, mLongPressTxtBgPaint);
+        //y
+        float longPressTxtYPadding = 10;
+        canvas.drawRect(finalFundMode.floatX - mLongPressTxtBgPaint.measureText(finalFundMode.showTime) / 2 - longPressTxtYPadding,
+                mPaddingTop, finalFundMode.floatX + mLongPressTxtBgPaint.measureText(finalFundMode.showTime) / 2 + longPressTxtYPadding,
+                mPaddingTop + txtBgHight, mLongPressTxtBgPaint);
+        //x
+        //加一个左右边距
+        canvas.drawRect(mWidth - mPaddingRight, finalFundMode.floatY - txtBgHight / 2, mWidth,
+                finalFundMode.floatY + txtBgHight / 2, mLongPressTxtBgPaint);
+
+        //绘制长按上方和右侧文字信息
+        float txtHight = getFontHeight(mLongPressTxtSize, mLongPressTxtPaint);
+        //x
+        //距离左边的距离
+        float leftDis = 8;
+        canvas.drawText(FormatUtil.numFormat(finalFundMode.c, digits),
+                mWidth - mPaddingRight + leftDis,
+                finalFundMode.floatY + txtHight / 4//这特么的又是需要+/4,理论应该是-/2,原因不明
+                , mLongPressTxtPaint);
+        //y
+        canvas.drawText(finalFundMode.showTime,
+                finalFundMode.floatX - mLongPressTxtPaint.measureText(finalFundMode.showTime) / 2,
+                mPaddingTop + txtHight - 6
+                , mLongPressTxtPaint);
+
+        //在这里回调数据信息
+    }
+
+    private void drawLongPressTxt(Canvas canvas) {
+        //see:drawLongPress(Canvas canvas)
+
     }
 
     /**
