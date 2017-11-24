@@ -48,6 +48,12 @@ public class TimeSharingView extends View {
     float mPaddingLeft = 8;
     float mPaddingRight = 90;
 
+    //正在加载中
+    Paint mLoadingPaint;
+    final float mLoadingTextSize = 20;
+    final String mLoadingText = "数据加载，请稍后";
+    boolean mDrawLoadingPaint = true;
+
     /**
      * 最外面的上下左右的框
      */
@@ -207,7 +213,9 @@ public class TimeSharingView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         Log.e("TimeSharingView", "onDraw: ");
-        if (mQuotesList.isEmpty()) {
+        //默认加载loading界面
+        showLoadingPaint(canvas);
+        if (mQuotesList == null || mQuotesList.isEmpty()) {
             return;
         }
         drawOuterLine(canvas);
@@ -260,6 +268,7 @@ public class TimeSharingView extends View {
         loadDefAttrs();
 
         //初始化画笔
+        initLoadingPaint();
         initOuterPaint();
         initInnerXyPaint();
         initXyTxtPaint();
@@ -288,6 +297,13 @@ public class TimeSharingView extends View {
         mLongPressColor = getColor(R.color.color_timeSharing_longPressLineColor);
         mLongPressTxtColor = getColor(R.color.color_timeSharing_longPressTxtColor);
         mLongPressTxtBgColor = getColor(R.color.color_timeSharing_longPressTxtBgColor);
+    }
+
+    private void initLoadingPaint() {
+        mLoadingPaint = new Paint();
+        mLoadingPaint.setColor(getColor(R.color.color_timeSharing_xYTxtColor));
+        mLoadingPaint.setTextSize(mLoadingTextSize);
+        mLoadingPaint.setAntiAlias(true);
     }
 
     private void initOuterPaint() {
@@ -372,6 +388,12 @@ public class TimeSharingView extends View {
 
         mLongPressTxtBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLongPressTxtBgPaint.setColor(mLongPressTxtBgColor);
+    }
+
+    private void showLoadingPaint(Canvas canvas) {
+        if (!mDrawLoadingPaint) return;
+        //这里特别注意，x轴的起始点要减去文字宽度的一半
+        canvas.drawText(mLoadingText, mWidth / 2 - mLoadingPaint.measureText(mLoadingText) / 2, mHeight / 2, mLoadingPaint);
     }
 
     private void drawOuterLine(Canvas canvas) {
@@ -599,6 +621,12 @@ public class TimeSharingView extends View {
         }
     }
 
+    // 只需要把画笔颜色置为透明即可
+    private void hiddenLoadingPaint() {
+        mLoadingPaint.setColor(0x00000000);
+        mDrawLoadingPaint = false;
+    }
+
     public float getFontHeight(float fontSize, Paint paint) {
         paint.setTextSize(fontSize);
         Paint.FontMetrics fm = paint.getFontMetrics();
@@ -626,7 +654,8 @@ public class TimeSharingView extends View {
         }
 
         mQuotesList = quotesList;
-
+        //数据过来，隐藏加载更多
+        hiddenLoadingPaint();
         //开始处理数据
         processData();
     }
