@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Locale;
 
 import wgyscsf.financialcustomerview.R;
-import wgyscsf.financialcustomerview.fund.FundMode;
 import wgyscsf.financialcustomerview.utils.FormatUtil;
 import wgyscsf.financialcustomerview.utils.TimeUtils;
 
@@ -80,7 +79,7 @@ public class TimeSharingView extends View {
     boolean isBrokenLineDashed = false;
 
     /**
-     * 折线图阴影
+     * 折线图阴影,折线图阴影的处理方式采用一个画笔两个Path进行处理
      */
     Paint mBrokenLineBgPaint;
     //折线下面的浅蓝色
@@ -94,7 +93,7 @@ public class TimeSharingView extends View {
     int mDotColor;
 
     /**
-     * 实时横线
+     * 实时横线，这里的处理思路：记录最后一个点的位置坐标即可，从该点开始画小圆点、横线以及右侧实时数据
      */
     Paint mTimingLinePaint;
     float mTimingLineWidth = 2;
@@ -122,12 +121,12 @@ public class TimeSharingView extends View {
     final float mBottomTxtPadding = 20;
 
     //长按相关处理
-    //按下的时间
-    long mPressTime;
-    //默认多长时间算长按
+    //默认多长时间算长按（ms）
     final long DEF_LONGPRESS_LENGTH = 700;
-    float mPressX;
-    float mPressY;
+    //单机
+    final long DEF_CLICKPRESS_LENGTH = 300;
+
+    float mMovingX;
     boolean mDrawLongPressPaint = false;
     //长按的十字线
     Paint mLongPressPaint;
@@ -147,9 +146,11 @@ public class TimeSharingView extends View {
      */
     Context mContext;
     //可见的显示的条数(屏幕上显示的并不是所有的数据，只是部分)
-    int mShownMaxCount = 50;
+    int mShownMaxCount = 30;
     //开始位置，数据集合的起始位置
-    int beginIndex = 0;
+    int mBeginIndex = 0;
+    //数据的结束位置，这里之所以定义结束位置，因为数据可能会小于mShownMaxCount
+    int mEndIndex = 50;
     //数据集合
     List<Quotes> mQuotesList;
     //默认情况下结束点距离右边边距
@@ -158,7 +159,7 @@ public class TimeSharingView extends View {
     float mInnerTopBlankPadding = 60;
     float mInnerBottomBlankPadding = 60;
     //y轴数据的小数位数，这个本来数据产品属性，但是模拟数据中没有，就在这里定义了
-    int digits = 2;
+    int mDigits = 2;
     //每一个x、y轴的一个单元的的宽和高
     float mPerX;
     float mPerY;
@@ -169,6 +170,20 @@ public class TimeSharingView extends View {
     Quotes mBeginQuotes;
     Quotes mEndQuotes;
 
+    /**
+     * 这里开始处理分时图的左右移动问题，思路：当手指移动时，会有移动距离（A），我们又有x轴的单位距离(B)，
+     * 所以可以计算出来需要移动的个数（C=A/B,注意向上取整）。
+     * 这个时候，就可以确定新的开始位置（D）和新的结束位置（E）：
+     * D=mBeginIndex±C,E=mEndIndex干C，正负号取决于移动方向。
+     */
+    int mFingerPressedCount;//手指按下的个数
+    boolean mPullRight = true;//是否是向右拉
+    int mPullCount;//需要拉动几个单位
+    final long DEF_PULL_LENGTH = 5;//手指移动多远算移动的阀值
+    float mPressedX;
+    long mPressTime;
+    //手指移动的类型
+    PullType mPullType = PullType.PULL_NONE;
 
     public TimeSharingView(Context context) {
         this(context, null);
@@ -232,25 +247,64 @@ public class TimeSharingView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                //按下的时候，如果存在十字，取消掉
-                hiddenLongPressView();
+                mPressedX = event.getX();
                 mPressTime = event.getDownTime();
+                //按下的手指个数
+                mFingerPressedCount = event.getPointerCount();
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (event.getEventTime() - mPressTime > DEF_LONGPRESS_LENGTH) {
                     Log.e(TAG, "onTouchEvent: 长按了。。。");
-                    mPressX = event.getX();
-                    mPressY = event.getY();
+                    mMovingX = event.getX();
                     showLongPressView();
+                }
+                //判断是否是手指移动
+                float currentPressedX = event.getX();
+                float moveLen = currentPressedX - mPressedX;
+                //重置当前按下的位置
+                mPressedX = currentPressedX;
+                if (Math.abs(moveLen) > DEF_PULL_LENGTH && mFingerPressedCount == 1) {
+                    Log.e(TAG, "onTouchEvent: 正在移动分时图");
+                    //移动k线图
+                    moveKView(moveLen);
                 }
                 break;
             case MotionEvent.ACTION_UP:
+                if (event.getEventTime() - mPressTime < DEF_CLICKPRESS_LENGTH && mDrawLongPressPaint) {
+                    //取消掉长按十字
+                    hiddenLongPressView();
+                }
                 break;
             default:
                 break;
         }
-        //不要拦截事件，不然点击事件无法响应
         return super.onTouchEvent(event);
+    }
+
+    private void moveKView(float moveLen) {
+        mPullRight = moveLen > 0;
+        mPullType = moveLen > 0 ? PullType.PULL_RIGHT : PullType.PULL_LEFT;
+        int moveCount = (int) Math.ceil(Math.abs(moveLen) / mPerX);
+        if (mPullRight) {
+            int len = mBeginIndex - moveCount;
+            if (len < 0) {
+                mBeginIndex = 0;
+            } else {
+                mBeginIndex = len;
+            }
+        } else {
+            int len = mBeginIndex + moveCount;
+            if (len + mShownMaxCount > mQuotesList.size()) {
+                mBeginIndex = mQuotesList.size() - mShownMaxCount;
+            } else {
+                mBeginIndex = len;
+                mPullType = PullType.PULL_NONE;//到最左边啦
+            }
+        }
+        mEndIndex = mBeginIndex + mShownMaxCount;
+        //开始位置和结束位置确认好，就可以重绘啦~
+        Log.e(TAG, "moveKView: mPullRight：" + mPullRight + ",mBeginIndex:" + mBeginIndex + ",mEndIndex:" + mEndIndex);
+        processData();
     }
 
     private void showLongPressView() {
@@ -437,7 +491,7 @@ public class TimeSharingView extends View {
 
     private void drawBrokenLine(Canvas canvas) {
         //先画第一个点
-        Quotes quotes = mQuotesList.get(beginIndex);
+        Quotes quotes = mQuotesList.get(mBeginIndex);
         Path path = new Path();
         Path path2 = new Path();
         //这里需要说明一下，x轴的起始点，其实需要加上mPerX，但是加上之后不是从起始位置开始，不好看。
@@ -449,9 +503,9 @@ public class TimeSharingView extends View {
         quotes.floatY = floatY;
         path.moveTo(mPaddingLeft, floatY);
         path2.moveTo(mPaddingLeft, floatY);
-        for (int i = beginIndex + 1; i < beginIndex + mShownMaxCount; i++) {
+        for (int i = mBeginIndex + 1; i < mEndIndex; i++) {
             Quotes q = mQuotesList.get(i);
-            float floatX2 = mPaddingLeft + mPerX * (i - beginIndex);//注意这个 mPerX * (i-beginIndex)，而不是mPerX * (i)
+            float floatX2 = mPaddingLeft + mPerX * (i - mBeginIndex);//注意这个 mPerX * (i-mBeginIndex)，而不是mPerX * (i)
             float floatY2 = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding - mPerY * (q.c - mMinQuotes.c));
             //记录下位置信息
             q.floatX = floatX2;
@@ -459,7 +513,7 @@ public class TimeSharingView extends View {
             path.lineTo(floatX2, floatY2);
             path2.lineTo(floatX2, floatY2);
             //最后一个点，画一个小圆点；实时横线；横线的右侧数据与背景；折线下方阴影
-            if (i == beginIndex + mShownMaxCount - 1) {
+            if (i == mEndIndex - 1) {
                 //绘制小圆点
                 canvas.drawCircle(floatX2, floatY2, mDotRadius, mDotPaint);
 
@@ -475,7 +529,7 @@ public class TimeSharingView extends View {
                 //绘制实时数据
                 //距离左边的距离
                 float leftDis = 8;
-                canvas.drawText(FormatUtil.numFormat(q.c, digits), mWidth - mPaddingRight + leftDis, floatY2 + txtHight / 4, mTimingTxtPaint);
+                canvas.drawText(FormatUtil.numFormat(q.c, mDigits), mWidth - mPaddingRight + leftDis, floatY2 + txtHight / 4, mTimingTxtPaint);
 
                 //在这里把path圈起来，添加阴影。特别注意，这里处理下方阴影和折线边框。采用两个画笔和两个Path处理的，貌似没有一个Paint可以同时绘制边框和填充色
                 path2.lineTo(floatX2, mHeight - mPaddingBottom);
@@ -491,11 +545,11 @@ public class TimeSharingView extends View {
         if (!mDrawLongPressPaint) return;
 
         //获取距离最近按下的位置的model
-        float pressX = mPressX;
+        float pressX = mMovingX;
         //循环遍历，找到距离最短的x轴的mode
-        Quotes finalFundMode = mQuotesList.get(beginIndex);
+        Quotes finalFundMode = mQuotesList.get(mBeginIndex);
         float minXLen = Integer.MAX_VALUE;
-        for (int i = beginIndex; i < beginIndex + mShownMaxCount; i++) {
+        for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes currFunMode = mQuotesList.get(i);
             float abs = Math.abs(pressX - currFunMode.floatX);
             if (abs < minXLen) {
@@ -527,7 +581,7 @@ public class TimeSharingView extends View {
         //x
         //距离左边的距离
         float leftDis = 8;
-        canvas.drawText(FormatUtil.numFormat(finalFundMode.c, digits),
+        canvas.drawText(FormatUtil.numFormat(finalFundMode.c, mDigits),
                 mWidth - mPaddingRight + leftDis,
                 finalFundMode.floatY + txtHight / 4//这特么的又是需要+/4,理论应该是-/2,原因不明
                 , mLongPressTxtPaint);
@@ -570,11 +624,11 @@ public class TimeSharingView extends View {
 
         //现将最小值、最大值画好
         float rightBorderPadding = mRightTxtPadding;
-        canvas.drawText(FormatUtil.numFormat(minBorderData, digits),
+        canvas.drawText(FormatUtil.numFormat(minBorderData, mDigits),
                 mWidth - mPaddingRight + rightBorderPadding,
                 mHeight - mPaddingBottom + halfTxtHight, mXYTxtPaint);
         //draw max
-        canvas.drawText(FormatUtil.numFormat(maxBorderData, digits),
+        canvas.drawText(FormatUtil.numFormat(maxBorderData, mDigits),
                 mWidth - mPaddingRight + rightBorderPadding,
                 mPaddingTop + halfTxtHight, mXYTxtPaint);
         //因为横线是均分的，所以只要取到最大值最小值的差值，均分即可。
@@ -582,7 +636,7 @@ public class TimeSharingView extends View {
         float perYWidth = (mHeight - mPaddingBottom - mPaddingTop) / 4;
         //从下到上依次画
         for (int i = 1; i <= 3; i++) {
-            canvas.drawText(FormatUtil.numFormat(minBorderData + perYValues * i, digits),
+            canvas.drawText(FormatUtil.numFormat(minBorderData + perYValues * i, mDigits),
                     mWidth - mPaddingRight + rightBorderPadding,
                     mHeight - mPaddingBottom - perYWidth * i + halfTxtHight, mXYTxtPaint);
         }
@@ -657,7 +711,23 @@ public class TimeSharingView extends View {
         //数据过来，隐藏加载更多
         hiddenLoadingPaint();
         //开始处理数据
+        mDigits = 4;
+        counterBeginAndEndByNewer();
         processData();
+    }
+
+    /**
+     * 来最新数据或者刚加载的时候，计算开始位置和结束位置。特别注意，最新的数据在最后面，所以数据范围应该是[(size-mShownMaxCount)~size)
+     */
+    private void counterBeginAndEndByNewer() {
+        int size = mQuotesList.size();
+        if (size >= mShownMaxCount) {
+            mBeginIndex = size - mShownMaxCount;
+            mEndIndex = mBeginIndex + mShownMaxCount;
+        } else {
+            mBeginIndex = 0;
+            mEndIndex = mBeginIndex + mQuotesList.size();
+        }
     }
 
     /**
@@ -672,24 +742,25 @@ public class TimeSharingView extends View {
             return;
         }
         mQuotesList.add(quotes);
-        processData();
+        //如果实在左右移动，则不去实时更新K线图，但是要把数据加进去
+        if (mPullType == PullType.PULL_NONE) {
+            Log.e(TAG, "addTimeSharingData: 处理实时更新操作...");
+            counterBeginAndEndByNewer();
+            processData();
+        }
     }
 
     private void processData() {
-        digits = 4;
         //找到最大值和最小值
         double tempMinClosePrice = Double.MAX_VALUE;
         double tempMaxClosePrice = Double.MIN_VALUE;
 
-        //特别注意，最新的数据在最后面，所以数据范围应该是[size-mShownMaxCount~size)
-        int size = mQuotesList.size();
-        beginIndex = size - mShownMaxCount;
-        for (int i = beginIndex; i < beginIndex + mShownMaxCount; i++) {
+        for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes quotes = mQuotesList.get(i);
-            if (i == beginIndex) {
+            if (i == mBeginIndex) {
                 mBeginQuotes = quotes;
             }
-            if (i == beginIndex + mShownMaxCount - 1) {
+            if (i == mEndIndex - 1) {
                 mEndQuotes = quotes;
             }
             if (quotes.c <= tempMinClosePrice) {
@@ -704,7 +775,6 @@ public class TimeSharingView extends View {
         mPerX = (mWidth - mPaddingLeft - mPaddingRight - mRightBlankPadding) / mShownMaxCount;
         //不要忘了减去内部的上下Padding
         mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding - mInnerBottomBlankPadding) / (mMaxQuotes.c - mMinQuotes.c));
-        Log.e(TAG, "processData: mPerX:" + mPerX + ",mPerY:" + mPerY);
         invalidate();
     }
 
@@ -712,5 +782,11 @@ public class TimeSharingView extends View {
         void success();
 
         void error(Exception e);
+    }
+
+    enum PullType {
+        PULL_RIGHT,
+        PULL_LEFT,
+        PULL_NONE,
     }
 }
