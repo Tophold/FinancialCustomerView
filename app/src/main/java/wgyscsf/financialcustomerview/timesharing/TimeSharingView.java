@@ -281,6 +281,10 @@ public class TimeSharingView extends View {
         return super.onTouchEvent(event);
     }
 
+    /**
+     * 移动K线图计算移动的单位和重新计算起始位置和结束位置
+     * @param moveLen
+     */
     private void moveKView(float moveLen) {
         mPullRight = moveLen > 0;
         mPullType = moveLen > 0 ? PullType.PULL_RIGHT : PullType.PULL_LEFT;
