@@ -1,5 +1,6 @@
 package wgyscsf.financialcustomerview.fund;
 
+import wgyscsf.financialcustomerview.BaseModel;
 import wgyscsf.financialcustomerview.utils.RegxUtils;
 
 /**
@@ -9,7 +10,7 @@ import wgyscsf.financialcustomerview.utils.RegxUtils;
  * 描 述 ：
  * ============================================================
  **/
-public class FundMode {
+public class FundMode extends BaseModel{
     //x轴原始时间数据，ms
     public long datetime;
     public float dataY;

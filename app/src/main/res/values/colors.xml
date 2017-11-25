@@ -12,4 +12,29 @@
     <color name="color_fundView_pressIncomeTxt">#ec210f</color>
     <color name="color_fundView_pressIncomeTxtBg">#87c9e7</color>
     <color name="color_fundView_defIncomeTxt">#000000</color>
+
+
+    <!--分时图相关属性-->
+    <color name="color_timeSharing_outerStrokeColor">#787274</color>
+    <!--内部xy虚线-->
+    <color name="color_timeSharing_innerXyDashColor">#787274</color>
+    <!--折线图-->
+    <color name="color_timeSharing_brokenLineColor">#3785d9</color>
+    <!--折线图最后的小圆点的颜色-->
+    <color name="color_timeSharing_dotColor">#3785d9</color>
+    <!--实时横线颜色-->
+    <color name="color_timeSharing_timingLineColor">#ec210f</color>
+    <!--折线下面的浅蓝色-->
+    <color name="color_timeSharing_blowBlueColor">#74caf9</color>
+    <!--x、y轴文字的颜色-->
+    <color name="color_timeSharing_xYTxtColor">#787274</color>
+    <!--实时横线右侧的红色的框和实时数据颜色-->
+    <color name="color_timeSharing_timingTxtColor">#ffffff</color>
+    <color name="color_timeSharing_timingTxtBgColor">#ec210f</color>
+    <!--长按十字线的颜色-->
+    <color name="color_timeSharing_longPressLineColor">#7b797b</color>
+    <!--长按十字时间、数据的框和文字颜色-->
+    <color name="color_timeSharing_longPressTxtColor">#ffffff</color>
+    <color name="color_timeSharing_longPressTxtBgColor">#7b797b</color>
+
 </resources>

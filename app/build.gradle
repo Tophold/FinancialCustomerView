@@ -31,4 +31,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
 
     compile "com.google.code.gson:gson:2.8.2"
+
+    //引入rx
+    compile 'io.reactivex:rxandroid:1.2.1'
+    compile 'io.reactivex:rxjava:1.2.4'
 }

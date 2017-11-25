@@ -6,7 +6,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
+
+import rx.Subscription;
+import rx.subscriptions.CompositeSubscription;
 
 /**
  * ============================================================
@@ -34,6 +38,9 @@ public class BaseActivity extends AppCompatActivity {
      */
     private Toast toast = null;
 
+    //retrofit请求集合
+    private CompositeSubscription mCompositeSubscription;
+
     @Override
     public void setContentView(int view) {
         super.setContentView(view);
@@ -58,6 +65,35 @@ public class BaseActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * 添加Subscription
+     *
+     * @param subscription
+     */
+    public void addGcManagerSubscription(Subscription subscription) {
+        Log.d(TAG, "add subscription");
+        initSingletonCompositeSubscription();
+        mCompositeSubscription.add(subscription);
+    }
+
+    private void initSingletonCompositeSubscription() {
+        if (mCompositeSubscription == null) {
+            synchronized (CompositeSubscription.class) {
+                if (mCompositeSubscription == null) {
+                    mCompositeSubscription = new CompositeSubscription();
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mCompositeSubscription != null) {
+            Log.d(TAG, "base activity unscbscribe");
+            mCompositeSubscription.unsubscribe();
+        }
+    }
 
     /**
      * startActivity

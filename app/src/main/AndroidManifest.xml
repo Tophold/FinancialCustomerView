@@ -18,6 +18,8 @@
         </activity>
         <activity android:name=".fund.FundActivity">
         </activity>
+        <activity android:name=".timesharing.TimeSharingActivity">
+        </activity>
     </application>
 
 </manifest>
