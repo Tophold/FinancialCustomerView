@@ -139,6 +139,8 @@ public class TimeSharingView extends View {
     int mLongPressTxtColor;
     float mLongPressTxtSize = 18;
     int mLongPressTxtBgColor;
+    //长按监听
+    LongTouchListener mLongTouchListener;
 
 
     /**
@@ -263,7 +265,7 @@ public class TimeSharingView extends View {
                 float moveLen = currentPressedX - mPressedX;
                 //重置当前按下的位置
                 mPressedX = currentPressedX;
-                if (Math.abs(moveLen) > DEF_PULL_LENGTH && mFingerPressedCount == 1) {
+                if (Math.abs(moveLen) > DEF_PULL_LENGTH && mFingerPressedCount == 1 && !mDrawLongPressPaint) {
                     Log.e(TAG, "onTouchEvent: 正在移动分时图");
                     //移动k线图
                     moveKView(moveLen);
@@ -283,6 +285,7 @@ public class TimeSharingView extends View {
 
     /**
      * 移动K线图计算移动的单位和重新计算起始位置和结束位置
+     *
      * @param moveLen
      */
     private void moveKView(float moveLen) {
@@ -319,6 +322,7 @@ public class TimeSharingView extends View {
     private void hiddenLongPressView() {
         mDrawLongPressPaint = false;
         invalidate();
+        mLongTouchListener.onUnLongTouch();
     }
 
     private void initAttrs() {
@@ -548,10 +552,13 @@ public class TimeSharingView extends View {
     private void drawLongPress(Canvas canvas) {
         if (!mDrawLongPressPaint) return;
 
+        //最后的最近的按下的位置
+        int finalIndex;
         //获取距离最近按下的位置的model
         float pressX = mMovingX;
         //循环遍历，找到距离最短的x轴的mode
         Quotes finalFundMode = mQuotesList.get(mBeginIndex);
+        finalIndex = mBeginIndex;
         float minXLen = Integer.MAX_VALUE;
         for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes currFunMode = mQuotesList.get(i);
@@ -559,6 +566,7 @@ public class TimeSharingView extends View {
             if (abs < minXLen) {
                 finalFundMode = currFunMode;
                 minXLen = abs;
+                finalIndex = i;
             }
         }
 
@@ -596,6 +604,12 @@ public class TimeSharingView extends View {
                 , mLongPressTxtPaint);
 
         //在这里回调数据信息
+        if (mLongTouchListener != null) {
+            int size = mQuotesList.size();
+            if ((0 <= finalIndex && finalIndex < size) &&
+                    (0 <= finalIndex - 1 && finalIndex - 1 < size))
+                mLongTouchListener.onLongTouch(mQuotesList.get(finalIndex - 1), mQuotesList.get(finalIndex));
+        }
     }
 
     private void drawLongPressTxt(Canvas canvas) {
@@ -703,6 +717,19 @@ public class TimeSharingView extends View {
      * 数据设置入口
      *
      * @param quotesList
+     * @param longTouchListener
+     */
+    public void setTimeSharingData(List<Quotes> quotesList, LongTouchListener longTouchListener) {
+        //绑定监听
+        mLongTouchListener = longTouchListener;
+        //添加数据
+        setTimeSharingData(quotesList);
+    }
+
+    /**
+     * 数据设置入口
+     *
+     * @param quotesList
      */
     public void setTimeSharingData(List<Quotes> quotesList) {
         if (quotesList == null || quotesList.isEmpty()) {
@@ -710,7 +737,6 @@ public class TimeSharingView extends View {
             Log.e(TAG, "setTimeSharingData: 数据异常");
             return;
         }
-
         mQuotesList = quotesList;
         //数据过来，隐藏加载更多
         hiddenLoadingPaint();
@@ -786,6 +812,12 @@ public class TimeSharingView extends View {
         void success();
 
         void error(Exception e);
+    }
+
+    interface LongTouchListener {
+        void onLongTouch(Quotes preQuotes, Quotes currentQuotes);
+
+        void onUnLongTouch();
     }
 
     enum PullType {

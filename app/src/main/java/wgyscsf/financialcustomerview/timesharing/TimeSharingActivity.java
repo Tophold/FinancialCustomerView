@@ -1,11 +1,15 @@
 package wgyscsf.financialcustomerview.timesharing;
 
 import android.os.Bundle;
+import android.support.annotation.ColorRes;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.gson.reflect.TypeToken;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,17 +21,26 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import wgyscsf.financialcustomerview.BaseActivity;
 import wgyscsf.financialcustomerview.R;
+import wgyscsf.financialcustomerview.utils.FormatUtil;
 import wgyscsf.financialcustomerview.utils.GsonUtil;
 import wgyscsf.financialcustomerview.utils.StringUtils;
+import wgyscsf.financialcustomerview.utils.TimeUtils;
 
 public class TimeSharingActivity extends BaseActivity {
     TimeSharingView tsv;
+    private LinearLayout ats_ll_container;
+    private TextView mAtsTvH;
+    private TextView mAtsTvO;
+    private TextView mAtsTvL;
+    private TextView mAtsTvC;
+    private TextView mAtsTvP;
+    private TextView ats_tv_time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_time_sharing);
-        tsv = (TimeSharingView) findViewById(R.id.tsv);
+        bindView();
         loadData();
         pushData();
         tsv.setOnClickListener(new View.OnClickListener() {
@@ -36,6 +49,17 @@ public class TimeSharingActivity extends BaseActivity {
 
             }
         });
+    }
+
+    private void bindView() {
+        ats_ll_container = (LinearLayout) findViewById(R.id.ats_ll_container);
+        tsv = (TimeSharingView) findViewById(R.id.tsv);
+        mAtsTvH = (TextView) findViewById(R.id.ats_tv_h);
+        mAtsTvO = (TextView) findViewById(R.id.ats_tv_o);
+        mAtsTvL = (TextView) findViewById(R.id.ats_tv_l);
+        mAtsTvC = (TextView) findViewById(R.id.ats_tv_c);
+        mAtsTvP = (TextView) findViewById(R.id.ats_tv_p);
+        ats_tv_time = (TextView) findViewById(R.id.ats_tv_time);
     }
 
 
@@ -73,7 +97,18 @@ public class TimeSharingActivity extends BaseActivity {
                     @Override
                     public void call(List<Quotes> o) {
                         if (o != null) {
-                            tsv.setTimeSharingData(o);
+                            tsv.setTimeSharingData(o, new TimeSharingView.LongTouchListener() {
+
+                                @Override
+                                public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
+                                    showContanier(preQuotes, currentQuotes);
+                                }
+
+                                @Override
+                                public void onUnLongTouch() {
+                                    ats_ll_container.setVisibility(View.INVISIBLE);
+                                }
+                            });
                         } else {
                             Log.e(TAG, "run: 数据适配失败、、、、");
                         }
@@ -81,6 +116,39 @@ public class TimeSharingActivity extends BaseActivity {
                 });
         //及时回收，防止泄露
         addGcManagerSubscription(subscribeApi);
+    }
+
+    private void showContanier(Quotes preQuotes, Quotes currentQuotes) {
+        ats_ll_container.setVisibility(View.VISIBLE);
+        int digits = 4;
+        boolean isPositive;
+        String precent;
+        double dis = (currentQuotes.c - preQuotes.c) / currentQuotes.c * 100;
+        isPositive = dis >= 0;
+        precent = FormatUtil.formatBySubString(dis, 2);
+        precent += "%";
+
+        //
+        mAtsTvH.setText(FormatUtil.numFormat(currentQuotes.h, digits));
+        mAtsTvO.setText(FormatUtil.numFormat(currentQuotes.o, digits));
+        mAtsTvL.setText(FormatUtil.numFormat(currentQuotes.l, digits));
+        mAtsTvC.setText(FormatUtil.numFormat(currentQuotes.c, digits));
+        mAtsTvP.setText(precent);
+        ats_tv_time.setText(TimeUtils.millis2String(currentQuotes.t, new SimpleDateFormat("MM-dd HH:mm")));
+
+        if (isPositive) {
+            mAtsTvH.setTextColor(getMyColor(R.color.color_timeSharing_callBackRed));
+            mAtsTvO.setTextColor(getMyColor(R.color.color_timeSharing_callBackRed));
+            mAtsTvL.setTextColor(getMyColor(R.color.color_timeSharing_callBackRed));
+            mAtsTvC.setTextColor(getMyColor(R.color.color_timeSharing_callBackRed));
+            mAtsTvP.setTextColor(getMyColor(R.color.color_timeSharing_callBackRed));
+        } else {
+            mAtsTvH.setTextColor(getMyColor(R.color.color_timeSharing_callBackGreen));
+            mAtsTvO.setTextColor(getMyColor(R.color.color_timeSharing_callBackGreen));
+            mAtsTvL.setTextColor(getMyColor(R.color.color_timeSharing_callBackGreen));
+            mAtsTvC.setTextColor(getMyColor(R.color.color_timeSharing_callBackGreen));
+            mAtsTvP.setTextColor(getMyColor(R.color.color_timeSharing_callBackGreen));
+        }
     }
 
     private List<Quotes> adapterData(List<OriginQuotes> originFundModeList) {
@@ -91,6 +159,10 @@ public class TimeSharingActivity extends BaseActivity {
             fundModeList.add(Quotes);
         }
         return fundModeList;
+    }
+
+    private int getMyColor(@ColorRes int colorId) {
+        return getResources().getColor(colorId);
     }
 
     //模拟推送实时数据
@@ -149,4 +221,5 @@ public class TimeSharingActivity extends BaseActivity {
         //及时回收，防止泄露
         addGcManagerSubscription(subscribeSocekt);
     }
+
 }
