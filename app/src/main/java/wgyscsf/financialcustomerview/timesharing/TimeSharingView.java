@@ -11,6 +11,7 @@ import android.support.annotation.StringRes;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Toast;
 
@@ -187,6 +188,15 @@ public class TimeSharingView extends View {
     //手指移动的类型
     PullType mPullType = PullType.PULL_NONE;
 
+    /**
+     * 缩放手势相关,思路：根据原来的可见总个数（A）和detector.getScaleFactor()(B)确认
+     * 新可见的的总个数（C=A*B）,计算缩放值（D=Math.abs(C-A)）;根据onScaleBegin:detector.getFocusX()
+     * 确认最近的缩放中心点（E）,继而确认新的mBeginIndex（F=mBeginIndex±D/2）和mEndIndex（F=mBeginIndex干D/2）。
+     * 最后，刷新界面。
+     */
+    ScaleGestureDetector mScaleGestureDetector;
+
+
     public TimeSharingView(Context context) {
         this(context, null);
     }
@@ -247,6 +257,9 @@ public class TimeSharingView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        //手势监听
+        //Log.e(TAG, "onTouchEvent: " + event.getPointerCount());
+        mScaleGestureDetector.onTouchEvent(event);
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mPressedX = event.getX();
@@ -256,7 +269,7 @@ public class TimeSharingView extends View {
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (event.getEventTime() - mPressTime > DEF_LONGPRESS_LENGTH) {
-                    Log.e(TAG, "onTouchEvent: 长按了。。。");
+                    //Log.e(TAG, "onTouchEvent: 长按了。。。");
                     mMovingX = event.getX();
                     showLongPressView();
                 }
@@ -266,7 +279,7 @@ public class TimeSharingView extends View {
                 //重置当前按下的位置
                 mPressedX = currentPressedX;
                 if (Math.abs(moveLen) > DEF_PULL_LENGTH && mFingerPressedCount == 1 && !mDrawLongPressPaint) {
-                    Log.e(TAG, "onTouchEvent: 正在移动分时图");
+                    //Log.e(TAG, "onTouchEvent: 正在移动分时图");
                     //移动k线图
                     moveKView(moveLen);
                 }
@@ -310,7 +323,7 @@ public class TimeSharingView extends View {
         }
         mEndIndex = mBeginIndex + mShownMaxCount;
         //开始位置和结束位置确认好，就可以重绘啦~
-        Log.e(TAG, "moveKView: mPullRight：" + mPullRight + ",mBeginIndex:" + mBeginIndex + ",mEndIndex:" + mEndIndex);
+        //Log.e(TAG, "moveKView: mPullRight：" + mPullRight + ",mBeginIndex:" + mBeginIndex + ",mEndIndex:" + mEndIndex);
         processData();
     }
 
@@ -341,6 +354,9 @@ public class TimeSharingView extends View {
         initTimingLinePaint();
         initLongPressPaint();
         initLongPressTxtPaint();
+
+        //手势
+        mScaleGestureDetector = new ScaleGestureDetector(mContext, mOnScaleGestureListener);
     }
 
     private void loadDefAttrs() {
@@ -774,7 +790,7 @@ public class TimeSharingView extends View {
         mQuotesList.add(quotes);
         //如果实在左右移动，则不去实时更新K线图，但是要把数据加进去
         if (mPullType == PullType.PULL_NONE) {
-            Log.e(TAG, "addTimeSharingData: 处理实时更新操作...");
+            //Log.e(TAG, "addTimeSharingData: 处理实时更新操作...");
             counterBeginAndEndByNewer();
             processData();
         }
@@ -807,6 +823,69 @@ public class TimeSharingView extends View {
         mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding - mInnerBottomBlankPadding) / (mMaxQuotes.c - mMinQuotes.c));
         invalidate();
     }
+
+    ScaleGestureDetector.OnScaleGestureListener mOnScaleGestureListener = new ScaleGestureDetector.OnScaleGestureListener() {
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+//            Log.e(TAG, "onScaleBegin:detector.getFocusX(): " + detector.getFocusX()
+//                    + ",detector.getFocusY():" + detector.getFocusY()+",detector.getScaleFactor()"+detector.getScaleFactor());
+//            if (detector.getScaleFactor() == 1) return true;
+//            boolean isBigger = detector.getScaleFactor() > 1;
+//            int shownCount = (int) Math.floor(mShownMaxCount * detector.getScaleFactor());
+//            if (shownCount > mQuotesList.size()) {
+//                shownCount = mQuotesList.size();
+//            }
+//            //pressX
+//            //            float pressX = detector.getFocusX();
+//            //            float minXLen = Integer.MAX_VALUE;
+//            //            int finalIndex;
+//            //            finalIndex = mBeginIndex;
+//            //            for (int i = mBeginIndex; i < mEndIndex; i++) {
+//            //                Quotes currFunMode = mQuotesList.get(i);
+//            //                float abs = Math.abs(pressX - currFunMode.floatX);
+//            //                if (abs < minXLen) {
+//            //                    minXLen = abs;
+//            //                    finalIndex = i;
+//            //                }
+//            //            }
+//            //计算差值
+//            //test
+//            int oldBeginIndex = mBeginIndex;
+//            int oldEndIndex = mEndIndex;
+//
+//            int dis = Math.abs(shownCount - mShownMaxCount);
+//            Log.e(TAG, "onScaleBegin: dis:" + dis + ",detector.getScaleFactor():" + detector.getScaleFactor());
+//            mShownMaxCount = shownCount;
+//            if (isBigger) {
+//                mBeginIndex += dis / 2;
+//                mEndIndex += dis / 2;
+//            } else {
+//                mBeginIndex -= dis / 2;
+//                mEndIndex -= dis / 2;
+//            }
+//            if (mBeginIndex < 0) {
+//                mEndIndex = 0;
+//            }
+//            if (mEndIndex > mQuotesList.size()) {
+//                mEndIndex = mQuotesList.size();
+//            }
+//            Log.e(TAG, "onScaleBegin:mBeginIndex: " + mBeginIndex + ",mEndIndex:" + mEndIndex +
+//                    "---oldBeginIndex:" + oldBeginIndex + ",oldEndIndex:" + oldEndIndex);
+//            processData();
+            return true;
+        }
+
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector detector) {
+
+            return true;
+        }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector detector) {
+            Log.i(TAG, "onScaleEnd");
+        }
+    };
 
     interface TimeSharingListener {
         void success();
