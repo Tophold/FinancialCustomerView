@@ -6,6 +6,157 @@
     android:gravity="center"
     android:orientation="vertical">
 
+    <LinearLayout
+        android:id="@+id/ats_ll_container"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#e7e3e3"
+        android:orientation="vertical"
+        android:paddingTop="4dp"
+        android:visibility="invisible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="高:"
+                    android:textColor="#000"
+                    android:textSize="12dp"/>
+
+                <TextView
+                    android:id="@+id/ats_tv_h"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/string_placeHold"
+                    android:textColor="#f00"
+                    android:textSize="12dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="高:"
+                    android:textColor="#000"
+                    android:textSize="12dp"/>
+
+                <TextView
+                    android:id="@+id/ats_tv_o"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/string_placeHold"
+                    android:textColor="#f00"
+                    android:textSize="12dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/ats_tv_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/string_placeHold"
+                    android:textColor="#000"
+                    android:textSize="12dp"/>
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="低:"
+                    android:textColor="#000"
+                    android:textSize="12dp"/>
+
+                <TextView
+                    android:id="@+id/ats_tv_l"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/string_placeHold"
+                    android:textColor="#f00"
+                    android:textSize="12dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="收:"
+                    android:textColor="#000"
+                    android:textSize="12dp"/>
+
+                <TextView
+                    android:id="@+id/ats_tv_c"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/string_placeHold"
+                    android:textColor="#f00"
+                    android:textSize="12dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="幅:"
+                    android:textColor="#000"
+                    android:textSize="12dp"/>
+
+                <TextView
+                    android:id="@+id/ats_tv_p"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/string_placeHold"
+                    android:textColor="#f00"
+                    android:textSize="12dp"/>
+            </LinearLayout>
+
+
+        </LinearLayout>
+    </LinearLayout>
+
     <wgyscsf.financialcustomerview.timesharing.TimeSharingView
         android:id="@+id/tsv"
         android:layout_width="match_parent"

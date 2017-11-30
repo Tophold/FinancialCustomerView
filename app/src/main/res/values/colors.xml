@@ -37,4 +37,8 @@
     <color name="color_timeSharing_longPressTxtColor">#ffffff</color>
     <color name="color_timeSharing_longPressTxtBgColor">#7b797b</color>
 
+    <!--回调的颜色-->
+    <color name="color_timeSharing_callBackRed">#ec210f</color>
+    <color name="color_timeSharing_callBackGreen">#12ec3a</color>
+
 </resources>
