@@ -38,6 +38,10 @@ public class TimeSharingView extends View {
     //控件默认宽高
     private static final float DEF_WIDTH = 650;
     private static final float DEF_HIGHT = 400;
+    //默认情况下结束点距离右边边距
+    private static final float DEF_INNERRIGHTBLANKPADDING = 60;
+    //当在左侧不可见范围内还剩多少数据时开始加载更多。加载阀值。
+    private static final int DEF_MINLEN_LOADMORE = 10;
 
     //控件宽高
     int mWidth;
@@ -87,7 +91,7 @@ public class TimeSharingView extends View {
     int mBrokenLineBgColor;
     int mAlpha = 40;
     /**
-     * 最后一个小圆点的半径
+     * 最后一个小圆点的半径。对于是否显示小圆点，根据PullType.PULL_RIGHT_STOP判断
      */
     Paint mDotPaint;
     float mDotRadius = 6;
@@ -140,9 +144,6 @@ public class TimeSharingView extends View {
     int mLongPressTxtColor;
     float mLongPressTxtSize = 18;
     int mLongPressTxtBgColor;
-    //长按监听
-    LongTouchListener mLongTouchListener;
-
 
     /**
      * 其它属性
@@ -152,17 +153,18 @@ public class TimeSharingView extends View {
     int mShownMaxCount = 30;
     //开始位置，数据集合的起始位置
     int mBeginIndex = 0;
-    //数据的结束位置，这里之所以定义结束位置，因为数据可能会小于mShownMaxCount
-    int mEndIndex = 50;
+    //数据的结束位置，这里之所以定义结束位置，因为数据可能会小于mShownMaxCount。
+    // 注意，遵循取前不取后，因此这个点不应该取到。但是mBeginIndex会取到。
+    int mEndIndex;
     //数据集合
     List<Quotes> mQuotesList;
     //默认情况下结束点距离右边边距
-    float mRightBlankPadding = 60;
+    float mInnerRightBlankPadding = DEF_INNERRIGHTBLANKPADDING;
     //为了美观，容器内（边框内部的折线图距离外边框线的上下距离）上面有一定间距，下面也有一定的间距。
     float mInnerTopBlankPadding = 60;
     float mInnerBottomBlankPadding = 60;
     //y轴数据的小数位数，这个本来数据产品属性，但是模拟数据中没有，就在这里定义了
-    int mDigits = 2;
+    int mDigits = 4;
     //每一个x、y轴的一个单元的的宽和高
     float mPerX;
     float mPerY;
@@ -172,6 +174,10 @@ public class TimeSharingView extends View {
     //x轴起始位置的时间和结束位置的时间
     Quotes mBeginQuotes;
     Quotes mEndQuotes;
+    //事件监听
+    TimeSharingListener mTimeSharingListener;
+    //是否可以加载更多,出现这个属性的原因，防止多次加载更多
+    boolean canLoadMore = true;
 
     /**
      * 这里开始处理分时图的左右移动问题，思路：当手指移动时，会有移动距离（A），我们又有x轴的单位距离(B)，
@@ -180,13 +186,13 @@ public class TimeSharingView extends View {
      * D=mBeginIndex±C,E=mEndIndex干C，正负号取决于移动方向。
      */
     int mFingerPressedCount;//手指按下的个数
-    boolean mPullRight = true;//是否是向右拉
-    int mPullCount;//需要拉动几个单位
+    boolean mPullRight = false;//是否是向右拉
     final long DEF_PULL_LENGTH = 5;//手指移动多远算移动的阀值
     float mPressedX;
     long mPressTime;
-    //手指移动的类型
-    PullType mPullType = PullType.PULL_NONE;
+    //手指移动的类型，默认在最后边
+    PullType mPullType = PullType.PULL_RIGHT_STOP;
+
 
     /**
      * 缩放手势相关,思路：根据原来的可见总个数（A）和detector.getScaleFactor()(B)确认
@@ -239,7 +245,7 @@ public class TimeSharingView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        Log.e("TimeSharingView", "onDraw: ");
+        //Log.e("TimeSharingView", "onDraw: ");
         //默认加载loading界面
         showLoadingPaint(canvas);
         if (mQuotesList == null || mQuotesList.isEmpty()) {
@@ -302,23 +308,38 @@ public class TimeSharingView extends View {
      * @param moveLen
      */
     private void moveKView(float moveLen) {
+        //移动之前将右侧的内间距值为0
+        mInnerRightBlankPadding = 0;
+
         mPullRight = moveLen > 0;
-        mPullType = moveLen > 0 ? PullType.PULL_RIGHT : PullType.PULL_LEFT;
         int moveCount = (int) Math.ceil(Math.abs(moveLen) / mPerX);
         if (mPullRight) {
             int len = mBeginIndex - moveCount;
+            if (len < DEF_MINLEN_LOADMORE) {
+                //加载更多
+                if (mTimeSharingListener != null && canLoadMore) {
+                    loadMoreIng();
+                    mTimeSharingListener.needLoadMore();
+                }
+            }
             if (len < 0) {
                 mBeginIndex = 0;
+                mPullType = PullType.PULL_LEFT_STOP;
             } else {
                 mBeginIndex = len;
+                mPullType = PullType.PULL_LEFT;
             }
         } else {
             int len = mBeginIndex + moveCount;
             if (len + mShownMaxCount > mQuotesList.size()) {
                 mBeginIndex = mQuotesList.size() - mShownMaxCount;
+                //到最左边啦
+                mPullType = PullType.PULL_RIGHT_STOP;
+                //重置到之前的状态
+                mInnerRightBlankPadding = DEF_INNERRIGHTBLANKPADDING;
             } else {
                 mBeginIndex = len;
-                mPullType = PullType.PULL_NONE;//到最左边啦
+                mPullType = PullType.PULL_RIGHT;
             }
         }
         mEndIndex = mBeginIndex + mShownMaxCount;
@@ -335,7 +356,7 @@ public class TimeSharingView extends View {
     private void hiddenLongPressView() {
         mDrawLongPressPaint = false;
         invalidate();
-        mLongTouchListener.onUnLongTouch();
+        mTimeSharingListener.onUnLongTouch();
     }
 
     private void initAttrs() {
@@ -538,22 +559,32 @@ public class TimeSharingView extends View {
             path2.lineTo(floatX2, floatY2);
             //最后一个点，画一个小圆点；实时横线；横线的右侧数据与背景；折线下方阴影
             if (i == mEndIndex - 1) {
-                //绘制小圆点
-                canvas.drawCircle(floatX2, floatY2, mDotRadius, mDotPaint);
+                //这里滑动到最右端
+                if (mPullType == PullType.PULL_RIGHT_STOP) {
+                    //绘制小圆点
+                    canvas.drawCircle(floatX2, floatY2, mDotRadius, mDotPaint);
+                } else {
+                    //这里隐藏小圆点并且重新计算Y值。这里这样处理，对应现象的问题：横线划出界面。
+                    Quotes endQuotes = mQuotesList.get(mQuotesList.size() - 1);
+                    floatY2 = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding - mPerY * (endQuotes.c - mMinQuotes.c));
+                }
 
-                //接着画实时横线
-                canvas.drawLine(mPaddingLeft, floatY2, mWidth - mPaddingRight, floatY2, mTimingLinePaint);
+                //实时数据展示的前提是在指定范围内。不处理对应的异常：实时横线显示在底部横线的下面...
+                if (mPaddingTop < floatY2 && floatY2 < mHeight - mPaddingBottom) {
+                    //接着画实时横线
+                    canvas.drawLine(mPaddingLeft, floatY2, mWidth - mPaddingRight, floatY2, mTimingLinePaint);
 
-                //接着绘制实时横线的右侧数据与背景
-                //文字高度
-                float txtHight = getFontHeight(mTimingTxtWidth, mTimingTxtBgPaint);
-                //绘制背景
-                canvas.drawRect(mWidth - mPaddingRight, floatY2 - txtHight / 2, mWidth, floatY2 + txtHight / 2, mTimingTxtBgPaint);
+                    //接着绘制实时横线的右侧数据与背景
+                    //文字高度
+                    float txtHight = getFontHeight(mTimingTxtWidth, mTimingTxtBgPaint);
+                    //绘制背景
+                    canvas.drawRect(mWidth - mPaddingRight, floatY2 - txtHight / 2, mWidth, floatY2 + txtHight / 2, mTimingTxtBgPaint);
 
-                //绘制实时数据
-                //距离左边的距离
-                float leftDis = 8;
-                canvas.drawText(FormatUtil.numFormat(q.c, mDigits), mWidth - mPaddingRight + leftDis, floatY2 + txtHight / 4, mTimingTxtPaint);
+                    //绘制实时数据
+                    //距离左边的距离
+                    float leftDis = 8;
+                    canvas.drawText(FormatUtil.numFormat(q.c, mDigits), mWidth - mPaddingRight + leftDis, floatY2 + txtHight / 4, mTimingTxtPaint);
+                }
 
                 //在这里把path圈起来，添加阴影。特别注意，这里处理下方阴影和折线边框。采用两个画笔和两个Path处理的，貌似没有一个Paint可以同时绘制边框和填充色
                 path2.lineTo(floatX2, mHeight - mPaddingBottom);
@@ -620,11 +651,11 @@ public class TimeSharingView extends View {
                 , mLongPressTxtPaint);
 
         //在这里回调数据信息
-        if (mLongTouchListener != null) {
+        if (mTimeSharingListener != null) {
             int size = mQuotesList.size();
             if ((0 <= finalIndex && finalIndex < size) &&
                     (0 <= finalIndex - 1 && finalIndex - 1 < size))
-                mLongTouchListener.onLongTouch(mQuotesList.get(finalIndex - 1), mQuotesList.get(finalIndex));
+                mTimeSharingListener.onLongTouch(mQuotesList.get(finalIndex - 1), mQuotesList.get(finalIndex));
         }
     }
 
@@ -689,7 +720,7 @@ public class TimeSharingView extends View {
 
         //单位间距，注意这里需要加上右边内边距
         double perXWith = (mWidth - mPaddingLeft - mPaddingRight) / 4;
-        double xDis = (mWidth - mPaddingLeft - mPaddingRight - mRightBlankPadding);
+        double xDis = (mWidth - mPaddingLeft - mPaddingRight - mInnerRightBlankPadding);
         long timeDis = mEndQuotes.t - mBeginQuotes.t;
         long perXTime = (long) (timeDis / xDis);
         String showTime;
@@ -733,11 +764,11 @@ public class TimeSharingView extends View {
      * 数据设置入口
      *
      * @param quotesList
-     * @param longTouchListener
+     * @param timeSharingListener
      */
-    public void setTimeSharingData(List<Quotes> quotesList, LongTouchListener longTouchListener) {
+    public void setTimeSharingData(List<Quotes> quotesList, TimeSharingListener timeSharingListener) {
         //绑定监听
-        mLongTouchListener = longTouchListener;
+        mTimeSharingListener = timeSharingListener;
         //添加数据
         setTimeSharingData(quotesList);
     }
@@ -789,12 +820,77 @@ public class TimeSharingView extends View {
         }
         mQuotesList.add(quotes);
         //如果实在左右移动，则不去实时更新K线图，但是要把数据加进去
-        if (mPullType == PullType.PULL_NONE) {
+        if (mPullType == PullType.PULL_RIGHT_STOP) {
             //Log.e(TAG, "addTimeSharingData: 处理实时更新操作...");
             counterBeginAndEndByNewer();
             processData();
         }
     }
+
+    /**
+     * 加载更多数据
+     *
+     * @param quotesList
+     */
+    public void loadMoreData(List<Quotes> quotesList) {
+        if (quotesList == null || quotesList.isEmpty()) {
+            Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "setTimeSharingData: 数据异常");
+            return;
+        }
+        mQuotesList.addAll(0, quotesList);
+
+        //到这里就可以判断，加载更对成功了
+        loadMoreSuccess();
+
+        //特别特别注意，加载更多之后，不应该更新起始位置和结束位置，
+        //因为可能在加载的过程中，原来的意图是在最左边，但是加载完毕后，又不在最左边了。
+        // 因此，只要保持原来的起始位置和结束位置即可。【原来：指的是视觉上的原来】
+        int addSize = quotesList.size();
+        Log.e(TAG, "loadMoreData: 新来的数据大小：" + addSize);
+        mBeginIndex = mBeginIndex + addSize;
+        if (mBeginIndex + mShownMaxCount > mQuotesList.size()) {
+            mBeginIndex = mQuotesList.size() - mShownMaxCount;
+        }
+        mEndIndex = mBeginIndex + mShownMaxCount;
+        Log.e(TAG, "loadMoreData: 加载更多完毕，mBeginIndex：" + mBeginIndex + ",mEndIndex:" + mEndIndex);
+        //重新测量一下,这里不能重新测量。因为重新测量的逻辑是寻找最新的点。
+        //counterBeginAndEndByNewer();
+        processData();
+    }
+
+    /**
+     * 加载更多失败，在这里添加逻辑
+     */
+    public void loadMoreError() {
+        canLoadMore = true;
+        Toast.makeText(mContext, "加载更多失败", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * 加载更多成功，在这里添加逻辑
+     */
+    public void loadMoreSuccess() {
+        canLoadMore = true;
+        Toast.makeText(mContext, "加载更多成功", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * 正在加载更多，在这里添加逻辑
+     */
+    public void loadMoreIng() {
+        canLoadMore = false;
+        Toast.makeText(mContext, "正在加载更多", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * 正在加载没有更多数据，在这里添加逻辑
+     */
+    public void loadMoreNoData() {
+        canLoadMore = false;
+        Toast.makeText(mContext, "加载更多，没有数据了...", Toast.LENGTH_SHORT).show();
+    }
+
 
     private void processData() {
         //找到最大值和最小值
@@ -818,7 +914,7 @@ public class TimeSharingView extends View {
                 mMaxQuotes = quotes;
             }
         }
-        mPerX = (mWidth - mPaddingLeft - mPaddingRight - mRightBlankPadding) / mShownMaxCount;
+        mPerX = (mWidth - mPaddingLeft - mPaddingRight - mInnerRightBlankPadding) / (mShownMaxCount - 1);//特别注意，这里-1并不代表个数减少了，因为起始点是从0开始的。
         //不要忘了减去内部的上下Padding
         mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding - mInnerBottomBlankPadding) / (mMaxQuotes.c - mMinQuotes.c));
         invalidate();
@@ -827,51 +923,51 @@ public class TimeSharingView extends View {
     ScaleGestureDetector.OnScaleGestureListener mOnScaleGestureListener = new ScaleGestureDetector.OnScaleGestureListener() {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-//            Log.e(TAG, "onScaleBegin:detector.getFocusX(): " + detector.getFocusX()
-//                    + ",detector.getFocusY():" + detector.getFocusY()+",detector.getScaleFactor()"+detector.getScaleFactor());
-//            if (detector.getScaleFactor() == 1) return true;
-//            boolean isBigger = detector.getScaleFactor() > 1;
-//            int shownCount = (int) Math.floor(mShownMaxCount * detector.getScaleFactor());
-//            if (shownCount > mQuotesList.size()) {
-//                shownCount = mQuotesList.size();
-//            }
-//            //pressX
-//            //            float pressX = detector.getFocusX();
-//            //            float minXLen = Integer.MAX_VALUE;
-//            //            int finalIndex;
-//            //            finalIndex = mBeginIndex;
-//            //            for (int i = mBeginIndex; i < mEndIndex; i++) {
-//            //                Quotes currFunMode = mQuotesList.get(i);
-//            //                float abs = Math.abs(pressX - currFunMode.floatX);
-//            //                if (abs < minXLen) {
-//            //                    minXLen = abs;
-//            //                    finalIndex = i;
-//            //                }
-//            //            }
-//            //计算差值
-//            //test
-//            int oldBeginIndex = mBeginIndex;
-//            int oldEndIndex = mEndIndex;
-//
-//            int dis = Math.abs(shownCount - mShownMaxCount);
-//            Log.e(TAG, "onScaleBegin: dis:" + dis + ",detector.getScaleFactor():" + detector.getScaleFactor());
-//            mShownMaxCount = shownCount;
-//            if (isBigger) {
-//                mBeginIndex += dis / 2;
-//                mEndIndex += dis / 2;
-//            } else {
-//                mBeginIndex -= dis / 2;
-//                mEndIndex -= dis / 2;
-//            }
-//            if (mBeginIndex < 0) {
-//                mEndIndex = 0;
-//            }
-//            if (mEndIndex > mQuotesList.size()) {
-//                mEndIndex = mQuotesList.size();
-//            }
-//            Log.e(TAG, "onScaleBegin:mBeginIndex: " + mBeginIndex + ",mEndIndex:" + mEndIndex +
-//                    "---oldBeginIndex:" + oldBeginIndex + ",oldEndIndex:" + oldEndIndex);
-//            processData();
+            //            Log.e(TAG, "onScaleBegin:detector.getFocusX(): " + detector.getFocusX()
+            //                    + ",detector.getFocusY():" + detector.getFocusY()+",detector.getScaleFactor()"+detector.getScaleFactor());
+            //            if (detector.getScaleFactor() == 1) return true;
+            //            boolean isBigger = detector.getScaleFactor() > 1;
+            //            int shownCount = (int) Math.floor(mShownMaxCount * detector.getScaleFactor());
+            //            if (shownCount > mQuotesList.size()) {
+            //                shownCount = mQuotesList.size();
+            //            }
+            //            //pressX
+            //            //            float pressX = detector.getFocusX();
+            //            //            float minXLen = Integer.MAX_VALUE;
+            //            //            int finalIndex;
+            //            //            finalIndex = mBeginIndex;
+            //            //            for (int i = mBeginIndex; i < mEndIndex; i++) {
+            //            //                Quotes currFunMode = mQuotesList.get(i);
+            //            //                float abs = Math.abs(pressX - currFunMode.floatX);
+            //            //                if (abs < minXLen) {
+            //            //                    minXLen = abs;
+            //            //                    finalIndex = i;
+            //            //                }
+            //            //            }
+            //            //计算差值
+            //            //test
+            //            int oldBeginIndex = mBeginIndex;
+            //            int oldEndIndex = mEndIndex;
+            //
+            //            int dis = Math.abs(shownCount - mShownMaxCount);
+            //            Log.e(TAG, "onScaleBegin: dis:" + dis + ",detector.getScaleFactor():" + detector.getScaleFactor());
+            //            mShownMaxCount = shownCount;
+            //            if (isBigger) {
+            //                mBeginIndex += dis / 2;
+            //                mEndIndex += dis / 2;
+            //            } else {
+            //                mBeginIndex -= dis / 2;
+            //                mEndIndex -= dis / 2;
+            //            }
+            //            if (mBeginIndex < 0) {
+            //                mEndIndex = 0;
+            //            }
+            //            if (mEndIndex > mQuotesList.size()) {
+            //                mEndIndex = mQuotesList.size();
+            //            }
+            //            Log.e(TAG, "onScaleBegin:mBeginIndex: " + mBeginIndex + ",mEndIndex:" + mEndIndex +
+            //                    "---oldBeginIndex:" + oldBeginIndex + ",oldEndIndex:" + oldEndIndex);
+            //            processData();
             return true;
         }
 
@@ -887,21 +983,20 @@ public class TimeSharingView extends View {
         }
     };
 
+
+    //长按监听
     interface TimeSharingListener {
-        void success();
-
-        void error(Exception e);
-    }
-
-    interface LongTouchListener {
         void onLongTouch(Quotes preQuotes, Quotes currentQuotes);
 
         void onUnLongTouch();
+
+        void needLoadMore();
     }
 
     enum PullType {
-        PULL_RIGHT,
-        PULL_LEFT,
-        PULL_NONE,
+        PULL_RIGHT,//向右滑动
+        PULL_LEFT,//向左滑动
+        PULL_RIGHT_STOP,//滑动到最右边
+        PULL_LEFT_STOP,//滑动到最左边
     }
 }

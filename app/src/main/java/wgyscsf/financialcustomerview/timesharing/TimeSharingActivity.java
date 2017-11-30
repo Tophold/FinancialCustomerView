@@ -26,8 +26,13 @@ import wgyscsf.financialcustomerview.utils.GsonUtil;
 import wgyscsf.financialcustomerview.utils.StringUtils;
 import wgyscsf.financialcustomerview.utils.TimeUtils;
 
+/**
+ * timesharing0:模拟的是加载更多的数据，注意，会分段取，模拟的是多次加载更多
+ * timesharing1：模拟的是api请求的数据集合，注意：一次加载完毕，模拟的是第一次加载的数据
+ * timesharing2：模拟的是实时**推送**的数据，注意：会分段取，一次取一个。
+ */
 public class TimeSharingActivity extends BaseActivity {
-    TimeSharingView tsv;
+    TimeSharingView mTimeSharingView;
     private LinearLayout ats_ll_container;
     private TextView mAtsTvH;
     private TextView mAtsTvO;
@@ -36,6 +41,9 @@ public class TimeSharingActivity extends BaseActivity {
     private TextView mAtsTvP;
     private TextView ats_tv_time;
 
+    List<Quotes> mLoadMoreList;
+    int index = 0;//加载更多，加载到哪儿了。因为真实应用中，也存在加载完毕的情况。这里对应加载到list的最后
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,17 +51,36 @@ public class TimeSharingActivity extends BaseActivity {
         bindView();
         loadData();
         pushData();
-        tsv.setOnClickListener(new View.OnClickListener() {
+        mTimeSharingView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
             }
         });
+        //这里先预加载加载更多的数据，然后加载更多的时候分段取出来，模拟加载更多
+        initLoadMore();
+    }
+
+    private void initLoadMore() {
+        mLoadMoreList = new ArrayList<>();
+        String originalFundData = SimulateNetAPI.getOriginalFundData(mContext, 0);
+        if (originalFundData == null) {
+            Log.e(TAG, "loadData: 从网络获取到的数据为空");
+            return;
+        }
+        try {
+            List<OriginQuotes> quotesList = GsonUtil.fromJson2Object(originalFundData, new TypeToken<List<OriginQuotes>>() {
+            }.getType());
+            mLoadMoreList = adapterData(quotesList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
     }
 
     private void bindView() {
         ats_ll_container = (LinearLayout) findViewById(R.id.ats_ll_container);
-        tsv = (TimeSharingView) findViewById(R.id.tsv);
+        mTimeSharingView = (TimeSharingView) findViewById(R.id.tsv);
         mAtsTvH = (TextView) findViewById(R.id.ats_tv_h);
         mAtsTvO = (TextView) findViewById(R.id.ats_tv_o);
         mAtsTvL = (TextView) findViewById(R.id.ats_tv_l);
@@ -97,7 +124,7 @@ public class TimeSharingActivity extends BaseActivity {
                     @Override
                     public void call(List<Quotes> o) {
                         if (o != null) {
-                            tsv.setTimeSharingData(o, new TimeSharingView.LongTouchListener() {
+                            mTimeSharingView.setTimeSharingData(o, new TimeSharingView.TimeSharingListener() {
 
                                 @Override
                                 public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
@@ -107,6 +134,12 @@ public class TimeSharingActivity extends BaseActivity {
                                 @Override
                                 public void onUnLongTouch() {
                                     ats_ll_container.setVisibility(View.INVISIBLE);
+                                }
+
+                                @Override
+                                public void needLoadMore() {
+                                    Log.e(TAG, "needLoadMore: 需要加载更多了..");
+                                    loadMoreData();
                                 }
                             });
                         } else {
@@ -214,7 +247,7 @@ public class TimeSharingActivity extends BaseActivity {
                 .subscribe(new Action1<Quotes>() {
                     @Override
                     public void call(Quotes o) {
-                        tsv.addTimeSharingData(o);
+                        mTimeSharingView.addTimeSharingData(o);
                     }
                 });
 
@@ -222,4 +255,45 @@ public class TimeSharingActivity extends BaseActivity {
         addGcManagerSubscription(subscribeSocekt);
     }
 
+    private void loadMoreData() {
+        if (mLoadMoreList.isEmpty()) return;
+        Observable.create(new Observable.OnSubscribe<List<Quotes>>() {
+            @Override
+            public void call(Subscriber<? super List<Quotes>> subscriber) {
+                try {
+                    Thread.sleep(StringUtils.getRadomNum(1000, 5000));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                int size = mLoadMoreList.size();
+                int min = size / 20;
+                int max = size / 5;//一次最多加载多少
+                int loadSize = StringUtils.getRadomNum(min, max);
+                if (index == loadSize) {
+                    //没有更多数据了
+                    mTimeSharingView.loadMoreNoData();
+                }
+                if ((index + loadSize) > mLoadMoreList.size()) {
+                    loadSize = mLoadMoreList.size();
+                }
+                List<Quotes> loadList = mLoadMoreList.subList(index, index + loadSize);
+                index = index + loadSize;//重置起始位置
+                subscriber.onNext(loadList);
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<List<Quotes>>() {
+                    @Override
+                    public void call(List<Quotes> integer) {
+                        mTimeSharingView.loadMoreData(integer);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e(TAG, "call: 加载更多出现了异常");
+                        mTimeSharingView.loadMoreError();
+                    }
+                });
+    }
 }
