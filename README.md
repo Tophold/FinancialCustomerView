@@ -17,7 +17,7 @@
 
 #### TimeSharingView.view
 
-> 股票、外汇等交易类的分时图，开发在timesharing分支。下方是进度
+> 股票、外汇等交易类的分时图。开发在timesharing分支，比较稳定的版本在dev。下方是开发进度
 
 * 第一阶段，参数准备，外边框、内虚线、折线图等的绘制
 
@@ -34,4 +34,8 @@
 * 第四阶段，长按十字线，左右移动分时图
 
 ![https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E5%8F%AF%E4%BB%A5%E9%95%BF%E6%8C%89_%E5%8F%AF%E4%BB%A5%E5%B7%A6%E5%8F%B3%E6%8B%96%E5%8A%A8.gif?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E5%8F%AF%E4%BB%A5%E9%95%BF%E6%8C%89_%E5%8F%AF%E4%BB%A5%E5%B7%A6%E5%8F%B3%E6%8B%96%E5%8A%A8.gif?raw=true)
+
+* 第五阶段，长按实时显示详细数据、加载更多处理、实时横线优化、滑动优化
+
+![https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/dev/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E4%BA%94%E9%98%B6%E6%AE%B5_%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9A.gif](https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/dev/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E4%BA%94%E9%98%B6%E6%AE%B5_%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9A.gif)
 
