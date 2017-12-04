@@ -35,3 +35,4 @@
 
 ![https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E5%8F%AF%E4%BB%A5%E9%95%BF%E6%8C%89_%E5%8F%AF%E4%BB%A5%E5%B7%A6%E5%8F%B3%E6%8B%96%E5%8A%A8.gif?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E5%8F%AF%E4%BB%A5%E9%95%BF%E6%8C%89_%E5%8F%AF%E4%BB%A5%E5%B7%A6%E5%8F%B3%E6%8B%96%E5%8A%A8.gif?raw=true)
 
+* 第五阶段，长按实时显示详细数据、加载更多处理、实时横线优化、滑动优化
