@@ -32,7 +32,7 @@ import wgyscsf.financialcustomerview.utils.TimeUtils;
  * timesharing2：模拟的是实时**推送**的数据，注意：会分段取，一次取一个。
  */
 public class TimeSharingActivity extends BaseActivity {
-    TimeSharingView mTimeSharingView;
+    MpTimeSharingView mTimeSharingView;
     private LinearLayout ats_ll_container;
     private TextView mAtsTvH;
     private TextView mAtsTvO;
@@ -80,7 +80,7 @@ public class TimeSharingActivity extends BaseActivity {
 
     private void bindView() {
         ats_ll_container = (LinearLayout) findViewById(R.id.ats_ll_container);
-        mTimeSharingView = (TimeSharingView) findViewById(R.id.tsv);
+        mTimeSharingView = (MpTimeSharingView) findViewById(R.id.tsv);
         mAtsTvH = (TextView) findViewById(R.id.ats_tv_h);
         mAtsTvO = (TextView) findViewById(R.id.ats_tv_o);
         mAtsTvL = (TextView) findViewById(R.id.ats_tv_l);
@@ -124,24 +124,7 @@ public class TimeSharingActivity extends BaseActivity {
                     @Override
                     public void call(List<Quotes> o) {
                         if (o != null) {
-                            mTimeSharingView.setTimeSharingData(o, new TimeSharingView.TimeSharingListener() {
-
-                                @Override
-                                public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
-                                    showContanier(preQuotes, currentQuotes);
-                                }
-
-                                @Override
-                                public void onUnLongTouch() {
-                                    ats_ll_container.setVisibility(View.INVISIBLE);
-                                }
-
-                                @Override
-                                public void needLoadMore() {
-                                    Log.e(TAG, "needLoadMore: 需要加载更多了..");
-                                    loadMoreData();
-                                }
-                            });
+                            mTimeSharingView.setTimeSharingData(o);
                         } else {
                             Log.e(TAG, "run: 数据适配失败、、、、");
                         }
@@ -247,7 +230,7 @@ public class TimeSharingActivity extends BaseActivity {
                 .subscribe(new Action1<Quotes>() {
                     @Override
                     public void call(Quotes o) {
-                        mTimeSharingView.addTimeSharingData(o);
+                      mTimeSharingView.addTimeSharingData(o);
                     }
                 });
 
@@ -272,7 +255,7 @@ public class TimeSharingActivity extends BaseActivity {
                 int loadSize = StringUtils.getRadomNum(min, max);
                 if (index == loadSize) {
                     //没有更多数据了
-                    mTimeSharingView.loadMoreNoData();
+                    //mTimeSharingView.loadMoreNoData();
                 }
                 if ((index + loadSize) > mLoadMoreList.size()) {
                     loadSize = mLoadMoreList.size();
@@ -286,13 +269,13 @@ public class TimeSharingActivity extends BaseActivity {
                 .subscribe(new Action1<List<Quotes>>() {
                     @Override
                     public void call(List<Quotes> integer) {
-                        mTimeSharingView.loadMoreData(integer);
+                        //mTimeSharingView.loadMoreData(integer);
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
                         Log.e(TAG, "call: 加载更多出现了异常");
-                        mTimeSharingView.loadMoreError();
+                        //mTimeSharingView.loadMoreError();
                     }
                 });
     }

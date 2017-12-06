@@ -35,4 +35,8 @@ dependencies {
     //引入rx
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.2.4'
+
+    //mp
+    compile 'com.github.PhilJay:MPAndroidChart:v3.0.2'
+
 }
