@@ -201,6 +201,17 @@ public class TimeSharingView extends View {
      * 最后，刷新界面。
      */
     ScaleGestureDetector mScaleGestureDetector;
+    //开始缩放的x轴的位置所距离最近的点的数据集合(整个数据集合)的坐标
+    int mScaleBeginIndex;
+    //必须保证在伸缩的时候数据不变，不然会导致数组越界，
+    // 其实可以理解。在进行伸缩的过程中，会计算起始位置和结束位置，
+    // 如果计算完毕之后，这个时候还没有执行以下逻辑，这个时候过来数据更新了数据，数据大小就变了。
+    //在这里控制
+
+    //缩放最小值，该值理论上可以最小为3
+    int mDefScaleminnum = 3;
+    //缩放最大值，该值最大理论上可为数据集合的大小
+    int mDefScalemaxnum = 100;
 
 
     public TimeSharingView(Context context) {
@@ -263,6 +274,8 @@ public class TimeSharingView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        //按下的手指个数
+        mFingerPressedCount = event.getPointerCount();
         //手势监听
         //Log.e(TAG, "onTouchEvent: " + event.getPointerCount());
         mScaleGestureDetector.onTouchEvent(event);
@@ -270,8 +283,6 @@ public class TimeSharingView extends View {
             case MotionEvent.ACTION_DOWN:
                 mPressedX = event.getX();
                 mPressTime = event.getDownTime();
-                //按下的手指个数
-                mFingerPressedCount = event.getPointerCount();
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (event.getEventTime() - mPressTime > DEF_LONGPRESS_LENGTH) {
@@ -749,7 +760,7 @@ public class TimeSharingView extends View {
     public float getFontHeight(float fontSize, Paint paint) {
         paint.setTextSize(fontSize);
         Paint.FontMetrics fm = paint.getFontMetrics();
-        return (float) (Math.ceil(fm.descent - fm.top) + 2);
+        return (float) (Math.ceil(fm.descent - fm.top) + 2f);
     }
 
     private int getColor(@ColorRes int colorId) {
@@ -920,66 +931,73 @@ public class TimeSharingView extends View {
         invalidate();
     }
 
-    ScaleGestureDetector.OnScaleGestureListener mOnScaleGestureListener = new ScaleGestureDetector.OnScaleGestureListener() {
+    ScaleGestureDetector.OnScaleGestureListener mOnScaleGestureListener = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            //            Log.e(TAG, "onScaleBegin:detector.getFocusX(): " + detector.getFocusX()
-            //                    + ",detector.getFocusY():" + detector.getFocusY()+",detector.getScaleFactor()"+detector.getScaleFactor());
-            //            if (detector.getScaleFactor() == 1) return true;
-            //            boolean isBigger = detector.getScaleFactor() > 1;
-            //            int shownCount = (int) Math.floor(mShownMaxCount * detector.getScaleFactor());
-            //            if (shownCount > mQuotesList.size()) {
-            //                shownCount = mQuotesList.size();
-            //            }
-            //            //pressX
-            //            //            float pressX = detector.getFocusX();
-            //            //            float minXLen = Integer.MAX_VALUE;
-            //            //            int finalIndex;
-            //            //            finalIndex = mBeginIndex;
-            //            //            for (int i = mBeginIndex; i < mEndIndex; i++) {
-            //            //                Quotes currFunMode = mQuotesList.get(i);
-            //            //                float abs = Math.abs(pressX - currFunMode.floatX);
-            //            //                if (abs < minXLen) {
-            //            //                    minXLen = abs;
-            //            //                    finalIndex = i;
-            //            //                }
-            //            //            }
-            //            //计算差值
-            //            //test
-            //            int oldBeginIndex = mBeginIndex;
-            //            int oldEndIndex = mEndIndex;
-            //
-            //            int dis = Math.abs(shownCount - mShownMaxCount);
-            //            Log.e(TAG, "onScaleBegin: dis:" + dis + ",detector.getScaleFactor():" + detector.getScaleFactor());
-            //            mShownMaxCount = shownCount;
-            //            if (isBigger) {
-            //                mBeginIndex += dis / 2;
-            //                mEndIndex += dis / 2;
-            //            } else {
-            //                mBeginIndex -= dis / 2;
-            //                mEndIndex -= dis / 2;
-            //            }
-            //            if (mBeginIndex < 0) {
-            //                mEndIndex = 0;
-            //            }
-            //            if (mEndIndex > mQuotesList.size()) {
-            //                mEndIndex = mQuotesList.size();
-            //            }
-            //            Log.e(TAG, "onScaleBegin:mBeginIndex: " + mBeginIndex + ",mEndIndex:" + mEndIndex +
-            //                    "---oldBeginIndex:" + oldBeginIndex + ",oldEndIndex:" + oldEndIndex);
-            //            processData();
+            // FIXME: 2017/12/6 当缩小最小时。也就是显示的数据量最多时会出现数据越界错误。重现错误时将mDefScalemaxnum改为一个极大值即可。
+            Log.e(TAG, "onScale: mFingerPressedCount:" + mFingerPressedCount +
+                    ",mShownMaxCount == mQuotesList.size():" + (mShownMaxCount == mQuotesList.size()) +
+                    ",mShownMaxCount:" + mShownMaxCount);
+            //没有缩放
+            if (detector.getScaleFactor() == 1) return true;
+
+            //正式开始表演
+            boolean isBigger = detector.getScaleFactor() > 1;
+            //当放大时，可见的数据集合的个数(A)应该减少。detector.getScaleFactor()(B的范围[1,2)),
+            // 这个时候可以新的可见数据集合（C）可以考虑采用C=A-A*(B-1);当然这样计算是否准确，还需要商榷。
+            //必须向上取整，不然当mShownMaxCount过小时容易取到0
+            int changeNum = (int) Math.ceil(mShownMaxCount * Math.abs(detector.getScaleFactor() - 1));
+
+            int helfChangeNum = (int) Math.ceil(changeNum / 2f);
+
+            Log.e(TAG, "onScale:changeNum: " + changeNum + ",helfChangeNum:" + helfChangeNum);
+
+            //缩放个数太少
+            if (changeNum == 0 || helfChangeNum == 0) return true;
+
+            //变大了(拉伸了)，数量变少了
+            int tempCount = isBigger ? mShownMaxCount - changeNum : mShownMaxCount + changeNum;
+
+            Log.e(TAG, "onScale:mShownMaxCount： " + mShownMaxCount);
+
+            //容错处理
+            if (mDefScaleminnum < 3) {
+                mDefScaleminnum = 3;
+            }
+            if (mDefScalemaxnum > mQuotesList.size()) {
+                mDefScalemaxnum = mQuotesList.size();
+            }
+
+            //缩小大到最小了或者放大到很大了
+            if (tempCount > mDefScalemaxnum || tempCount < mDefScaleminnum) return true;
+
+            mShownMaxCount = tempCount;
+            //这个地方比较难以理解:拉伸了起始点变大，并且是拉伸数量的一半，结束点变小，也是原来的一半。收缩，相反。可以自己画一个图看看
+            mBeginIndex = isBigger ? mBeginIndex + helfChangeNum : mBeginIndex - helfChangeNum;
+            if (mBeginIndex < 0) {
+                mBeginIndex = 0;
+            } else if ((mBeginIndex + mShownMaxCount) > mQuotesList.size()) {
+                mBeginIndex = mQuotesList.size() - mShownMaxCount;
+            }
+
+            mEndIndex = mBeginIndex + mShownMaxCount;
+
+            Log.e(TAG, "onScaleBegin:mBeginIndex: " + mBeginIndex + ",mEndIndex:" + mEndIndex + ",changeNum:" + changeNum + ",mShownMaxCount:" + mShownMaxCount);
+            //只要找好起始点和结束点就可以交给处理重绘的方法就好啦~
+            processData();
             return true;
         }
 
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
-
+            //指头数量
+            if (mFingerPressedCount != 2) return true;
+            Log.e(TAG, "onScaleBegin: " + detector.getFocusX());
+            //这里获取距离焦点最近的位置
+            float beginX = detector.getFocusX();
+            float v = beginX - mPaddingLeft;
+            mScaleBeginIndex = (int) Math.ceil(v / mPerX) + mBeginIndex;
             return true;
-        }
-
-        @Override
-        public void onScaleEnd(ScaleGestureDetector detector) {
-            Log.i(TAG, "onScaleEnd");
         }
     };
 
