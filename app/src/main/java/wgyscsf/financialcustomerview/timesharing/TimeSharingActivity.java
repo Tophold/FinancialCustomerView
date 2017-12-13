@@ -257,7 +257,7 @@ public class TimeSharingActivity extends BaseActivity {
 
     private void loadMoreData() {
         if (mLoadMoreList.isEmpty()) return;
-        Observable.create(new Observable.OnSubscribe<List<Quotes>>() {
+        Subscription subscribe = Observable.create(new Observable.OnSubscribe<List<Quotes>>() {
             @Override
             public void call(Subscriber<? super List<Quotes>> subscriber) {
                 try {
@@ -295,5 +295,8 @@ public class TimeSharingActivity extends BaseActivity {
                         mTimeSharingView.loadMoreError();
                     }
                 });
+
+        //及时回收，防止泄露
+        addGcManagerSubscription(subscribe);
     }
 }

@@ -203,15 +203,10 @@ public class TimeSharingView extends View {
     ScaleGestureDetector mScaleGestureDetector;
     //开始缩放的x轴的位置所距离最近的点的数据集合(整个数据集合)的坐标
     int mScaleBeginIndex;
-    //必须保证在伸缩的时候数据不变，不然会导致数组越界，
-    // 其实可以理解。在进行伸缩的过程中，会计算起始位置和结束位置，
-    // 如果计算完毕之后，这个时候还没有执行以下逻辑，这个时候过来数据更新了数据，数据大小就变了。
-    //在这里控制
-
-    //缩放最小值，该值理论上可以最小为3
-    int mDefScaleminnum = 3;
+    //缩放最小值，该值理论上可以最小为3。为了美观，这个值不能太小，不然就成一条线了。
+    int mDefScaleminnum = 30;
     //缩放最大值，该值最大理论上可为数据集合的大小
-    int mDefScalemaxnum = 100;
+    int mDefScalemaxnum = 300;
 
 
     public TimeSharingView(Context context) {
@@ -934,7 +929,6 @@ public class TimeSharingView extends View {
     ScaleGestureDetector.OnScaleGestureListener mOnScaleGestureListener = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            // FIXME: 2017/12/6 当缩小最小时。也就是显示的数据量最多时会出现数据越界错误。重现错误时将mDefScalemaxnum改为一个极大值即可。
             Log.e(TAG, "onScale: mFingerPressedCount:" + mFingerPressedCount +
                     ",mShownMaxCount == mQuotesList.size():" + (mShownMaxCount == mQuotesList.size()) +
                     ",mShownMaxCount:" + mShownMaxCount);
