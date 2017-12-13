@@ -33,7 +33,7 @@ gen/
 out/
 build/
 *.dex
-*.apk
+## *.apk
 *.ap_
 *.class
 
