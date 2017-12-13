@@ -39,3 +39,7 @@
 
 ![https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/dev/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E4%BA%94%E9%98%B6%E6%AE%B5_%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9A.gif](https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/dev/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E4%BA%94%E9%98%B6%E6%AE%B5_%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9A.gif)
 
+* 第六阶段，缩放、代码整理、注释
+
+![https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E5%85%AD%E9%98%B6%E6%AE%B5_%E7%BC%A9%E6%94%BE-%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96-%E6%B3%A8%E9%87%8A.gif?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E5%85%AD%E9%98%B6%E6%AE%B5_%E7%BC%A9%E6%94%BE-%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96-%E6%B3%A8%E9%87%8A.gif?raw=true)
+
