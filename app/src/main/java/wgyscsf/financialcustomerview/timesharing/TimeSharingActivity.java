@@ -247,7 +247,7 @@ public class TimeSharingActivity extends BaseActivity {
                 .subscribe(new Action1<Quotes>() {
                     @Override
                     public void call(Quotes o) {
-                       mTimeSharingView.addTimeSharingData(o);
+                       mTimeSharingView.pushingTimeSharingData(o);
                     }
                 });
 
@@ -286,7 +286,7 @@ public class TimeSharingActivity extends BaseActivity {
                 .subscribe(new Action1<List<Quotes>>() {
                     @Override
                     public void call(List<Quotes> integer) {
-                        mTimeSharingView.loadMoreData(integer);
+                        mTimeSharingView.loadMoreTimeSharingData(integer);
                     }
                 }, new Action1<Throwable>() {
                     @Override

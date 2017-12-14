@@ -30,7 +30,10 @@ import static android.view.View.MeasureSpec.AT_MOST;
  * ============================================================
  * 作 者 :    wgyscsf@163.com
  * 创建日期 ：2017/11/21 16:26
- * 描 述 ：分时图，根据闭盘价绘制折线图。
+ * 描 述 ：分时图，根据闭盘价绘制分时图。
+ * 为了模拟真实环境，拿到的数据没有直接使用，而是做了适配转换处理。没有使用任何第三方框架，
+ * rx的使用紧紧在模拟网络环境获取数据的时候进行了线程的切换处理，控件中并没有使用。
+ * <p>
  * 现功能如下：
  * 绘制必要的各种背景、加载分时折线图、实时价横线显示、实时价更新分时图、
  * 长按显示当前（距离按下点最近的有效点）价，并回调有效点、支持拖拽、支持缩放、支持加载更多、
@@ -341,7 +344,7 @@ public class TimeSharingView extends View {
      *
      * @param moveLen
      */
-    private void moveKView(float moveLen) {
+    protected void moveKView(float moveLen) {
         //移动之前将右侧的内间距值为0
         mInnerRightBlankPadding = 0;
 
@@ -379,21 +382,21 @@ public class TimeSharingView extends View {
         mEndIndex = mBeginIndex + mShownMaxCount;
         //开始位置和结束位置确认好，就可以重绘啦~
         //Log.e(TAG, "moveKView: mPullRight：" + mPullRight + ",mBeginIndex:" + mBeginIndex + ",mEndIndex:" + mEndIndex);
-        processData();
+        seekAndCalculateCellData();
     }
 
-    private void showLongPressView() {
+    protected void showLongPressView() {
         mDrawLongPressPaint = true;
         invalidate();
     }
 
-    private void hiddenLongPressView() {
+    protected void hiddenLongPressView() {
         mDrawLongPressPaint = false;
         invalidate();
         mTimeSharingListener.onUnLongTouch();
     }
 
-    private void initAttrs() {
+    protected void initAttrs() {
         //加载颜色和字符串资源
         loadDefAttrs();
 
@@ -414,7 +417,7 @@ public class TimeSharingView extends View {
         mScaleGestureDetector = new ScaleGestureDetector(mContext, mOnScaleGestureListener);
     }
 
-    private void loadDefAttrs() {
+    protected void loadDefAttrs() {
         //数据源
         mQuotesList = new ArrayList<>(mShownMaxCount);
         //颜色
@@ -432,20 +435,20 @@ public class TimeSharingView extends View {
         mLongPressTxtBgColor = getColor(R.color.color_timeSharing_longPressTxtBgColor);
     }
 
-    private void initLoadingPaint() {
+    protected void initLoadingPaint() {
         mLoadingPaint = new Paint();
         mLoadingPaint.setColor(getColor(R.color.color_timeSharing_xYTxtColor));
         mLoadingPaint.setTextSize(mLoadingTextSize);
         mLoadingPaint.setAntiAlias(true);
     }
 
-    private void initOuterPaint() {
+    protected void initOuterPaint() {
         mOuterPaint = new Paint();
         mOuterPaint.setColor(mOuterLineColor);
         mOuterPaint.setStrokeWidth(mOuterLineWidth);
     }
 
-    private void initInnerXyPaint() {
+    protected void initInnerXyPaint() {
         mInnerXyPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mInnerXyPaint.setColor(mInnerXyLineColor);
         mInnerXyPaint.setStrokeWidth(mInnerXyLineWidth);
@@ -456,14 +459,14 @@ public class TimeSharingView extends View {
         }
     }
 
-    private void initXyTxtPaint() {
+    protected void initXyTxtPaint() {
         mXYTxtPaint = new Paint();
         mXYTxtPaint.setColor(mXYTxtColor);
         mXYTxtPaint.setTextSize(mXYTxtSize);
         mXYTxtPaint.setAntiAlias(true);
     }
 
-    private void initBrokenLinePaint() {
+    protected void initBrokenLinePaint() {
         mBrokenLinePaint = new Paint();
         mBrokenLinePaint.setColor(mBrokenLineColor);
         mBrokenLinePaint.setStrokeWidth(mBrokenLineWidth);
@@ -476,7 +479,7 @@ public class TimeSharingView extends View {
         }
     }
 
-    private void initBrokenLineBgPaint() {
+    protected void initBrokenLineBgPaint() {
         mBrokenLineBgPaint = new Paint();
         mBrokenLineBgPaint.setColor(mBrokenLineBgColor);
         mBrokenLineBgPaint.setStyle(Paint.Style.FILL);
@@ -484,14 +487,14 @@ public class TimeSharingView extends View {
         mBrokenLineBgPaint.setAlpha(mAlpha);
     }
 
-    private void initDotPaint() {
+    protected void initDotPaint() {
         mDotPaint = new Paint();
         mDotPaint.setColor(mDotColor);
         mDotPaint.setStyle(Paint.Style.FILL);
         mDotPaint.setAntiAlias(true);
     }
 
-    private void initTimingTxtPaint() {
+    protected void initTimingTxtPaint() {
         mTimingTxtBgPaint = new Paint();
         mTimingTxtBgPaint.setColor(mTimingTxtBgColor);
         mTimingTxtBgPaint.setAntiAlias(true);
@@ -502,7 +505,7 @@ public class TimeSharingView extends View {
         mTimingTxtPaint.setAntiAlias(true);
     }
 
-    private void initTimingLinePaint() {
+    protected void initTimingLinePaint() {
         mTimingLinePaint = new Paint();
         mTimingLinePaint.setColor(mTimingLineColor);
         mTimingLinePaint.setStrokeWidth(mTimingLineWidth);
@@ -514,14 +517,14 @@ public class TimeSharingView extends View {
         }
     }
 
-    private void initLongPressPaint() {
+    protected void initLongPressPaint() {
         mLongPressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLongPressPaint.setColor(mLongPressColor);
         mLongPressPaint.setStrokeWidth(mLongPressLineWidth);
         mLongPressPaint.setStyle(Paint.Style.STROKE);
     }
 
-    private void initLongPressTxtPaint() {
+    protected void initLongPressTxtPaint() {
         mLongPressTxtPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLongPressTxtPaint.setTextSize(mLongPressTxtSize);
         mLongPressTxtPaint.setColor(mLongPressTxtColor);
@@ -530,14 +533,14 @@ public class TimeSharingView extends View {
         mLongPressTxtBgPaint.setColor(mLongPressTxtBgColor);
     }
 
-    private void showLoadingPaint(Canvas canvas) {
+    protected void showLoadingPaint(Canvas canvas) {
         if (!mDrawLoadingPaint) return;
         //这里特别注意，x轴的起始点要减去文字宽度的一半
         canvas.drawText(mLoadingText, mWidth / 2 - mLoadingPaint.measureText(mLoadingText) / 2,
                 mHeight / 2, mLoadingPaint);
     }
 
-    private void drawOuterLine(Canvas canvas) {
+    protected void drawOuterLine(Canvas canvas) {
         //先绘制x轴
         canvas.drawLine(mPaddingLeft, mPaddingTop,
                 mWidth - mPaddingRight, mPaddingTop, mOuterPaint);
@@ -551,7 +554,7 @@ public class TimeSharingView extends View {
                 mWidth - mPaddingRight, mHeight - mPaddingBottom, mOuterPaint);
     }
 
-    private void drawInnerXy(Canvas canvas) {
+    protected void drawInnerXy(Canvas canvas) {
         //先绘制x轴
         //计算每一段x的高度
         double perhight = (mHeight - mPaddingTop - mPaddingBottom) / 4;
@@ -570,7 +573,7 @@ public class TimeSharingView extends View {
         }
     }
 
-    private void drawXyTxt(Canvas canvas) {
+    protected void drawXyTxt(Canvas canvas) {
         //先处理y轴方向文字
         drawYPaint(canvas);
 
@@ -578,7 +581,7 @@ public class TimeSharingView extends View {
         drawXPaint(canvas);
     }
 
-    private void drawBrokenLine(Canvas canvas) {
+    protected void drawBrokenLine(Canvas canvas) {
         //先画第一个点
         Quotes quotes = mQuotesList.get(mBeginIndex);
         Path path = new Path();
@@ -649,7 +652,7 @@ public class TimeSharingView extends View {
         canvas.drawPath(path2, mBrokenLineBgPaint);
     }
 
-    private void drawLongPress(Canvas canvas) {
+    protected void drawLongPress(Canvas canvas) {
         if (!mDrawLongPressPaint) return;
 
         //最后的最近的按下的位置
@@ -723,7 +726,7 @@ public class TimeSharingView extends View {
         }
     }
 
-    private void drawLongPressTxt(Canvas canvas) {
+    protected void drawLongPressTxt(Canvas canvas) {
         //see:drawLongPress(Canvas canvas)
 
     }
@@ -737,7 +740,7 @@ public class TimeSharingView extends View {
      *
      * @param canvas
      */
-    private void drawYPaint(Canvas canvas) {
+    protected void drawYPaint(Canvas canvas) {
         //细节处理，文字高度居中
         float halfTxtHight;
         double minBorderData;
@@ -779,7 +782,7 @@ public class TimeSharingView extends View {
      *
      * @param canvas
      */
-    private void drawXPaint(Canvas canvas) {
+    protected void drawXPaint(Canvas canvas) {
         //细节，让中间虚线对应的文字居中
         float halfTxtWidth = mXYTxtPaint.measureText("00:00") / 2;
 
@@ -807,7 +810,7 @@ public class TimeSharingView extends View {
     }
 
     // 只需要把画笔颜色置为透明即可
-    private void hiddenLoadingPaint() {
+    protected void hiddenLoadingPaint() {
         mLoadingPaint.setColor(0x00000000);
         mDrawLoadingPaint = false;
     }
@@ -818,11 +821,11 @@ public class TimeSharingView extends View {
         return (float) (Math.ceil(fm.descent - fm.top) + 2f);
     }
 
-    private int getColor(@ColorRes int colorId) {
+    protected int getColor(@ColorRes int colorId) {
         return getResources().getColor(colorId);
     }
 
-    private String getString(@StringRes int stringId) {
+    protected String getString(@StringRes int stringId) {
         return getResources().getString(stringId);
     }
 
@@ -855,14 +858,19 @@ public class TimeSharingView extends View {
         hiddenLoadingPaint();
         //开始处理数据
         mDigits = 4;
-        counterBeginAndEndByNewer();
-        processData();
+
+        //寻找开始位置和结束位置
+        seekBeginAndEndByNewer();
+
+        //寻找边界和计算单元数据大小
+        seekAndCalculateCellData();
     }
 
     /**
-     * 来最新数据或者刚加载的时候，计算开始位置和结束位置。特别注意，最新的数据在最后面，所以数据范围应该是[(size-mShownMaxCount)~size)
+     * 获取最新数据时（包括第一次进来）获取可见数据的开始位置和结束位置。来最新数据或者刚加载的时候，计算开始位置和结束位置。
+     * 特别注意，最新的数据在最后面，所以数据范围应该是[(size-mShownMaxCount)~size)
      */
-    private void counterBeginAndEndByNewer() {
+    protected void seekBeginAndEndByNewer() {
         int size = mQuotesList.size();
         if (size >= mShownMaxCount) {
             mBeginIndex = size - mShownMaxCount;
@@ -878,7 +886,7 @@ public class TimeSharingView extends View {
      *
      * @param quotes
      */
-    public void addTimeSharingData(Quotes quotes) {
+    public void pushingTimeSharingData(Quotes quotes) {
         if (quotes == null) {
             Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
             Log.e(TAG, "setTimeSharingData: 数据异常");
@@ -887,9 +895,9 @@ public class TimeSharingView extends View {
         mQuotesList.add(quotes);
         //如果实在左右移动，则不去实时更新K线图，但是要把数据加进去
         if (mPullType == PullType.PULL_RIGHT_STOP) {
-            //Log.e(TAG, "addTimeSharingData: 处理实时更新操作...");
-            counterBeginAndEndByNewer();
-            processData();
+            //Log.e(TAG, "pushingTimeSharingData: 处理实时更新操作...");
+            seekBeginAndEndByNewer();
+            seekAndCalculateCellData();
         }
     }
 
@@ -898,7 +906,7 @@ public class TimeSharingView extends View {
      *
      * @param quotesList
      */
-    public void loadMoreData(List<Quotes> quotesList) {
+    public void loadMoreTimeSharingData(List<Quotes> quotesList) {
         if (quotesList == null || quotesList.isEmpty()) {
             Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
             Log.e(TAG, "setTimeSharingData: 数据异常");
@@ -913,16 +921,16 @@ public class TimeSharingView extends View {
         //因为可能在加载的过程中，原来的意图是在最左边，但是加载完毕后，又不在最左边了。
         // 因此，只要保持原来的起始位置和结束位置即可。【原来：指的是视觉上的原来】
         int addSize = quotesList.size();
-        Log.e(TAG, "loadMoreData: 新来的数据大小：" + addSize);
+        Log.e(TAG, "loadMoreTimeSharingData: 新来的数据大小：" + addSize);
         mBeginIndex = mBeginIndex + addSize;
         if (mBeginIndex + mShownMaxCount > mQuotesList.size()) {
             mBeginIndex = mQuotesList.size() - mShownMaxCount;
         }
         mEndIndex = mBeginIndex + mShownMaxCount;
-        Log.e(TAG, "loadMoreData: 加载更多完毕，mBeginIndex：" + mBeginIndex + ",mEndIndex:" + mEndIndex);
+        Log.e(TAG, "loadMoreTimeSharingData: 加载更多完毕，mBeginIndex：" + mBeginIndex + ",mEndIndex:" + mEndIndex);
         //重新测量一下,这里不能重新测量。因为重新测量的逻辑是寻找最新的点。
-        //counterBeginAndEndByNewer();
-        processData();
+        //seekBeginAndEndByNewer();
+        seekAndCalculateCellData();
     }
 
     /**
@@ -957,8 +965,11 @@ public class TimeSharingView extends View {
         Toast.makeText(mContext, "加载更多，没有数据了...", Toast.LENGTH_SHORT).show();
     }
 
-
-    private void processData() {
+    /**
+     * 寻找边界和计算单元数据大小。寻找:x轴开始位置数据和结束位置的model、y轴的最大数据和最小数据对应的model；
+     * 计算x/y轴数据单元大小
+     */
+    protected void seekAndCalculateCellData() {
         //找到最大值和最小值
         double tempMinClosePrice = Double.MAX_VALUE;
         double tempMaxClosePrice = Double.MIN_VALUE;
@@ -985,78 +996,81 @@ public class TimeSharingView extends View {
         //不要忘了减去内部的上下Padding
         mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
                 - mInnerBottomBlankPadding) / (mMaxQuotes.c - mMinQuotes.c));
+
+        //刷新界面
         invalidate();
     }
 
+    //缩放手势监听
     ScaleGestureDetector.OnScaleGestureListener mOnScaleGestureListener =
             new ScaleGestureDetector.SimpleOnScaleGestureListener() {
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            Log.e(TAG, "onScale: mFingerPressedCount:" + mFingerPressedCount +
-                    ",mShownMaxCount == mQuotesList.size():" + (mShownMaxCount == mQuotesList.size()) +
-                    ",mShownMaxCount:" + mShownMaxCount);
-            //没有缩放
-            if (detector.getScaleFactor() == 1) return true;
+                @Override
+                public boolean onScale(ScaleGestureDetector detector) {
+                    Log.e(TAG, "onScale: mFingerPressedCount:" + mFingerPressedCount +
+                            ",mShownMaxCount == mQuotesList.size():" + (mShownMaxCount == mQuotesList.size()) +
+                            ",mShownMaxCount:" + mShownMaxCount);
+                    //没有缩放
+                    if (detector.getScaleFactor() == 1) return true;
 
-            //是放大还是缩小
-            boolean isBigger = detector.getScaleFactor() > 1;
+                    //是放大还是缩小
+                    boolean isBigger = detector.getScaleFactor() > 1;
 
-            //变化的个数（缩小或者放大），必须向上取整，不然当mShownMaxCount过小时容易取到0。
-            int changeNum = (int) Math.ceil(mShownMaxCount * Math.abs(detector.getScaleFactor() - 1));
+                    //变化的个数（缩小或者放大），必须向上取整，不然当mShownMaxCount过小时容易取到0。
+                    int changeNum = (int) Math.ceil(mShownMaxCount * Math.abs(detector.getScaleFactor() - 1));
 
-            //一半
-            int helfChangeNum = (int) Math.ceil(changeNum / 2f);
+                    //一半
+                    int helfChangeNum = (int) Math.ceil(changeNum / 2f);
 
-            Log.e(TAG, "onScale:changeNum: " + changeNum + ",helfChangeNum:" + helfChangeNum);
+                    Log.e(TAG, "onScale:changeNum: " + changeNum + ",helfChangeNum:" + helfChangeNum);
 
-            //缩放个数太少，直接return
-            if (changeNum == 0 || helfChangeNum == 0) return true;
+                    //缩放个数太少，直接return
+                    if (changeNum == 0 || helfChangeNum == 0) return true;
 
-            Log.e(TAG, "onScale:mShownMaxCount： " + mShownMaxCount);
+                    Log.e(TAG, "onScale:mShownMaxCount： " + mShownMaxCount);
 
-            //容错处理,获取最大最小值
-            if (DEF_SCALE_MINNUM < 3) {
-                DEF_SCALE_MINNUM = 3;
-            }
-            if (DEF_SCALE_MAXNUM > mQuotesList.size()) {
-                DEF_SCALE_MAXNUM = mQuotesList.size();
-            }
+                    //容错处理,获取最大最小值
+                    if (DEF_SCALE_MINNUM < 3) {
+                        DEF_SCALE_MINNUM = 3;
+                    }
+                    if (DEF_SCALE_MAXNUM > mQuotesList.size()) {
+                        DEF_SCALE_MAXNUM = mQuotesList.size();
+                    }
 
-            //变大了(拉伸了)，数量变少了
-            int tempCount = isBigger ? mShownMaxCount - changeNum : mShownMaxCount + changeNum;
+                    //变大了(拉伸了)，数量变少了
+                    int tempCount = isBigger ? mShownMaxCount - changeNum : mShownMaxCount + changeNum;
 
-            //缩小大到最小了或者放大到很大了
-            if (tempCount > DEF_SCALE_MAXNUM || tempCount < DEF_SCALE_MINNUM) return true;
+                    //缩小大到最小了或者放大到很大了
+                    if (tempCount > DEF_SCALE_MAXNUM || tempCount < DEF_SCALE_MINNUM) return true;
 
-            mShownMaxCount = tempCount;
+                    mShownMaxCount = tempCount;
 
-            //计算新的开始位置。这个地方比较难以理解:拉伸了起始点变大，并且是拉伸数量的一半，结束点变小，也是原来的一半。
-            // 收缩，相反。可以自己画一个图看看
-            mBeginIndex = isBigger ? mBeginIndex + helfChangeNum : mBeginIndex - helfChangeNum;
-            if (mBeginIndex < 0) {
-                mBeginIndex = 0;
-            } else if ((mBeginIndex + mShownMaxCount) > mQuotesList.size()) {
-                mBeginIndex = mQuotesList.size() - mShownMaxCount;
-            }
+                    //计算新的开始位置。这个地方比较难以理解:拉伸了起始点变大，并且是拉伸数量的一半，结束点变小，也是原来的一半。
+                    // 收缩，相反。可以自己画一个图看看
+                    mBeginIndex = isBigger ? mBeginIndex + helfChangeNum : mBeginIndex - helfChangeNum;
+                    if (mBeginIndex < 0) {
+                        mBeginIndex = 0;
+                    } else if ((mBeginIndex + mShownMaxCount) > mQuotesList.size()) {
+                        mBeginIndex = mQuotesList.size() - mShownMaxCount;
+                    }
 
-            mEndIndex = mBeginIndex + mShownMaxCount;
+                    mEndIndex = mBeginIndex + mShownMaxCount;
 
-            Log.e(TAG, "onScaleBegin:mBeginIndex: " + mBeginIndex + ",mEndIndex:"
-                    + mEndIndex + ",changeNum:" + changeNum + ",mShownMaxCount:" + mShownMaxCount);
+                    Log.e(TAG, "onScaleBegin:mBeginIndex: " + mBeginIndex + ",mEndIndex:"
+                            + mEndIndex + ",changeNum:" + changeNum + ",mShownMaxCount:" + mShownMaxCount);
 
-            //只要找好起始点和结束点就可以交给处理重绘的方法就好啦~
-            processData();
-            return true;
-        }
+                    //只要找好起始点和结束点就可以交给处理重绘的方法就好啦~
+                    seekAndCalculateCellData();
+                    return true;
+                }
 
-        @Override
-        public boolean onScaleBegin(ScaleGestureDetector detector) {
-            Log.e(TAG, "onScaleBegin: " + detector.getFocusX());
-            //指头数量
-            if (mFingerPressedCount != 2) return true;
-            return true;
-        }
-    };
+                @Override
+                public boolean onScaleBegin(ScaleGestureDetector detector) {
+                    Log.e(TAG, "onScaleBegin: " + detector.getFocusX());
+                    //指头数量
+                    if (mFingerPressedCount != 2) return true;
+                    return true;
+                }
+            };
 
     //产品的小数位数
     public void setDigits(int digits) {
