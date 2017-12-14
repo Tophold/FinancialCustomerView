@@ -792,20 +792,6 @@ public class TimeSharingView extends BaseFinancialView {
         mDrawLoadingPaint = false;
     }
 
-    public float getFontHeight(float fontSize, Paint paint) {
-        paint.setTextSize(fontSize);
-        Paint.FontMetrics fm = paint.getFontMetrics();
-        return (float) (Math.ceil(fm.descent - fm.top) + 2f);
-    }
-
-    protected int getColor(@ColorRes int colorId) {
-        return getResources().getColor(colorId);
-    }
-
-    protected String getString(@StringRes int stringId) {
-        return getResources().getString(stringId);
-    }
-
     /**
      * 数据设置入口
      *

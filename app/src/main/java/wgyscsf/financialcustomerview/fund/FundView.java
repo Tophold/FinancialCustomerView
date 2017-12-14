@@ -16,6 +16,7 @@ import android.view.View;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+import wgyscsf.financialcustomerview.BaseFinancialView;
 import wgyscsf.financialcustomerview.R;
 
 import static android.view.View.MeasureSpec.AT_MOST;
@@ -27,18 +28,11 @@ import static android.view.View.MeasureSpec.AT_MOST;
  * 描 述 ：蚂蚁财富基金收益折线图
  * ============================================================
  **/
-public class FundView extends View {
-
-    private static final String TAG = "FundView";
-    //控件默认宽高
-    private static final float DEF_WIDTH = 650;
-    private static final float DEF_HIGHT = 400;
+public class FundView extends BaseFinancialView {
 
     //数据源
     List<FundMode> mFundModeList;
-    //控件宽高
-    int mWidth;
-    int mHeight;
+
     //上下左右padding
     float mPaddingTop = 100;
     float mPaddingBottom = 70;
@@ -97,8 +91,6 @@ public class FundView extends View {
     //长按情况下x轴和y轴要显示的文字
     Paint mLongPressTxtPaint;
     final float mLongPressTextSize = 20;
-
-
     public FundView(Context context) {
         this(context, null);
     }
@@ -106,7 +98,6 @@ public class FundView extends View {
     public FundView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
-
     public FundView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initAttrs();
@@ -115,21 +106,6 @@ public class FundView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
-        int widthSpecSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
-        int heightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
-        if (widthSpecMode == AT_MOST && heightSpecMode == AT_MOST) {
-            setMeasuredDimension((int) DEF_WIDTH, (int) DEF_HIGHT);
-        } else if (widthSpecMode == AT_MOST) {
-            setMeasuredDimension((int) DEF_WIDTH, heightSpecSize);
-        } else if (heightSpecMode == AT_MOST) {
-            setMeasuredDimension(widthSpecSize, (int) DEF_HIGHT);
-        } else {
-            setMeasuredDimension(widthSpecSize, heightSpecSize);
-        }
-        mWidth = getMeasuredWidth();
-        mHeight = getMeasuredHeight();
     }
 
     @Override
@@ -475,11 +451,6 @@ public class FundView extends View {
         return sdf.format(beginTime);
     }
 
-
-    private int getColor(@ColorRes int colorId) {
-        return getResources().getColor(colorId);
-    }
-
     private float convertDp2Px(float dpValue) {
         final float scale = getContext().getResources().getDisplayMetrics().density;
         return (dpValue * scale + 0.5f);
@@ -489,10 +460,6 @@ public class FundView extends View {
         paint.setTextSize(fontSize);
         Paint.FontMetrics fm = paint.getFontMetrics();
         return (float) (Math.ceil(fm.descent - fm.top) + 2);
-    }
-
-    private String getString(int string_fundView_defHintTxt) {
-        return getResources().getString(R.string.string_fundView_defHintTxt);
     }
 
     /**

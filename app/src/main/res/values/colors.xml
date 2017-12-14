@@ -36,9 +36,23 @@
     <!--长按十字时间、数据的框和文字颜色-->
     <color name="color_timeSharing_longPressTxtColor">#ffffff</color>
     <color name="color_timeSharing_longPressTxtBgColor">#7b797b</color>
-
     <!--回调的颜色-->
     <color name="color_timeSharing_callBackRed">#ec210f</color>
     <color name="color_timeSharing_callBackGreen">#12ec3a</color>
+
+
+    <!--副图相关属性-->
+
+    <color name="color_minorView_outerStrokeColor">#787274</color>
+    <!--内部xy虚线-->
+    <color name="color_minorView_innerXyDashColor">#787274</color>
+    <!--x、y轴文字的颜色-->
+    <color name="color_minorView_xYTxtColor">#787274</color>
+    <!--macd相关-->
+    <color name="color_minorView_macdBuyColor">#ec210f</color>
+    <color name="color_minorView_macdSellColor">#5aab52</color>
+    <color name="color_minorView_macdColor">#3785d9</color>
+    <color name="color_minorView_macdDifColor">#dcb1ad</color>
+    <color name="color_minorView_macdDeaColor">#9941e1</color>
 
 </resources>

@@ -1,7 +1,10 @@
 package wgyscsf.financialcustomerview;
 
 import android.content.Context;
+import android.graphics.Paint;
+import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -19,9 +22,9 @@ public class BaseFinancialView extends View {
     protected String TAG;
     protected Context mContext;
 
-    //控件默认宽高。当控件的宽高设置为wrap_content时会采用该参数进行默认的设置（单位：sp）
-    public float DEF_WIDTH = 650;
-    public float DEF_HIGHT = 400;
+    //控件默认宽高。当控件的宽高设置为wrap_content时会采用该参数进行默认的设置（单位：sp）。子类可以修改。
+    protected float DEF_WIDTH = 650;
+    protected float DEF_HIGHT = 400;
 
     //测量的控件宽高，会在onMeasure中进行测量。
     protected int mWidth;
@@ -65,6 +68,27 @@ public class BaseFinancialView extends View {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
     }
+
+    protected int getColor(@ColorRes int colorId) {
+        return getResources().getColor(colorId);
+    }
+
+    protected String getString(@StringRes int stringId) {
+        return getResources().getString(stringId);
+    }
+
+    /**
+     * 测量指定画笔的文字的高度
+     * @param fontSize
+     * @param paint
+     * @return
+     */
+    protected float getFontHeight(float fontSize, Paint paint) {
+        paint.setTextSize(fontSize);
+        Paint.FontMetrics fm = paint.getFontMetrics();
+        return (float) (Math.ceil(fm.descent - fm.top) + 2f);
+    }
+
 
     //自定义单击
     interface OnFClickListener {
