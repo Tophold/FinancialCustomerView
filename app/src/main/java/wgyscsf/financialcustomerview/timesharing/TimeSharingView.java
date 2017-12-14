@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import wgyscsf.financialcustomerview.BaseFinancialView;
 import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.utils.FormatUtil;
 import wgyscsf.financialcustomerview.utils.TimeUtils;
@@ -50,15 +51,10 @@ import static android.view.View.MeasureSpec.AT_MOST;
  * <p>
  * ============================================================
  **/
-public class TimeSharingView extends View {
+public class TimeSharingView extends BaseFinancialView {
     /**
      * 默认参数及常量
      */
-    public static final String TAG = TimeSharingView.class.getSimpleName();
-    Context mContext;
-    //控件默认宽高。当控件的宽高设置为wrap_content时会采用该参数进行默认的设置（单位：sp）
-    public static final float DEF_WIDTH = 650;
-    public static final float DEF_HIGHT = 400;
 
     //右侧内边距，默认情况下结束点距离右边边距（单位：sp）
     public static final float DEF_INNER_RIGHT_BLANK_PADDING = 60;
@@ -165,10 +161,6 @@ public class TimeSharingView extends View {
     /**
      * 其它属性
      */
-
-    //控件宽高，会在onMeasure中进行测量。
-    int mWidth;
-    int mHeight;
     //上下左右padding，这里不再采用系统属性padding，因为用户容易忘记设置padding,直接在这里更改即可。
     float mPaddingTop = 20;
     float mPaddingBottom = 50;
@@ -255,21 +247,6 @@ public class TimeSharingView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
-        int widthSpecSize = MeasureSpec.getSize(widthMeasureSpec);
-        int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
-        int heightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
-        if (widthSpecMode == AT_MOST && heightSpecMode == AT_MOST) {
-            setMeasuredDimension((int) DEF_WIDTH, (int) DEF_HIGHT);
-        } else if (widthSpecMode == AT_MOST) {
-            setMeasuredDimension((int) DEF_WIDTH, heightSpecSize);
-        } else if (heightSpecMode == AT_MOST) {
-            setMeasuredDimension(widthSpecSize, (int) DEF_HIGHT);
-        } else {
-            setMeasuredDimension(widthSpecSize, heightSpecSize);
-        }
-        mWidth = getMeasuredWidth();
-        mHeight = getMeasuredHeight();
     }
 
     @Override
