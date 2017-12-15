@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.fund;
+package wgyscsf.financialcustomerview.financialview.fund;
 
 import wgyscsf.financialcustomerview.BaseModel;
 

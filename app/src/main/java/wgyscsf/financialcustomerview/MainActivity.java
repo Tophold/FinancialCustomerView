@@ -3,8 +3,8 @@ package wgyscsf.financialcustomerview;
 import android.os.Bundle;
 import android.view.View;
 
-import wgyscsf.financialcustomerview.fund.FundActivity;
-import wgyscsf.financialcustomerview.timesharing.TimeSharingActivity;
+import wgyscsf.financialcustomerview.financialview.fund.FundActivity;
+import wgyscsf.financialcustomerview.financialview.kview.timesharing.TimeSharingActivity;
 
 public class MainActivity extends BaseActivity {
 

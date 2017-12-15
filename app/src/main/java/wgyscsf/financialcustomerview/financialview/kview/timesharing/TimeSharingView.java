@@ -1,31 +1,25 @@
-package wgyscsf.financialcustomerview.timesharing;
+package wgyscsf.financialcustomerview.financialview.kview.timesharing;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.view.View;
-import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
-import wgyscsf.financialcustomerview.BaseFinancialView;
 import wgyscsf.financialcustomerview.R;
+import wgyscsf.financialcustomerview.financialview.kview.KView;
+import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.utils.FormatUtil;
 import wgyscsf.financialcustomerview.utils.TimeUtils;
-
-import static android.view.View.MeasureSpec.AT_MOST;
 
 /**
  * ============================================================
@@ -51,45 +45,11 @@ import static android.view.View.MeasureSpec.AT_MOST;
  * <p>
  * ============================================================
  **/
-public class TimeSharingView extends BaseFinancialView {
-    /**
-     * 默认参数及常量
-     */
-
-    //右侧内边距，默认情况下结束点距离右边边距（单位：sp）
-    public static final float DEF_INNER_RIGHT_BLANK_PADDING = 60;
-
-    //加载更多阀值。当在左侧不可见范围内还剩多少数据时开始加载更多。（单位：数据个数）
-    public static final int DEF_MINLEN_LOADMORE = 10;
-
-    //长按阀值，默认多长时间算长按（ms）
-    public static final long DEF_LONGPRESS_LENGTH = 700;
-    //单击阀值
-    public static final long DEF_CLICKPRESS_LENGTH = 300;
-
-    //移动阀值。手指移动多远算移动的阀值（单位：sp）
-    public static final long DEF_PULL_LENGTH = 5;
-
-    //缩放最小值，该值理论上可以最小为3。为了美观，这个值不能太小，不然就成一条线了。不能定义为final,程序可能会对该值进行修改（容错）
-    public static int DEF_SCALE_MINNUM = 30;
-    //缩放最大值，该值最大理论上可为数据集合的大小
-    public static int DEF_SCALE_MAXNUM = 300;
+public class TimeSharingView extends KView {
 
     /**
      * 各种画笔及其参数
      */
-
-    //画笔:正在加载中
-    Paint mLoadingPaint;
-    final float mLoadingTextSize = 20;
-    final String mLoadingText = "数据加载，请稍后";
-    //是否显示loading,在入场的时候，数据还没有加载时进行显示。逻辑判断使用，不可更改
-    boolean mDrawLoadingPaint = true;
-
-    //画笔:最外面的上下左右的框
-    Paint mOuterPaint;
-    float mOuterLineWidth = 1;
-    int mOuterLineColor;
 
     //画笔:内部xy轴虚线
     Paint mInnerXyPaint;
@@ -158,78 +118,6 @@ public class TimeSharingView extends BaseFinancialView {
     int mLongPressTxtBgColor;
 
 
-    /**
-     * 其它属性
-     */
-    //上下左右padding，这里不再采用系统属性padding，因为用户容易忘记设置padding,直接在这里更改即可。
-    float mPaddingTop = 20;
-    float mPaddingBottom = 50;
-    float mPaddingLeft = 8;
-    float mPaddingRight = 90;
-
-    //可见的显示的条数，屏幕上显示的并不是所有的数据，只是部分数据，这个数据就是“可见的条数”
-    int mShownMaxCount = 30;
-
-
-    // 注意，遵循取前不取后，因此mEndIndex这个点不应该取到,但是mBeginIndex会取到。
-    //数据开始位置，数据集合的起始位置
-    int mBeginIndex = 0;
-    //数据的结束位置，这里之所以定义结束位置，因为数据可能会小于mShownMaxCount。
-    int mEndIndex;
-    //数据集合
-    List<Quotes> mQuotesList;
-
-    //默认情况下结束点距离右边边距
-    float mInnerRightBlankPadding = DEF_INNER_RIGHT_BLANK_PADDING;
-    //为了美观，容器内（边框内部的折线图距离外边框线的上下距离）上面有一定间距，下面也有一定的间距。
-    float mInnerTopBlankPadding = 60;
-    float mInnerBottomBlankPadding = 60;
-
-    //默认产品小数位数
-    int mDigits = 4;
-    //每一个x、y轴的一个单元的的宽和高
-    float mPerX;
-    float mPerY;
-    //Y轴：最小值和最大值对应的Model
-    Quotes mMinQuotes;
-    Quotes mMaxQuotes;
-    //X轴:起始位置的时间和结束位置的时间
-    Quotes mBeginQuotes;
-    Quotes mEndQuotes;
-
-    //事件监听回调
-    TimeSharingListener mTimeSharingListener;
-    //是否可以加载更多,出现这个属性的原因，防止多次加载更多，不可修改
-    boolean mCanLoadMore = true;
-
-    /**
-     * 左右拖动思路：这里开始处理分时图的左右移动问题，思路：当手指移动时，会有移动距离（A），我们又有x轴的单位距离(B)，
-     * 所以可以计算出来需要移动的个数（C=A/B,注意向上取整）。
-     * 这个时候，就可以确定新的开始位置（D）和新的结束位置（E）：
-     * D=mBeginIndex±C,E=mEndIndex干C，正负号取决于移动方向。
-     */
-    //手指按下的个数
-    int mFingerPressedCount;
-    //是否是向右拉，不可修改
-    boolean mPullRight = false;
-    //按下的x轴坐标
-    float mPressedX;
-    //按下的时刻
-    long mPressTime;
-    //手指移动的类型，默认在最后边
-    PullType mPullType = PullType.PULL_RIGHT_STOP;
-
-
-    /**
-     * 缩放思路：所谓缩放，也是计算新的起始位置和结束位置。这里根据缩放因子detector.getScaleFactor()计算新的可见个数（x缩放因子即可）。
-     * 当放大时，可见的数据集合的个数(A)应该减少。detector.getScaleFactor()(B的范围[1,2)),
-     * 这个时候可以新的可见数据集合（C）可以考虑采用C=A-A*(B-1);当然这样计算是否准确，还需要商榷。
-     * 思路简单，但是这里细节比较多，具体可以参考代码。see:mOnScaleGestureListener->onScale
-     */
-
-    ScaleGestureDetector mScaleGestureDetector;
-
-
     public TimeSharingView(Context context) {
         this(context, null);
     }
@@ -240,7 +128,6 @@ public class TimeSharingView extends BaseFinancialView {
 
     public TimeSharingView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mContext = context;
         initAttrs();
     }
 
@@ -258,12 +145,9 @@ public class TimeSharingView extends BaseFinancialView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         //Log.e("TimeSharingView", "onDraw: ");
-        //默认加载loading界面
-        showLoadingPaint(canvas);
         if (mQuotesList == null || mQuotesList.isEmpty()) {
             return;
         }
-        drawOuterLine(canvas);
         drawInnerXy(canvas);
         drawXyTxt(canvas);
         drawBrokenLine(canvas);
@@ -378,8 +262,6 @@ public class TimeSharingView extends BaseFinancialView {
         loadDefAttrs();
 
         //初始化画笔
-        initLoadingPaint();
-        initOuterPaint();
         initInnerXyPaint();
         initXyTxtPaint();
         initBrokenLinePaint();
@@ -398,7 +280,6 @@ public class TimeSharingView extends BaseFinancialView {
         //数据源
         mQuotesList = new ArrayList<>(mShownMaxCount);
         //颜色
-        mOuterLineColor = getColor(R.color.color_timeSharing_outerStrokeColor);
         mInnerXyLineColor = getColor(R.color.color_timeSharing_innerXyDashColor);
         mBrokenLineColor = getColor(R.color.color_timeSharing_brokenLineColor);
         mDotColor = getColor(R.color.color_timeSharing_dotColor);
@@ -410,19 +291,6 @@ public class TimeSharingView extends BaseFinancialView {
         mLongPressColor = getColor(R.color.color_timeSharing_longPressLineColor);
         mLongPressTxtColor = getColor(R.color.color_timeSharing_longPressTxtColor);
         mLongPressTxtBgColor = getColor(R.color.color_timeSharing_longPressTxtBgColor);
-    }
-
-    protected void initLoadingPaint() {
-        mLoadingPaint = new Paint();
-        mLoadingPaint.setColor(getColor(R.color.color_timeSharing_xYTxtColor));
-        mLoadingPaint.setTextSize(mLoadingTextSize);
-        mLoadingPaint.setAntiAlias(true);
-    }
-
-    protected void initOuterPaint() {
-        mOuterPaint = new Paint();
-        mOuterPaint.setColor(mOuterLineColor);
-        mOuterPaint.setStrokeWidth(mOuterLineWidth);
     }
 
     protected void initInnerXyPaint() {
@@ -508,27 +376,6 @@ public class TimeSharingView extends BaseFinancialView {
 
         mLongPressTxtBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLongPressTxtBgPaint.setColor(mLongPressTxtBgColor);
-    }
-
-    protected void showLoadingPaint(Canvas canvas) {
-        if (!mDrawLoadingPaint) return;
-        //这里特别注意，x轴的起始点要减去文字宽度的一半
-        canvas.drawText(mLoadingText, mWidth / 2 - mLoadingPaint.measureText(mLoadingText) / 2,
-                mHeight / 2, mLoadingPaint);
-    }
-
-    protected void drawOuterLine(Canvas canvas) {
-        //先绘制x轴
-        canvas.drawLine(mPaddingLeft, mPaddingTop,
-                mWidth - mPaddingRight, mPaddingTop, mOuterPaint);
-        canvas.drawLine(mPaddingLeft, mHeight - mPaddingBottom,
-                mWidth - mPaddingRight, mHeight - mPaddingBottom, mOuterPaint);
-
-        //绘制y轴
-        canvas.drawLine(mPaddingLeft, mPaddingTop,
-                mPaddingLeft, mHeight - mPaddingBottom, mOuterPaint);
-        canvas.drawLine(mWidth - mPaddingRight, mPaddingTop,
-                mWidth - mPaddingRight, mHeight - mPaddingBottom, mOuterPaint);
     }
 
     protected void drawInnerXy(Canvas canvas) {
@@ -786,184 +633,6 @@ public class TimeSharingView extends BaseFinancialView {
         }
     }
 
-    // 只需要把画笔颜色置为透明即可
-    protected void hiddenLoadingPaint() {
-        mLoadingPaint.setColor(0x00000000);
-        mDrawLoadingPaint = false;
-    }
-
-    /**
-     * 数据设置入口
-     *
-     * @param quotesList
-     * @param timeSharingListener
-     */
-    public void setTimeSharingData(List<Quotes> quotesList, TimeSharingListener timeSharingListener) {
-        //绑定监听
-        mTimeSharingListener = timeSharingListener;
-        //添加数据
-        setTimeSharingData(quotesList);
-    }
-
-    /**
-     * 数据设置入口
-     *
-     * @param quotesList
-     */
-    public void setTimeSharingData(List<Quotes> quotesList) {
-        if (quotesList == null || quotesList.isEmpty()) {
-            Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "setTimeSharingData: 数据异常");
-            return;
-        }
-        mQuotesList = quotesList;
-        //数据过来，隐藏加载更多
-        hiddenLoadingPaint();
-        //开始处理数据
-        mDigits = 4;
-
-        //寻找开始位置和结束位置
-        seekBeginAndEndByNewer();
-
-        //寻找边界和计算单元数据大小
-        seekAndCalculateCellData();
-    }
-
-    /**
-     * 获取最新数据时（包括第一次进来）获取可见数据的开始位置和结束位置。来最新数据或者刚加载的时候，计算开始位置和结束位置。
-     * 特别注意，最新的数据在最后面，所以数据范围应该是[(size-mShownMaxCount)~size)
-     */
-    protected void seekBeginAndEndByNewer() {
-        int size = mQuotesList.size();
-        if (size >= mShownMaxCount) {
-            mBeginIndex = size - mShownMaxCount;
-            mEndIndex = mBeginIndex + mShownMaxCount;
-        } else {
-            mBeginIndex = 0;
-            mEndIndex = mBeginIndex + mQuotesList.size();
-        }
-    }
-
-    /**
-     * 实时推送过来的数据，实时更新
-     *
-     * @param quotes
-     */
-    public void pushingTimeSharingData(Quotes quotes) {
-        if (quotes == null) {
-            Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "setTimeSharingData: 数据异常");
-            return;
-        }
-        mQuotesList.add(quotes);
-        //如果实在左右移动，则不去实时更新K线图，但是要把数据加进去
-        if (mPullType == PullType.PULL_RIGHT_STOP) {
-            //Log.e(TAG, "pushingTimeSharingData: 处理实时更新操作...");
-            seekBeginAndEndByNewer();
-            seekAndCalculateCellData();
-        }
-    }
-
-    /**
-     * 加载更多数据
-     *
-     * @param quotesList
-     */
-    public void loadMoreTimeSharingData(List<Quotes> quotesList) {
-        if (quotesList == null || quotesList.isEmpty()) {
-            Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "setTimeSharingData: 数据异常");
-            return;
-        }
-        mQuotesList.addAll(0, quotesList);
-
-        //到这里就可以判断，加载更对成功了
-        loadMoreSuccess();
-
-        //特别特别注意，加载更多之后，不应该更新起始位置和结束位置，
-        //因为可能在加载的过程中，原来的意图是在最左边，但是加载完毕后，又不在最左边了。
-        // 因此，只要保持原来的起始位置和结束位置即可。【原来：指的是视觉上的原来】
-        int addSize = quotesList.size();
-        Log.e(TAG, "loadMoreTimeSharingData: 新来的数据大小：" + addSize);
-        mBeginIndex = mBeginIndex + addSize;
-        if (mBeginIndex + mShownMaxCount > mQuotesList.size()) {
-            mBeginIndex = mQuotesList.size() - mShownMaxCount;
-        }
-        mEndIndex = mBeginIndex + mShownMaxCount;
-        Log.e(TAG, "loadMoreTimeSharingData: 加载更多完毕，mBeginIndex：" + mBeginIndex + ",mEndIndex:" + mEndIndex);
-        //重新测量一下,这里不能重新测量。因为重新测量的逻辑是寻找最新的点。
-        //seekBeginAndEndByNewer();
-        seekAndCalculateCellData();
-    }
-
-    /**
-     * 加载更多失败，在这里添加逻辑
-     */
-    public void loadMoreError() {
-        mCanLoadMore = true;
-        Toast.makeText(mContext, "加载更多失败", Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * 加载更多成功，在这里添加逻辑
-     */
-    public void loadMoreSuccess() {
-        mCanLoadMore = true;
-        Toast.makeText(mContext, "加载更多成功", Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * 正在加载更多，在这里添加逻辑
-     */
-    public void loadMoreIng() {
-        mCanLoadMore = false;
-        Toast.makeText(mContext, "正在加载更多", Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * 正在加载没有更多数据，在这里添加逻辑
-     */
-    public void loadMoreNoData() {
-        mCanLoadMore = false;
-        Toast.makeText(mContext, "加载更多，没有数据了...", Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * 寻找边界和计算单元数据大小。寻找:x轴开始位置数据和结束位置的model、y轴的最大数据和最小数据对应的model；
-     * 计算x/y轴数据单元大小
-     */
-    protected void seekAndCalculateCellData() {
-        //找到最大值和最小值
-        double tempMinClosePrice = Double.MAX_VALUE;
-        double tempMaxClosePrice = Double.MIN_VALUE;
-
-        for (int i = mBeginIndex; i < mEndIndex; i++) {
-            Quotes quotes = mQuotesList.get(i);
-            if (i == mBeginIndex) {
-                mBeginQuotes = quotes;
-            }
-            if (i == mEndIndex - 1) {
-                mEndQuotes = quotes;
-            }
-            if (quotes.c <= tempMinClosePrice) {
-                tempMinClosePrice = quotes.c;
-                mMinQuotes = quotes;
-            }
-            if (quotes.c >= tempMaxClosePrice) {
-                tempMaxClosePrice = quotes.c;
-                mMaxQuotes = quotes;
-            }
-        }
-        mPerX = (mWidth - mPaddingLeft - mPaddingRight - mInnerRightBlankPadding)
-                / (mShownMaxCount - 1);//特别注意，这里-1并不代表个数减少了，因为起始点是从0开始的。
-        //不要忘了减去内部的上下Padding
-        mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
-                - mInnerBottomBlankPadding) / (mMaxQuotes.c - mMinQuotes.c));
-
-        //刷新界面
-        invalidate();
-    }
-
     //缩放手势监听
     ScaleGestureDetector.OnScaleGestureListener mOnScaleGestureListener =
             new ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -1034,25 +703,4 @@ public class TimeSharingView extends BaseFinancialView {
                     return true;
                 }
             };
-
-    //产品的小数位数
-    public void setDigits(int digits) {
-        mDigits = digits;
-    }
-
-    //监听回调
-    interface TimeSharingListener {
-        void onLongTouch(Quotes preQuotes, Quotes currentQuotes);
-
-        void onUnLongTouch();
-
-        void needLoadMore();
-    }
-
-    enum PullType {
-        PULL_RIGHT,//向右滑动
-        PULL_LEFT,//向左滑动
-        PULL_RIGHT_STOP,//滑动到最右边
-        PULL_LEFT_STOP,//滑动到最左边
-    }
 }

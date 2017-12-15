@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview;
+package wgyscsf.financialcustomerview.financialview;
 
 import android.content.Context;
 import android.graphics.Paint;
@@ -21,6 +21,12 @@ public class BaseFinancialView extends View {
 
     protected String TAG;
     protected Context mContext;
+
+    //长按阀值，默认多长时间算长按（ms）
+    protected static final long DEF_LONGPRESS_LENGTH = 700;
+    //单击阀值
+    protected static final long DEF_CLICKPRESS_LENGTH = 300;
+
 
     //控件默认宽高。当控件的宽高设置为wrap_content时会采用该参数进行默认的设置（单位：sp）。子类可以修改。
     protected float DEF_WIDTH = 650;
@@ -104,4 +110,6 @@ public class BaseFinancialView extends View {
     interface onFMoveListener {
         boolean onMove();
     }
+
+
 }

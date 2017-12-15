@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.fund;
+package wgyscsf.financialcustomerview.financialview.fund;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -6,20 +6,16 @@ import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathEffect;
-import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import wgyscsf.financialcustomerview.BaseFinancialView;
+import wgyscsf.financialcustomerview.financialview.BaseFinancialView;
 import wgyscsf.financialcustomerview.R;
-
-import static android.view.View.MeasureSpec.AT_MOST;
 
 /**
  * ============================================================
