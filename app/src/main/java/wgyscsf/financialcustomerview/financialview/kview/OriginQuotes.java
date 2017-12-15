@@ -1,6 +1,4 @@
-package wgyscsf.financialcustomerview.timesharing;
-
-import java.util.Date;
+package wgyscsf.financialcustomerview.financialview.kview;
 
 import wgyscsf.financialcustomerview.BaseModel;
 

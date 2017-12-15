@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
+    <!--++++++++++++++++++基金收益自定义View++++++++++++++++++++-->
     <!--基金自定义view相关属性-->
     <color name="color_fundView_xyTxtColor">#787274</color>
     <color name="color_fundView_xLineColor">#c1bdbe</color>
@@ -14,8 +15,19 @@
     <color name="color_fundView_defIncomeTxt">#000000</color>
 
 
+
+
+
+    <!--++++++++++++++++++++KView相关，包括：分时图、副图  开始+++++++++++++++++++++++++++++++++++++++++++++++-->
+
+    <!--公共属性-->
+    <!--外边框颜色-->
+    <color name="color_kview_outerStrokeColor">#787274</color>
+    <color name="color_kview_loadingTxtColor">#787274</color>
+
+
+    <!--++++++++++++++++++分时图自定义View++++++++++++++++++++-->
     <!--分时图相关属性-->
-    <color name="color_timeSharing_outerStrokeColor">#787274</color>
     <!--内部xy虚线-->
     <color name="color_timeSharing_innerXyDashColor">#787274</color>
     <!--折线图-->
@@ -36,9 +48,43 @@
     <!--长按十字时间、数据的框和文字颜色-->
     <color name="color_timeSharing_longPressTxtColor">#ffffff</color>
     <color name="color_timeSharing_longPressTxtBgColor">#7b797b</color>
-
     <!--回调的颜色-->
     <color name="color_timeSharing_callBackRed">#ec210f</color>
     <color name="color_timeSharing_callBackGreen">#12ec3a</color>
+
+    <!--++++++++++++++++++副图自定义View++++++++++++++++++++-->
+
+    <!--共有属性-->
+    <!--外边框颜色-->
+    <color name="color_minorView_outerStrokeColor">#787274</color>
+    <!--内部xy虚线-->
+    <color name="color_minorView_innerXyDashColor">#787274</color>
+    <!--x、y轴文字的颜色-->
+    <color name="color_minorView_xYTxtColor">#787274</color>
+    <!--图例文字的颜色-->
+    <color name="color_minorView_legendTxtColor">#787274</color>
+    <!--长按十字时间、数据的框和文字颜色-->
+    <color name="color_minorView_longPressTxtColor">#ffffff</color>
+
+    <!--macd相关-->
+    <color name="color_minorView_macdBuyColor">#ec210f</color>
+    <color name="color_minorView_macdSellColor">#5aab52</color>
+    <color name="color_minorView_macdDifColor">#dcb1ad</color>
+    <color name="color_minorView_macdDeaColor">#9941e1</color>
+    <color name="color_minorView_macdMacdColor">#3785d9</color>
+
+    <!--rsi相关-->
+    <color name="color_minorView_rsi16Color">#dcb1ad</color>
+    <color name="color_minorView_rsi12Color">#9941e1</color>
+    <color name="color_minorView_rsi24Color">#3785d9</color>
+
+    <!--kdj相关-->
+    <color name="color_minorView_kColor">#dcb1ad</color>
+    <color name="color_minorView_dColor">#9941e1</color>
+    <color name="color_minorView_jColor">#3785d9</color>
+
+    <!--++++++++++++++++++++KView相关，包括：分时图、副图  结束+++++++++++++++++++++++++++++++++++++++++++++++-->
+
+
 
 </resources>

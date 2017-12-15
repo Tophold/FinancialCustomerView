@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.timesharing;
+package wgyscsf.financialcustomerview.financialview.kview;
 
 import java.util.Date;
 
@@ -14,7 +14,7 @@ import wgyscsf.financialcustomerview.utils.TimeUtils;
  **/
 public class Quotes extends BaseModel {
 
-    Quotes(String o, String h, String l, String c, String t) {
+    public Quotes(String o, String h, String l, String c, String t) {
         this.o = Double.parseDouble(o);
         this.h = Double.parseDouble(h);
         this.l = Double.parseDouble(l);

@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.timesharing;
+package wgyscsf.financialcustomerview.financialview.kview.timesharing;
 
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
@@ -19,8 +19,12 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
-import wgyscsf.financialcustomerview.BaseActivity;
+import wgyscsf.financialcustomerview.KViewBaseActivity;
 import wgyscsf.financialcustomerview.R;
+import wgyscsf.financialcustomerview.financialview.kview.KView;
+import wgyscsf.financialcustomerview.financialview.kview.OriginQuotes;
+import wgyscsf.financialcustomerview.financialview.kview.Quotes;
+import wgyscsf.financialcustomerview.financialview.kview.SimulateNetAPI;
 import wgyscsf.financialcustomerview.utils.FormatUtil;
 import wgyscsf.financialcustomerview.utils.GsonUtil;
 import wgyscsf.financialcustomerview.utils.StringUtils;
@@ -31,7 +35,7 @@ import wgyscsf.financialcustomerview.utils.TimeUtils;
  * timesharing1：模拟的是api请求的数据集合，注意：一次加载完毕，模拟的是第一次加载的数据
  * timesharing2：模拟的是实时**推送**的数据，注意：会分段取，一次取一个。
  */
-public class TimeSharingActivity extends BaseActivity {
+public class TimeSharingActivity extends KViewBaseActivity {
     TimeSharingView mTimeSharingView;
     private LinearLayout ats_ll_container;
     private TextView mAtsTvH;
@@ -124,7 +128,7 @@ public class TimeSharingActivity extends BaseActivity {
                     @Override
                     public void call(List<Quotes> o) {
                         if (o != null) {
-                            mTimeSharingView.setTimeSharingData(o, new TimeSharingView.TimeSharingListener() {
+                            mTimeSharingView.setTimeSharingData(o, new KView.TimeSharingListener() {
 
                                 @Override
                                 public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
