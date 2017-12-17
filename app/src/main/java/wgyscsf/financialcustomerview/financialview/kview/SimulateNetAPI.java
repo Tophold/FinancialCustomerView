@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.timesharing;
+package wgyscsf.financialcustomerview.financialview.kview;
 
 import android.content.Context;
 
@@ -22,7 +22,7 @@ public class SimulateNetAPI {
     public static String getOriginalFundData(Context context, int index) {
         InputStream input = null;
         try {
-            input = context.getAssets().open("timesharing" + 1 + ".json");
+            input = context.getAssets().open("timesharing" + index + ".json");
             String json = convertStreamToString(input);
             return json;
         } catch (Exception e) {
