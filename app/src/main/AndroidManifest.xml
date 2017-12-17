@@ -20,6 +20,9 @@
         </activity>
         <activity android:name=".financialview.kview.timesharing.TimeSharingActivity">
         </activity>
+        <activity android:name=".financialview.kview.minor.MinorActivity"
+            android:screenOrientation="landscape">
+        </activity>
     </application>
 
 </manifest>

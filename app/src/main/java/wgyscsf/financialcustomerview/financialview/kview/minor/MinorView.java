@@ -1,6 +1,7 @@
 package wgyscsf.financialcustomerview.financialview.kview.minor;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
@@ -40,9 +41,6 @@ public class MinorView extends KView {
     int mDColor;
     int mJColor;
 
-
-
-
     //显示的副图类型
     MinorType mMinorType = MinorType.MACD;
 
@@ -69,6 +67,14 @@ public class MinorView extends KView {
         super.onLayout(changed, left, top, right, bottom);
     }
 
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (mQuotesList == null || mQuotesList.isEmpty()) {
+            return;
+        }
+        drawInnerXy(canvas);
+    }
 
     private void initAttrs() {
         initColorRes();
@@ -94,7 +100,25 @@ public class MinorView extends KView {
         mDColor = getColor(R.color.color_minorView_dColor);
         mJColor = getColor(R.color.color_minorView_jColor);
     }
+    protected void drawInnerXy(Canvas canvas) {
+        //x轴的虚线不再绘制
+        //先绘制x轴
+        //计算每一段x的高度
+//        double perhight = (mHeight - mPaddingTop - mPaddingBottom) / 4;
+//        for (int i = 1; i <= 3; i++) {
+//            canvas.drawLine(mPaddingLeft, (float) (mPaddingTop + perhight * i),
+//                    mWidth - mPaddingRight, (float) (mPaddingTop + perhight * i),
+//                    mInnerXyPaint);
+//        }
 
+        //绘制y轴
+        double perWidth = (mWidth - mPaddingLeft - mPaddingRight) / 4;
+        for (int i = 1; i <= 3; i++) {
+            canvas.drawLine((float) (mPaddingLeft + perWidth * i), mPaddingTop,
+                    (float) (mPaddingLeft + perWidth * i), mHeight - mPaddingBottom,
+                    mInnerXyPaint);
+        }
+    }
     //副图正在展示的类型
     enum MinorType {
         MACD,

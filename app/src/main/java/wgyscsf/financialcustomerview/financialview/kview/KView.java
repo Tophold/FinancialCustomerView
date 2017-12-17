@@ -2,6 +2,7 @@ package wgyscsf.financialcustomerview.financialview.kview;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -38,7 +39,7 @@ public class KView extends BaseFinancialView {
     protected static final long DEF_PULL_LENGTH = 5;
 
     //缩放最小值，该值理论上可以最小为3。为了美观，这个值不能太小，不然就成一条线了。不能定义为final,程序可能会对该值进行修改（容错）
-    protected static int DEF_SCALE_MINNUM = 30;
+    protected static int DEF_SCALE_MINNUM = 10;
     //缩放最大值，该值最大理论上可为数据集合的大小
     protected static int DEF_SCALE_MAXNUM = 300;
 
@@ -115,8 +116,8 @@ public class KView extends BaseFinancialView {
      */
     //画笔:正在加载中
     protected Paint mLoadingPaint;
-    protected  float mLoadingTextSize = 20;
-    protected  int mLoadingTextColor;
+    protected float mLoadingTextSize = 20;
+    protected int mLoadingTextColor;
     protected final String mLoadingText = "数据加载，请稍后";
     //是否显示loading,在入场的时候，数据还没有加载时进行显示。逻辑判断使用，不可更改
     protected boolean mDrawLoadingPaint = true;
@@ -126,7 +127,12 @@ public class KView extends BaseFinancialView {
     protected float mOuterLineWidth = 1;
     protected int mOuterLineColor;
 
-
+    //画笔:内部xy轴虚线
+    protected Paint mInnerXyPaint;
+    protected float  mInnerXyLineWidth = 1;
+    protected int mInnerXyLineColor;
+    //是否是虚线，可更改
+    protected boolean mIsInnerXyLineDashed = true;
 
 
     public KView(Context context) {
@@ -176,12 +182,14 @@ public class KView extends BaseFinancialView {
 
     private void initColorRes() {
         mOuterLineColor = getColor(R.color.color_kview_outerStrokeColor);
-        mLoadingTextColor=getColor(R.color.color_kview_loadingTxtColor);
+        mLoadingTextColor = getColor(R.color.color_kview_loadingTxtColor);
+        mInnerXyLineColor = getColor(R.color.color_kview_innerXyDashColor);
     }
 
     private void initPaintRes() {
         initLoadingPaint();
         initOuterPaint();
+        initInnerXyPaint();
     }
 
     protected void initLoadingPaint() {
@@ -195,6 +203,17 @@ public class KView extends BaseFinancialView {
         mOuterPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mOuterPaint.setColor(mOuterLineColor);
         mOuterPaint.setStrokeWidth(mOuterLineWidth);
+    }
+
+    protected void initInnerXyPaint() {
+        mInnerXyPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mInnerXyPaint.setColor(mInnerXyLineColor);
+        mInnerXyPaint.setStrokeWidth(mInnerXyLineWidth);
+        mInnerXyPaint.setStyle(Paint.Style.STROKE);
+        if (mIsInnerXyLineDashed) {
+            setLayerType(LAYER_TYPE_SOFTWARE, null);
+            mInnerXyPaint.setPathEffect(new DashPathEffect(new float[]{5, 5}, 0));
+        }
     }
 
     protected void showLoadingPaint(Canvas canvas) {

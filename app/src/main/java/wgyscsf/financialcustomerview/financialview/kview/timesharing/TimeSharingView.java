@@ -51,13 +51,6 @@ public class TimeSharingView extends KView {
      * 各种画笔及其参数
      */
 
-    //画笔:内部xy轴虚线
-    Paint mInnerXyPaint;
-    float mInnerXyLineWidth = 1;
-    int mInnerXyLineColor;
-    //是否是虚线，可更改
-    boolean mIsInnerXyLineDashed = true;
-
     //画笔:折线图
     Paint mBrokenLinePaint;
     float mBrokenLineWidth = 2;
@@ -262,7 +255,6 @@ public class TimeSharingView extends KView {
         loadDefAttrs();
 
         //初始化画笔
-        initInnerXyPaint();
         initXyTxtPaint();
         initBrokenLinePaint();
         initBrokenLineBgPaint();
@@ -280,7 +272,6 @@ public class TimeSharingView extends KView {
         //数据源
         mQuotesList = new ArrayList<>(mShownMaxCount);
         //颜色
-        mInnerXyLineColor = getColor(R.color.color_timeSharing_innerXyDashColor);
         mBrokenLineColor = getColor(R.color.color_timeSharing_brokenLineColor);
         mDotColor = getColor(R.color.color_timeSharing_dotColor);
         mTimingLineColor = getColor(R.color.color_timeSharing_timingLineColor);
@@ -291,17 +282,6 @@ public class TimeSharingView extends KView {
         mLongPressColor = getColor(R.color.color_timeSharing_longPressLineColor);
         mLongPressTxtColor = getColor(R.color.color_timeSharing_longPressTxtColor);
         mLongPressTxtBgColor = getColor(R.color.color_timeSharing_longPressTxtBgColor);
-    }
-
-    protected void initInnerXyPaint() {
-        mInnerXyPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mInnerXyPaint.setColor(mInnerXyLineColor);
-        mInnerXyPaint.setStrokeWidth(mInnerXyLineWidth);
-        mInnerXyPaint.setStyle(Paint.Style.STROKE);
-        if (mIsInnerXyLineDashed) {
-            setLayerType(LAYER_TYPE_SOFTWARE, null);
-            mInnerXyPaint.setPathEffect(new DashPathEffect(new float[]{5, 5}, 0));
-        }
     }
 
     protected void initXyTxtPaint() {

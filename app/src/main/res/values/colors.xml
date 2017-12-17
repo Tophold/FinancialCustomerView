@@ -24,12 +24,12 @@
     <!--外边框颜色-->
     <color name="color_kview_outerStrokeColor">#787274</color>
     <color name="color_kview_loadingTxtColor">#787274</color>
+    <!--内部xy虚线-->
+    <color name="color_kview_innerXyDashColor">#787274</color>
 
 
     <!--++++++++++++++++++分时图自定义View++++++++++++++++++++-->
     <!--分时图相关属性-->
-    <!--内部xy虚线-->
-    <color name="color_timeSharing_innerXyDashColor">#787274</color>
     <!--折线图-->
     <color name="color_timeSharing_brokenLineColor">#3785d9</color>
     <!--折线图最后的小圆点的颜色-->
