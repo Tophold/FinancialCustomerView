@@ -4,9 +4,15 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.widget.Toast;
+
+import java.util.List;
 
 import wgyscsf.financialcustomerview.R;
+import wgyscsf.financialcustomerview.financialview.FinancialAlgorithm;
 import wgyscsf.financialcustomerview.financialview.kview.KView;
+import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 
 /**
  * ============================================================
@@ -16,6 +22,13 @@ import wgyscsf.financialcustomerview.financialview.kview.KView;
  * ============================================================
  **/
 public class MinorView extends KView {
+
+    /**
+     * 常量
+     */
+    public final static int DEF_K_PERIOD=9;
+    public final static int DEF_D_PERIOD=3;
+    public final static int DEF_J_PERIOD=3;
 
     /**
      * 初始化所有需要的颜色资源
@@ -119,6 +132,27 @@ public class MinorView extends KView {
                     mInnerXyPaint);
         }
     }
+
+    //重写获取数据的方法，计算kjd
+
+
+    @Override
+    public void setTimeSharingData(List<Quotes> quotesList) {
+        super.setTimeSharingData(quotesList);
+        if (quotesList == null || quotesList.isEmpty()) {
+            Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "setTimeSharingData: 数据异常");
+            return;
+        }
+
+        //try {
+            FinancialAlgorithm.calculateKDJ(quotesList,DEF_K_PERIOD,DEF_D_PERIOD,DEF_J_PERIOD);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            //这里处理计算出错
+//        }
+    }
+
     //副图正在展示的类型
     enum MinorType {
         MACD,

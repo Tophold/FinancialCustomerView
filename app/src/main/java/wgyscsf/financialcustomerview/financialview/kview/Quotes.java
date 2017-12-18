@@ -22,17 +22,41 @@ public class Quotes extends BaseModel {
         this.t = TimeUtils.date2Millis(new Date(t));
         this.showTime = TimeUtils.millis2String(this.t);
     }
-    //在自定义view:FundView中的位置坐标
-    public float floatX;
-    public float floatY;
-    //实际中展示的时间
-    public String showTime;
-    //标准时间戳（ms）
+
+    /**
+     * 原始数据
+     */
     public long t;
     public double o;
     public double h;
     public double l;
     public double c;
+
+
+    /**
+     * 扩展的数据
+     */
+    //实际中展示的时间
+    public String showTime;
+    //在自定义view:FundView中的位置坐标
+    public float floatX;
+    public float floatY;
+
+    //KDJ
+    public double k;
+    public double d;
+    public double j;
+
+    //macd
+    public double diff;
+    public double dea;
+    public double macd;
+
+    //rsi
+    public double rsi6;
+    public double rsi12;
+    public double rsi24;
+
 
     @Override
     public String toString() {
