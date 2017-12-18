@@ -56,6 +56,12 @@ public class MinorView extends KView {
 
     //显示的副图类型
     MinorType mMinorType = MinorType.MACD;
+    Quotes mMinKjdQuotes;
+    Quotes mMaxKjdQuotes;
+    Quotes mMinMacdQuotes;
+    Quotes mMaxMacdQuotes;
+    Quotes mMinRsiQuotes;
+    Quotes mMaxRsiQuotes;
 
     public MinorView(Context context) {
         this(context, null);
@@ -145,12 +151,80 @@ public class MinorView extends KView {
             return;
         }
 
-        //try {
-            FinancialAlgorithm.calculateKDJ(quotesList,DEF_K_PERIOD,DEF_D_PERIOD,DEF_J_PERIOD);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            //这里处理计算出错
-//        }
+        try {
+            FinancialAlgorithm.calculateKDJ(quotesList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            //这里处理计算出错
+        }
+
+        try {
+            FinancialAlgorithm.calculateMACD(quotesList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            //这里处理计算出错
+        }
+
+        try {
+            FinancialAlgorithm.calculateRSI(quotesList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            //这里处理计算出错
+        }
+
+        //日志
+        //这里找到
+        double tempMinKdj=Integer.MAX_VALUE;
+        double tempMaxKdj=Integer.MIN_VALUE;
+
+        double tempMinMacd=Integer.MAX_VALUE;
+        double tempMaxMacd=Integer.MIN_VALUE;
+
+        double tempMinRsi=Integer.MAX_VALUE;
+        double tempMaxRsi=Integer.MIN_VALUE;
+        for (Quotes quotes : quotesList) {
+            //寻找kdj
+            double minKDJ = quotes.getMinKDJ();
+            double maxKDJ = quotes.getMaxKDJ();
+            if(minKDJ <tempMinKdj){
+                tempMinKdj= minKDJ;
+                mMinKjdQuotes=quotes;
+            }
+            if(maxKDJ >tempMaxKdj){
+                tempMaxKdj= maxKDJ;
+                mMaxKjdQuotes=quotes;
+            }
+
+            //寻找kdj
+            double minMacd = quotes.getMinMacd();
+            double maxMacd = quotes.getMaxMacd();
+            if(minMacd <tempMinMacd){
+                tempMinMacd= minMacd;
+                mMinMacdQuotes=quotes;
+            }
+            if(maxMacd >tempMaxMacd){
+                tempMaxMacd= maxMacd;
+                mMaxMacdQuotes=quotes;
+            }
+
+            //寻找kdj
+            double minRsi = quotes.getMinRsi();
+            double maxRsi = quotes.getMaxRsi();
+            if(minRsi <tempMinRsi){
+                tempMinRsi= minRsi;
+                mMinRsiQuotes=quotes;
+            }
+            if(maxRsi >tempMaxRsi){
+                tempMaxRsi= maxRsi;
+                mMaxRsiQuotes=quotes;
+            }
+        }
+
+        //打印日志，查看最大值和最小值
+        Log.e(TAG, "setTimeSharingData: \nmMinKjdQuotes:"+mMinKjdQuotes.getMinKDJ() +"\n,mMaxKjdQuotes:"+mMaxKjdQuotes.getMaxKDJ()
+                +"\n,mMinMacdQuotes:"+mMinMacdQuotes.getMinMacd() +"\n,mMaxMacdQuotes:"+mMaxMacdQuotes.getMaxMacd()
+                +"\n,mMinRsiQuotes:"+mMinRsiQuotes.getMinRsi()+"\n,mMaxMacdQuotes:"+mMaxRsiQuotes.getMaxRsi() );
+
     }
 
     //副图正在展示的类型

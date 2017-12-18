@@ -148,7 +148,6 @@ public class KView extends BaseFinancialView {
         initAttrs();
     }
 
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -407,8 +406,8 @@ public class KView extends BaseFinancialView {
      */
     protected void seekAndCalculateCellData() {
         //找到最大值和最小值
-        double tempMinClosePrice = Double.MAX_VALUE;
-        double tempMaxClosePrice = Double.MIN_VALUE;
+        double tempMinClosePrice = Integer.MAX_VALUE;
+        double tempMaxClosePrice = Integer.MIN_VALUE;
 
         for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes quotes = mQuotesList.get(i);

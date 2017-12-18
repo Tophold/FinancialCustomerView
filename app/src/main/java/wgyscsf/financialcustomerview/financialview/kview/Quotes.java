@@ -46,27 +46,103 @@ public class Quotes extends BaseModel {
     public double k;
     public double d;
     public double j;
+    //调试使用，找到k、d、j中的最小值
+    public double getMinKDJ(){
+       double min;
+       if(k<=d&&k<=j){
+           min=k;
+       }else if(d<=k&&d<=j){
+           min=d;
+       }else{
+           min=j;
+        }
+        return min;
+    }
+    //调试使用，找到k、d、j中的最大值
+    public double getMaxKDJ(){
+        double max;
+        if(k>=d&&k>=j){
+            max=k;
+        }else if(d>=k&&d>=j){
+            max=d;
+        }else{
+            max=j;
+        }
+        return max;
+    }
 
     //macd
-    public double diff;
+    public double dif;
     public double dea;
     public double macd;
+
+    //调试使用，找到dif、dea、macd中的最小值
+    public double getMinMacd(){
+        double min;
+        if(dif<=dea&&dif<=macd){
+            min=dif;
+        }else if(dea<=dif&&dea<=macd){
+            min=dea;
+        }else{
+            min=macd;
+        }
+        return min;
+    }
+    //调试使用，找到dif、dea、macd中的最大值
+    public double getMaxMacd(){
+        double max;
+        if(dif>=dea&&dif>=macd){
+            max=dif;
+        }else if(dea>=dif&&dea>=macd){
+            max=dea;
+        }else{
+            max=macd;
+        }
+        return max;
+    }
 
     //rsi
     public double rsi6;
     public double rsi12;
     public double rsi24;
 
+    //调试使用，找到rsi6、rsi12、rsi24中的最小值
+    public double getMinRsi(){
+        double min;
+        if(rsi6<=rsi12&&rsi6<=rsi24){
+            min=rsi6;
+        }else if(rsi12<=rsi6&&rsi12<=rsi24){
+            min=rsi12;
+        }else{
+            min=rsi24;
+        }
+        return min;
+    }
+    //调试使用，找到rsi6、rsi12、rsi24中的最大值
+    public double getMaxRsi(){
+        double max;
+        if(rsi6>=rsi12&&rsi6>=rsi24){
+            max=rsi6;
+        }else if(rsi12>=rsi6&&rsi12>=rsi24){
+            max=rsi12;
+        }else{
+            max=rsi24;
+        }
+        return max;
+    }
 
     @Override
     public String toString() {
         return "Quotes{" +
-                "showTime='" + showTime + '\'' +
-                ", t=" + t +
-                ", o=" + o +
-                ", h=" + h +
-                ", l=" + l +
-                ", c=" + c +
+                "k=" + k +
+                ", d=" + d +
+                ", j=" + j +
+                ", dif=" + dif +
+                ", dea=" + dea +
+                ", macd=" + macd +
+                ", rsi6=" + rsi6 +
+                ", rsi12=" + rsi12 +
+                ", rsi24=" + rsi24 +
                 '}';
     }
 }
