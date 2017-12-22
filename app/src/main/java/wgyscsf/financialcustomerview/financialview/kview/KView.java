@@ -129,10 +129,14 @@ public class KView extends BaseFinancialView {
 
     //画笔:内部xy轴虚线
     protected Paint mInnerXyPaint;
-    protected float  mInnerXyLineWidth = 1;
+    protected float mInnerXyLineWidth = 1;
     protected int mInnerXyLineColor;
     //是否是虚线，可更改
     protected boolean mIsInnerXyLineDashed = true;
+    //是否显示内部x虚线
+    protected boolean mIsShowInnerX = true;
+    //是否显示内部y虚线
+    protected boolean mIsShowInnerY = true;
 
 
     public KView(Context context) {
@@ -167,6 +171,7 @@ public class KView extends BaseFinancialView {
             return;
         }
         drawOuterLine(canvas);
+        drawInnerXy(canvas);
     }
 
     @Override
@@ -234,6 +239,34 @@ public class KView extends BaseFinancialView {
                 mPaddingLeft, mHeight - mPaddingBottom, mOuterPaint);
         canvas.drawLine(mWidth - mPaddingRight, mPaddingTop,
                 mWidth - mPaddingRight, mHeight - mPaddingBottom, mOuterPaint);
+    }
+
+    protected void drawInnerXy(Canvas canvas) {
+        if (isShowInnerX())
+            drawInnerX(canvas);
+        if (isShowInnerY())
+            drawInnerY(canvas);
+    }
+
+    private void drawInnerY(Canvas canvas) {
+        //绘制y轴
+        double perWidth = (mWidth - mPaddingLeft - mPaddingRight) / 4;
+        for (int i = 1; i <= 3; i++) {
+            canvas.drawLine((float) (mPaddingLeft + perWidth * i), mPaddingTop,
+                    (float) (mPaddingLeft + perWidth * i), mHeight - mPaddingBottom,
+                    mInnerXyPaint);
+        }
+    }
+
+    private void drawInnerX(Canvas canvas) {
+        //先绘制x轴
+        //计算每一段x的高度
+        double perhight = (mHeight - mPaddingTop - mPaddingBottom) / 4;
+        for (int i = 1; i <= 3; i++) {
+            canvas.drawLine(mPaddingLeft, (float) (mPaddingTop + perhight * i),
+                    mWidth - mPaddingRight, (float) (mPaddingTop + perhight * i),
+                    mInnerXyPaint);
+        }
     }
 
     // 只需要把画笔颜色置为透明即可
@@ -436,4 +469,19 @@ public class KView extends BaseFinancialView {
         invalidate();
     }
 
+    public boolean isShowInnerX() {
+        return mIsShowInnerX;
+    }
+
+    public void setShowInnerX(boolean showInnerX) {
+        mIsShowInnerX = showInnerX;
+    }
+
+    public boolean isShowInnerY() {
+        return mIsShowInnerY;
+    }
+
+    public void setShowInnerY(boolean showInnerY) {
+        mIsShowInnerY = showInnerY;
+    }
 }

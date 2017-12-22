@@ -10,7 +10,6 @@ import android.widget.Toast;
 import java.util.List;
 
 import wgyscsf.financialcustomerview.R;
-import wgyscsf.financialcustomerview.financialview.FinancialAlgorithm;
 import wgyscsf.financialcustomerview.financialview.kview.KView;
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 
@@ -23,12 +22,6 @@ import wgyscsf.financialcustomerview.financialview.kview.Quotes;
  **/
 public class MinorView extends KView {
 
-    /**
-     * 常量
-     */
-    public final static int DEF_K_PERIOD=9;
-    public final static int DEF_D_PERIOD=3;
-    public final static int DEF_J_PERIOD=3;
 
     /**
      * 初始化所有需要的颜色资源
@@ -54,14 +47,8 @@ public class MinorView extends KView {
     int mDColor;
     int mJColor;
 
-    //显示的副图类型
-    MinorType mMinorType = MinorType.MACD;
-    Quotes mMinKjdQuotes;
-    Quotes mMaxKjdQuotes;
-    Quotes mMinMacdQuotes;
-    Quotes mMaxMacdQuotes;
-    Quotes mMinRsiQuotes;
-    Quotes mMaxRsiQuotes;
+    //MinorModel聚合的数据`
+    MinorModel mMinorModel;
 
     public MinorView(Context context) {
         this(context, null);
@@ -92,12 +79,40 @@ public class MinorView extends KView {
         if (mQuotesList == null || mQuotesList.isEmpty()) {
             return;
         }
-        drawInnerXy(canvas);
+        if (mMinorModel.getMinorType() == MinorModel.MinorType.MACD) {
+            drawMACD(canvas);
+        } else if (mMinorModel.getMinorType() == MinorModel.MinorType.RSI) {
+            drawRSI(canvas);
+        } else if (mMinorModel.getMinorType() == MinorModel.MinorType.KDJ) {
+            drawKDJ(canvas);
+        }
+    }
+
+    private void drawMACD(Canvas canvas) {
+
+    }
+
+    private void drawRSI(Canvas canvas) {
+
+    }
+
+    private void drawKDJ(Canvas canvas) {
+
     }
 
     private void initAttrs() {
+        initDefAttrs();
         initColorRes();
 
+    }
+
+    private void initDefAttrs() {
+        mMinorModel = new MinorModel();
+        mMinorModel.setMinorType(MinorModel.MinorType.MACD);
+
+
+        setShowInnerX(false);
+        setShowInnerY(true);
     }
 
     private void initColorRes() {
@@ -119,28 +134,6 @@ public class MinorView extends KView {
         mDColor = getColor(R.color.color_minorView_dColor);
         mJColor = getColor(R.color.color_minorView_jColor);
     }
-    protected void drawInnerXy(Canvas canvas) {
-        //x轴的虚线不再绘制
-        //先绘制x轴
-        //计算每一段x的高度
-//        double perhight = (mHeight - mPaddingTop - mPaddingBottom) / 4;
-//        for (int i = 1; i <= 3; i++) {
-//            canvas.drawLine(mPaddingLeft, (float) (mPaddingTop + perhight * i),
-//                    mWidth - mPaddingRight, (float) (mPaddingTop + perhight * i),
-//                    mInnerXyPaint);
-//        }
-
-        //绘制y轴
-        double perWidth = (mWidth - mPaddingLeft - mPaddingRight) / 4;
-        for (int i = 1; i <= 3; i++) {
-            canvas.drawLine((float) (mPaddingLeft + perWidth * i), mPaddingTop,
-                    (float) (mPaddingLeft + perWidth * i), mHeight - mPaddingBottom,
-                    mInnerXyPaint);
-        }
-    }
-
-    //重写获取数据的方法，计算kjd
-
 
     @Override
     public void setTimeSharingData(List<Quotes> quotesList) {
@@ -150,88 +143,29 @@ public class MinorView extends KView {
             Log.e(TAG, "setTimeSharingData: 数据异常");
             return;
         }
+        //设置数据
+        mMinorModel.setQuotesList(quotesList);
 
-        try {
-            FinancialAlgorithm.calculateKDJ(quotesList);
-        } catch (Exception e) {
-            e.printStackTrace();
-            //这里处理计算出错
-        }
-
-        try {
-            FinancialAlgorithm.calculateMACD(quotesList);
-        } catch (Exception e) {
-            e.printStackTrace();
-            //这里处理计算出错
-        }
-
-        try {
-            FinancialAlgorithm.calculateRSI(quotesList);
-        } catch (Exception e) {
-            e.printStackTrace();
-            //这里处理计算出错
-        }
-
-        //日志
-        //这里找到
-        double tempMinKdj=Integer.MAX_VALUE;
-        double tempMaxKdj=Integer.MIN_VALUE;
-
-        double tempMinMacd=Integer.MAX_VALUE;
-        double tempMaxMacd=Integer.MIN_VALUE;
-
-        double tempMinRsi=Integer.MAX_VALUE;
-        double tempMaxRsi=Integer.MIN_VALUE;
-        for (Quotes quotes : quotesList) {
-            //寻找kdj
-            double minKDJ = quotes.getMinKDJ();
-            double maxKDJ = quotes.getMaxKDJ();
-            if(minKDJ <tempMinKdj){
-                tempMinKdj= minKDJ;
-                mMinKjdQuotes=quotes;
-            }
-            if(maxKDJ >tempMaxKdj){
-                tempMaxKdj= maxKDJ;
-                mMaxKjdQuotes=quotes;
-            }
-
-            //寻找kdj
-            double minMacd = quotes.getMinMacd();
-            double maxMacd = quotes.getMaxMacd();
-            if(minMacd <tempMinMacd){
-                tempMinMacd= minMacd;
-                mMinMacdQuotes=quotes;
-            }
-            if(maxMacd >tempMaxMacd){
-                tempMaxMacd= maxMacd;
-                mMaxMacdQuotes=quotes;
-            }
-
-            //寻找kdj
-            double minRsi = quotes.getMinRsi();
-            double maxRsi = quotes.getMaxRsi();
-            if(minRsi <tempMinRsi){
-                tempMinRsi= minRsi;
-                mMinRsiQuotes=quotes;
-            }
-            if(maxRsi >tempMaxRsi){
-                tempMaxRsi= maxRsi;
-                mMaxRsiQuotes=quotes;
-            }
-        }
-
-        //打印日志，查看最大值和最小值
-        Log.e(TAG, "setTimeSharingData: \nmMinKjdQuotes:"+mMinKjdQuotes.getMinKDJ() +"\n,mMaxKjdQuotes:"+mMaxKjdQuotes.getMaxKDJ()
-                +"\n,mMinMacdQuotes:"+mMinMacdQuotes.getMinMacd() +"\n,mMaxMacdQuotes:"+mMaxMacdQuotes.getMaxMacd()
-                +"\n,mMinRsiQuotes:"+mMinRsiQuotes.getMinRsi()+"\n,mMaxMacdQuotes:"+mMaxRsiQuotes.getMaxRsi() );
-
+        //执行寻找最大最小值
+        proformMinMaxData();
     }
 
-    //副图正在展示的类型
-    enum MinorType {
-        MACD,
-        RSI,
-        KDJ
-    }
+    /**
+     * 寻找指定指标类型的最大最小值
+     */
+    private void proformMinMaxData() {
+        if (mMinorModel.getMinorType() == MinorModel.MinorType.MACD) {
+            MacdModel macdModel = mMinorModel.getMacdModel();
+            //设置并开始寻找最小最大值
+            macdModel.setOriginList(mMinorModel.getQuotesList());
 
+            //以下开始寻找macd的单元宽度与间隔宽度。
+
+
+        } else if (mMinorModel.getMinorType() == MinorModel.MinorType.RSI) {
+            RsiModel rsiModel = mMinorModel.getRsiModel();
+        } else if (mMinorModel.getMinorType() == MinorModel.MinorType.KDJ) {
+            KdjModel kdjModel = mMinorModel.getKdjModel();
+        }
+    }
 }

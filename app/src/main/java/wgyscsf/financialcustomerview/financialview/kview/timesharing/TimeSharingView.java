@@ -141,7 +141,6 @@ public class TimeSharingView extends KView {
         if (mQuotesList == null || mQuotesList.isEmpty()) {
             return;
         }
-        drawInnerXy(canvas);
         drawXyTxt(canvas);
         drawBrokenLine(canvas);
         //长按处理
@@ -356,25 +355,6 @@ public class TimeSharingView extends KView {
 
         mLongPressTxtBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLongPressTxtBgPaint.setColor(mLongPressTxtBgColor);
-    }
-
-    protected void drawInnerXy(Canvas canvas) {
-        //先绘制x轴
-        //计算每一段x的高度
-        double perhight = (mHeight - mPaddingTop - mPaddingBottom) / 4;
-        for (int i = 1; i <= 3; i++) {
-            canvas.drawLine(mPaddingLeft, (float) (mPaddingTop + perhight * i),
-                    mWidth - mPaddingRight, (float) (mPaddingTop + perhight * i),
-                    mInnerXyPaint);
-        }
-
-        //绘制y轴
-        double perWidth = (mWidth - mPaddingLeft - mPaddingRight) / 4;
-        for (int i = 1; i <= 3; i++) {
-            canvas.drawLine((float) (mPaddingLeft + perWidth * i), mPaddingTop,
-                    (float) (mPaddingLeft + perWidth * i), mHeight - mPaddingBottom,
-                    mInnerXyPaint);
-        }
     }
 
     protected void drawXyTxt(Canvas canvas) {

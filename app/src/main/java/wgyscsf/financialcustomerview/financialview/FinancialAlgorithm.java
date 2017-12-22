@@ -90,7 +90,7 @@ public class FinancialAlgorithm {
 
             //计算结束
             //打印测试
-            Log.e(TAG, "calculateKDJ: k:" + quotes.k + ",d:" + quotes.d + ",j:" + quotes.j);
+            //Log.e(TAG, "calculateKDJ: k:" + quotes.k + ",d:" + quotes.d + ",j:" + quotes.j);
         }
     }
 
@@ -139,7 +139,7 @@ public class FinancialAlgorithm {
 
             //计算结束
             //打印日志
-            Log.e(TAG, "calculateMACD: dif:" + quotes.dif + ",dea:" + quotes.dea + ",macd:" + macd);
+            //Log.e(TAG, "calculateMACD: dif:" + quotes.dif + ",dea:" + quotes.dea + ",macd:" + macd);
         }
 
     }
@@ -301,8 +301,8 @@ public class FinancialAlgorithm {
             quotes.rsi24=rsi24;
 
             //打印日志
-            Log.e(TAG, "calculateRSI:rsi6 " + quotes.rsi6
-                    + ",rsi12:" + quotes.rsi12 + ",rsi24:" + quotes.rsi24);
+//            Log.e(TAG, "calculateRSI:rsi6 " + quotes.rsi6
+//                    + ",rsi12:" + quotes.rsi12 + ",rsi24:" + quotes.rsi24);
         }
 
     }
