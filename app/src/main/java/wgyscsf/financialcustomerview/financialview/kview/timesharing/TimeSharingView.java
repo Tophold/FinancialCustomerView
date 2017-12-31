@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -110,6 +111,13 @@ public class TimeSharingView extends KView {
     float mLongPressTxtSize = 18;
     int mLongPressTxtBgColor;
 
+    //画笔:蜡烛图
+    Paint mCandlePaint;
+    int mRedCandleColor;
+    int mGreenCandleColor;
+    //单个蜡烛最大值最小值对应的y轴方向的线宽度
+    int mCanldeHighLowWidth = 1;
+
 
     public TimeSharingView(Context context) {
         this(context, null);
@@ -141,8 +149,12 @@ public class TimeSharingView extends KView {
         if (mQuotesList == null || mQuotesList.isEmpty()) {
             return;
         }
+        //绘制x周和y周的文字
         drawXyTxt(canvas);
+        //绘制分时图折现
         drawBrokenLine(canvas);
+        //绘制蜡烛图
+        drawCandleView(canvas);
         //长按处理
         drawLongPress(canvas);
         //长按情况下的时间和数据框
@@ -255,16 +267,20 @@ public class TimeSharingView extends KView {
 
         //初始化画笔
         initXyTxtPaint();
-        initBrokenLinePaint();
-        initBrokenLineBgPaint();
         initDotPaint();
         initTimingTxtPaint();
         initTimingLinePaint();
         initLongPressPaint();
         initLongPressTxtPaint();
+        initBrokenLinePaint();
+        initBrokenLineBgPaint();
+        initCandlePaint();
 
         //手势
         mScaleGestureDetector = new ScaleGestureDetector(mContext, mOnScaleGestureListener);
+
+        //是分时图还是蜡烛图
+        setViewType(ViewType.CANDLE);
     }
 
     protected void loadDefAttrs() {
@@ -281,6 +297,8 @@ public class TimeSharingView extends KView {
         mLongPressColor = getColor(R.color.color_timeSharing_longPressLineColor);
         mLongPressTxtColor = getColor(R.color.color_timeSharing_longPressTxtColor);
         mLongPressTxtBgColor = getColor(R.color.color_timeSharing_longPressTxtBgColor);
+        mRedCandleColor = getColor(R.color.color_timeSharing_candleRed);
+        mGreenCandleColor = getColor(R.color.color_timeSharing_candleGreen);
     }
 
     protected void initXyTxtPaint() {
@@ -288,27 +306,6 @@ public class TimeSharingView extends KView {
         mXYTxtPaint.setColor(mXYTxtColor);
         mXYTxtPaint.setTextSize(mXYTxtSize);
         mXYTxtPaint.setAntiAlias(true);
-    }
-
-    protected void initBrokenLinePaint() {
-        mBrokenLinePaint = new Paint();
-        mBrokenLinePaint.setColor(mBrokenLineColor);
-        mBrokenLinePaint.setStrokeWidth(mBrokenLineWidth);
-        mBrokenLinePaint.setStyle(Paint.Style.STROKE);
-        mBrokenLinePaint.setAntiAlias(true);
-
-        if (mIsBrokenLineDashed) {
-            setLayerType(LAYER_TYPE_SOFTWARE, null);
-            mBrokenLinePaint.setPathEffect(new DashPathEffect(new float[]{5, 5}, 0));
-        }
-    }
-
-    protected void initBrokenLineBgPaint() {
-        mBrokenLineBgPaint = new Paint();
-        mBrokenLineBgPaint.setColor(mBrokenLineBgColor);
-        mBrokenLineBgPaint.setStyle(Paint.Style.FILL);
-        mBrokenLineBgPaint.setAntiAlias(true);
-        mBrokenLineBgPaint.setAlpha(mAlpha);
     }
 
     protected void initDotPaint() {
@@ -357,6 +354,35 @@ public class TimeSharingView extends KView {
         mLongPressTxtBgPaint.setColor(mLongPressTxtBgColor);
     }
 
+    protected void initBrokenLinePaint() {
+        mBrokenLinePaint = new Paint();
+        mBrokenLinePaint.setColor(mBrokenLineColor);
+        mBrokenLinePaint.setStrokeWidth(mBrokenLineWidth);
+        mBrokenLinePaint.setStyle(Paint.Style.STROKE);
+        mBrokenLinePaint.setAntiAlias(true);
+
+        if (mIsBrokenLineDashed) {
+            setLayerType(LAYER_TYPE_SOFTWARE, null);
+            mBrokenLinePaint.setPathEffect(new DashPathEffect(new float[]{5, 5}, 0));
+        }
+    }
+
+    protected void initBrokenLineBgPaint() {
+        mBrokenLineBgPaint = new Paint();
+        mBrokenLineBgPaint.setColor(mBrokenLineBgColor);
+        mBrokenLineBgPaint.setStyle(Paint.Style.FILL);
+        mBrokenLineBgPaint.setAntiAlias(true);
+        mBrokenLineBgPaint.setAlpha(mAlpha);
+    }
+
+    private void initCandlePaint() {
+        mCandlePaint = new Paint();
+        mCandlePaint.setColor(mRedCandleColor);
+        mCandlePaint.setStyle(Paint.Style.FILL);
+        mCandlePaint.setAntiAlias(true);
+        mCandlePaint.setStrokeWidth(mCanldeHighLowWidth);
+    }
+
     protected void drawXyTxt(Canvas canvas) {
         //先处理y轴方向文字
         drawYPaint(canvas);
@@ -373,7 +399,7 @@ public class TimeSharingView extends KView {
         //这里需要说明一下，x轴的起始点，其实需要加上mPerX，但是加上之后不是从起始位置开始，不好看。
         // 同理，for循环内x轴其实需要(i+1)。现在这样处理，最后会留一点空隙，其实挺好看的。
         float floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
-                mPerY * (quotes.c - mMinQuotes.c));
+                mClosePerY * (quotes.c - mMinColseQuotes.c));
         //在自定义view:FundView中的位置坐标
         //记录下位置信息
         quotes.floatX = mPaddingLeft;
@@ -385,7 +411,7 @@ public class TimeSharingView extends KView {
             //注意这个 mPerX * (i-mBeginIndex)，而不是mPerX * (i)
             float floatX2 = mPaddingLeft + mPerX * (i - mBeginIndex);
             float floatY2 = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
-                    mPerY * (q.c - mMinQuotes.c));
+                    mClosePerY * (q.c - mMinColseQuotes.c));
             //记录下位置信息
             q.floatX = floatX2;
             q.floatY = floatY2;
@@ -401,7 +427,7 @@ public class TimeSharingView extends KView {
                     //这里隐藏小圆点并且重新计算Y值。这里这样处理，对应现象的问题：横线划出界面。
                     Quotes endQuotes = mQuotesList.get(mQuotesList.size() - 1);
                     floatY2 = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
-                            mPerY * (endQuotes.c - mMinQuotes.c));
+                            mClosePerY * (endQuotes.c - mMinColseQuotes.c));
                 }
 
                 //实时数据展示的前提是在指定范围内。不处理对应的异常：实时横线显示在底部横线的下面...
@@ -434,6 +460,53 @@ public class TimeSharingView extends KView {
         }
         canvas.drawPath(path, mBrokenLinePaint);
         canvas.drawPath(path2, mBrokenLineBgPaint);
+    }
+
+    private void drawCandleView(Canvas canvas) {
+        if (mViewType != ViewType.CANDLE) return;
+
+        float topRectY;
+        float bottomRectY;
+        float leftRectX;
+        float rightRectX;
+
+        float topLineY;
+        float bottomLineY;
+        float leftLineX;
+        float rightLineX;
+        //蜡烛图单个之间的间隙
+        float diverWidth=mCandleDiverWidthRatio*mPerX;
+
+        for (int i = mBeginIndex; i < mEndIndex; i++) {
+            Quotes quotes = mQuotesList.get(i);
+            //定位蜡烛矩形的四个点
+            topRectY = (float) ( mPaddingTop+mInnerTopBlankPadding+
+                    mPerY * (quotes.o-mMinLowQuotes.l));
+            bottomRectY = (float) (mPaddingTop+mInnerTopBlankPadding+
+                    mPerY * (quotes.c-mMinLowQuotes.l));
+            leftRectX = mPaddingLeft + mPerX * (i - mBeginIndex)+diverWidth/2;
+            rightRectX = mPaddingLeft + mPerX * (i - mBeginIndex + 1)-diverWidth/2;
+
+            //定位单个蜡烛中间线的四个点
+            leftLineX= (float) (mPaddingLeft+mPerX/2.0+mPerX * (i - mBeginIndex));
+            topLineY=(float) ( mPaddingTop+mInnerTopBlankPadding+
+                    mPerY* (quotes.h-mMinLowQuotes.l));
+            rightLineX= (float) (mPaddingLeft+mPerX/2.0+mPerX * (i - mBeginIndex));
+            bottomLineY=(float) (mPaddingTop+mInnerTopBlankPadding+
+                    mPerY* (quotes.l-mMinLowQuotes.l));
+
+            RectF rectF = new RectF();
+            Log.e(TAG, "drawCandleView: leftX:"+leftRectX+",topY:"+topRectY+",rightX:"+rightRectX+",bottomY:"+bottomRectY );
+            rectF.set(leftRectX, topRectY, rightRectX, bottomRectY);
+            //设置颜色
+            mCandlePaint.setColor(quotes.c > quotes.o ? mRedCandleColor : mGreenCandleColor);
+            canvas.drawRect(rectF, mCandlePaint);
+
+            Log.e(TAG, "drawCandleView: leftLineX:"+leftLineX+",topLineY:"+topLineY+",rightLineX:"+rightLineX+",bottomLineY:"+bottomLineY );
+            //开始画low、high线
+            canvas.drawLine(leftLineX, topLineY,rightLineX,bottomLineY,mCandlePaint);
+        }
+
     }
 
     protected void drawLongPress(Canvas canvas) {
@@ -516,7 +589,7 @@ public class TimeSharingView extends KView {
     }
 
     /**
-     * 这里的均值如何处理：只知道最小值和最大值（mMinQuotes,mMaxQuotes）,但是不是容器的上border和下border。
+     * 这里的均值如何处理：只知道最小值和最大值（mMinColseQuotes,mMaxCloseQuotes）,但是不是容器的上border和下border。
      * 这里的处理方式是根据mMinQuotes和mMaxQuotes的差值与y轴高度的距离计算单位距离对应的值。
      * 然后根据mMinQuotes的值(A)和底部内边距的（折线底部距离底边线的距离mInnerBottomBlankPadding）（B）
      * 和单位对应的值(D)就可以计算出最下面border对应的值：(A-B*D)。
@@ -529,12 +602,12 @@ public class TimeSharingView extends KView {
         float halfTxtHight;
         double minBorderData;
         double maxBorderData;
-        double dataDis = mMaxQuotes.c - mMinQuotes.c;
+        double dataDis = mMaxCloseQuotes.c - mMinColseQuotes.c;
         double yDis = (mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding -
                 mInnerBottomBlankPadding);
         double perY = dataDis / yDis;
-        minBorderData = mMinQuotes.c - mInnerBottomBlankPadding * perY;
-        maxBorderData = mMinQuotes.c + mInnerTopBlankPadding * perY;
+        minBorderData = mMinColseQuotes.c - mInnerBottomBlankPadding * perY;
+        maxBorderData = mMinColseQuotes.c + mInnerTopBlankPadding * perY;
 
         halfTxtHight = getFontHeight(mXYTxtSize, mXYTxtPaint) / 4;//应该/2的，但是不准确，原因不明
         //halfTxtHight = 0;

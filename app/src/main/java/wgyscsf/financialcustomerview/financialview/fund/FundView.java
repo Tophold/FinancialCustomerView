@@ -261,7 +261,7 @@ public class FundView extends BaseFinancialView {
             fm.floatX = floatX2;
             fm.floatY = floatY2;
             path.lineTo(floatX2, floatY2);
-            //Log.e(TAG, "drawBrokenPaint: " + mPaddingLeft + mPerX * i + "-----" + (mHeight - mPerY * (mFundModeList.get(i).dataY - mMinFundMode.dataY) - mPaddingBottom));
+            //Log.e(TAG, "drawBrokenPaint: " + mPaddingLeft + mPerX * i + "-----" + (mHeight - mClosePerY * (mFundModeList.get(i).dataY - mMinFundMode.dataY) - mPaddingBottom));
         }
 
         canvas.drawPath(path, mBrokenPaint);

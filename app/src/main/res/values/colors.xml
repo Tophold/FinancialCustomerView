@@ -52,6 +52,11 @@
     <color name="color_timeSharing_callBackRed">#ec210f</color>
     <color name="color_timeSharing_callBackGreen">#12ec3a</color>
 
+    <!--蜡烛图的颜色-->
+    <color name="color_timeSharing_candleRed">#ec210f</color>
+    <color name="color_timeSharing_candleGreen">#12ec3a</color>
+
+
     <!--++++++++++++++++++副图自定义View++++++++++++++++++++-->
 
     <!--共有属性-->

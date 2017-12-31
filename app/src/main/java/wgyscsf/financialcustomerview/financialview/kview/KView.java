@@ -68,20 +68,48 @@ public class KView extends BaseFinancialView {
     protected float mInnerTopBlankPadding = 60;
     protected float mInnerBottomBlankPadding = 60;
 
-    //每一个x、y轴的一个单元的的宽和高
-    protected float mPerX;
-    protected float mPerY;
-    //Y轴：最小值和最大值对应的Model
-    protected Quotes mMinQuotes;
-    protected Quotes mMaxQuotes;
-    //X轴:起始位置的时间和结束位置的时间
-    protected Quotes mBeginQuotes;
-    protected Quotes mEndQuotes;
 
     //事件监听回调
     protected TimeSharingListener mTimeSharingListener;
     //是否可以加载更多,出现这个属性的原因，防止多次加载更多，不可修改
     protected boolean mCanLoadMore = true;
+
+    //view类型：是分时图还是蜡烛图
+    protected ViewType mViewType=ViewType.TIMESHARING;
+
+    /**
+     * 绘制分时图：
+     */
+
+    //每一个x、y轴的一个单元的的宽和高
+    //根据可见数量和有效宽度计算单位x大小
+    protected float mPerX;
+    //根据最大最小close价格计算的的单位y大小。
+    protected float mClosePerY;
+    //Y轴：close价格最小值和最大值对应的Model。这里最小最大是根据close价格算的，用于分时图。
+    protected Quotes mMinColseQuotes;
+    protected Quotes mMaxCloseQuotes;
+    //X轴:起始位置的时间和结束位置的时间
+    protected Quotes mBeginQuotes;
+    protected Quotes mEndQuotes;
+
+
+    /**
+     * 绘制蜡烛图：y轴，可以根据可视范围内的最大high值（A）和最小low值（B）以及有效y轴高度（C）计算出
+     * 单位高度mPerY(D),D=C/(A-B)。
+     * x轴暂时直接先取mPerX作为宽度，不留间隙。
+     * 那么，蜡烛图就可以根据当前位置的high、low两个值绘制最大最小值；
+     * 然后根据open和close绘制蜡烛图的上起点和下结束点。
+     * 至于颜色，当当前值为的Quote的close大于open,为红色；反之为绿色。
+     *
+     */
+    //根据可见范围内最大的high价格和最小的low价格计算的y单位长度
+    protected float mPerY;
+    //Y轴：根据可见范围内最大的high价格和最小的low价格分别对应的model
+    protected Quotes mMaxHighQuotes;
+    protected Quotes mMinLowQuotes;
+    //蜡烛图间隙，大小以单个蜡烛图的宽度的比例算。可修改。
+    protected float mCandleDiverWidthRatio=0.1f;
 
     /**
      * 左右拖动思路：这里开始处理分时图的左右移动问题，思路：当手指移动时，会有移动距离（A），我们又有x轴的单位距离(B)，
@@ -319,6 +347,11 @@ public class KView extends BaseFinancialView {
         PULL_LEFT_STOP,//滑动到最左边
     }
 
+    public enum ViewType{
+        TIMESHARING,
+        CANDLE
+    }
+
     //监听回调
     public interface TimeSharingListener {
         void onLongTouch(Quotes preQuotes, Quotes currentQuotes);
@@ -438,9 +471,19 @@ public class KView extends BaseFinancialView {
      * 计算x/y轴数据单元大小
      */
     protected void seekAndCalculateCellData() {
-        //找到最大值和最小值
+        //找到close最大值和最小值
         double tempMinClosePrice = Integer.MAX_VALUE;
         double tempMaxClosePrice = Integer.MIN_VALUE;
+
+        //找到可见范围之内的最大的high价格和最小的low价格
+        double tempMaxHighPrice=Integer.MIN_VALUE;
+        double tempMinLowPrice=Integer.MAX_VALUE;
+
+        //最终确定的最大high值和最小low值
+        double finalMaxHighPrice=mQuotesList.get(mBeginIndex).h;
+        double finalMinLowPrice=mQuotesList.get(mBeginIndex).l;
+        mMaxHighQuotes=mQuotesList.get(mBeginIndex);
+        mMinLowQuotes=mQuotesList.get(mBeginIndex);
 
         for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes quotes = mQuotesList.get(i);
@@ -452,18 +495,39 @@ public class KView extends BaseFinancialView {
             }
             if (quotes.c <= tempMinClosePrice) {
                 tempMinClosePrice = quotes.c;
-                mMinQuotes = quotes;
+                mMinColseQuotes = quotes;
             }
             if (quotes.c >= tempMaxClosePrice) {
                 tempMaxClosePrice = quotes.c;
-                mMaxQuotes = quotes;
+                mMaxCloseQuotes = quotes;
+            }
+
+            //蜡烛图
+            if (mViewType==ViewType.CANDLE){
+                if(quotes.h>tempMaxHighPrice){
+                    tempMaxHighPrice=quotes.h;
+                    finalMaxHighPrice=tempMaxHighPrice;
+                    mMaxHighQuotes=quotes;
+                }
+
+                if(quotes.l<tempMinLowPrice){
+                    tempMinLowPrice=quotes.l;
+                    finalMinLowPrice=tempMinLowPrice;
+                    mMinLowQuotes=quotes;
+                }
             }
         }
         mPerX = (mWidth - mPaddingLeft - mPaddingRight - mInnerRightBlankPadding)
                 / (mShownMaxCount - 1);//特别注意，这里-1并不代表个数减少了，因为起始点是从0开始的。
         //不要忘了减去内部的上下Padding
-        mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
-                - mInnerBottomBlankPadding) / (mMaxQuotes.c - mMinQuotes.c));
+        mClosePerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
+                - mInnerBottomBlankPadding) / (mMaxCloseQuotes.c - mMinColseQuotes.c));
+
+        if(mViewType==ViewType.CANDLE){
+            mPerY=(float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
+                    - mInnerBottomBlankPadding) / (finalMaxHighPrice- finalMinLowPrice));
+        }
+
 
         //刷新界面
         invalidate();
@@ -483,5 +547,13 @@ public class KView extends BaseFinancialView {
 
     public void setShowInnerY(boolean showInnerY) {
         mIsShowInnerY = showInnerY;
+    }
+
+    public ViewType getViewType() {
+        return mViewType;
+    }
+
+    public void setViewType(ViewType viewType) {
+        mViewType = viewType;
     }
 }
