@@ -496,13 +496,13 @@ public class TimeSharingView extends KView {
                     mPerY* (quotes.l-mMinLowQuotes.l));
 
             RectF rectF = new RectF();
-            Log.e(TAG, "drawCandleView: leftX:"+leftRectX+",topY:"+topRectY+",rightX:"+rightRectX+",bottomY:"+bottomRectY );
+            //Log.e(TAG, "drawCandleView: leftX:"+leftRectX+",topY:"+topRectY+",rightX:"+rightRectX+",bottomY:"+bottomRectY );
             rectF.set(leftRectX, topRectY, rightRectX, bottomRectY);
             //设置颜色
             mCandlePaint.setColor(quotes.c > quotes.o ? mRedCandleColor : mGreenCandleColor);
             canvas.drawRect(rectF, mCandlePaint);
 
-            Log.e(TAG, "drawCandleView: leftLineX:"+leftLineX+",topLineY:"+topLineY+",rightLineX:"+rightLineX+",bottomLineY:"+bottomLineY );
+            //Log.e(TAG, "drawCandleView: leftLineX:"+leftLineX+",topLineY:"+topLineY+",rightLineX:"+rightLineX+",bottomLineY:"+bottomLineY );
             //开始画low、high线
             canvas.drawLine(leftLineX, topLineY,rightLineX,bottomLineY,mCandlePaint);
         }
