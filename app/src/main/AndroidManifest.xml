@@ -16,9 +16,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".fund.FundActivity">
+        <activity android:name=".financialview.fund.FundActivity">
         </activity>
-        <activity android:name=".timesharing.TimeSharingActivity">
+        <activity android:name=".financialview.kview.timesharing.TimeSharingActivity">
+        </activity>
+        <activity android:name=".financialview.kview.minor.MinorActivity"
+            android:screenOrientation="landscape">
         </activity>
     </application>
 
