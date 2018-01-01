@@ -425,7 +425,7 @@ public class KView extends BaseFinancialView {
             return;
         }
         mQuotesList.add(quotes);
-        //如果实在左右移动，则不去实时更新K线图，但是要把数据加进去
+        //如果是在左右移动，则不去实时更新K线图，但是要把数据加进去
         if (mPullType == PullType.PULL_RIGHT_STOP) {
             //Log.e(TAG, "pushingTimeSharingData: 处理实时更新操作...");
             seekBeginAndEndByNewer();
@@ -480,8 +480,6 @@ public class KView extends BaseFinancialView {
         double tempMinLowPrice=Integer.MAX_VALUE;
 
         //最终确定的最大high值和最小low值
-        double finalMaxHighPrice=mQuotesList.get(mBeginIndex).h;
-        double finalMinLowPrice=mQuotesList.get(mBeginIndex).l;
         mMaxHighQuotes=mQuotesList.get(mBeginIndex);
         mMinLowQuotes=mQuotesList.get(mBeginIndex);
 
@@ -506,26 +504,24 @@ public class KView extends BaseFinancialView {
             if (mViewType==ViewType.CANDLE){
                 if(quotes.h>tempMaxHighPrice){
                     tempMaxHighPrice=quotes.h;
-                    finalMaxHighPrice=tempMaxHighPrice;
                     mMaxHighQuotes=quotes;
                 }
 
                 if(quotes.l<tempMinLowPrice){
                     tempMinLowPrice=quotes.l;
-                    finalMinLowPrice=tempMinLowPrice;
                     mMinLowQuotes=quotes;
                 }
             }
         }
         mPerX = (mWidth - mPaddingLeft - mPaddingRight - mInnerRightBlankPadding)
-                / (mShownMaxCount - 1);//特别注意，这里-1并不代表个数减少了，因为起始点是从0开始的。
+                / (mShownMaxCount);
         //不要忘了减去内部的上下Padding
         mClosePerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
                 - mInnerBottomBlankPadding) / (mMaxCloseQuotes.c - mMinColseQuotes.c));
 
         if(mViewType==ViewType.CANDLE){
             mPerY=(float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
-                    - mInnerBottomBlankPadding) / (finalMaxHighPrice- finalMinLowPrice));
+                    - mInnerBottomBlankPadding) / (mMaxHighQuotes.h- mMinLowQuotes.l));
         }
 
 

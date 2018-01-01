@@ -151,14 +151,12 @@ public class TimeSharingView extends KView {
         }
         //绘制x周和y周的文字
         drawXyTxt(canvas);
-        //绘制分时图折现
-        drawBrokenLine(canvas);
-        //绘制蜡烛图
-        drawCandleView(canvas);
-        //长按处理
-        drawLongPress(canvas);
-        //长按情况下的时间和数据框
-        drawLongPressTxt(canvas);
+
+        /**
+         * 将需要遍历可视范围内的数据的操作全部在这里处理，尽可能少的遍历数据次数。
+         * 现在处理的如下：分时图折现、蜡烛图、实时横线、长按十字。
+         */
+        drawLooper(canvas);
     }
 
     @Override
@@ -391,145 +389,134 @@ public class TimeSharingView extends KView {
         drawXPaint(canvas);
     }
 
-    protected void drawBrokenLine(Canvas canvas) {
-        //先画第一个点
-        Quotes quotes = mQuotesList.get(mBeginIndex);
-        Path path = new Path();
-        Path path2 = new Path();
-        //这里需要说明一下，x轴的起始点，其实需要加上mPerX，但是加上之后不是从起始位置开始，不好看。
-        // 同理，for循环内x轴其实需要(i+1)。现在这样处理，最后会留一点空隙，其实挺好看的。
-        float floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
-                mClosePerY * (quotes.c - mMinColseQuotes.c));
-        //在自定义view:FundView中的位置坐标
-        //记录下位置信息
-        quotes.floatX = mPaddingLeft;
-        quotes.floatY = floatY;
-        path.moveTo(mPaddingLeft, floatY);
-        path2.moveTo(mPaddingLeft, floatY);
-        for (int i = mBeginIndex + 1; i < mEndIndex; i++) {
-            Quotes q = mQuotesList.get(i);
-            //注意这个 mPerX * (i-mBeginIndex)，而不是mPerX * (i)
-            float floatX2 = mPaddingLeft + mPerX * (i - mBeginIndex);
-            float floatY2 = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
-                    mClosePerY * (q.c - mMinColseQuotes.c));
+    private void drawLooper(Canvas canvas) {
+        Quotes firstQ = mQuotesList.get(mBeginIndex);
+
+
+        /**分时图折现的绘制*/
+        Path brokenLinePath = new Path();
+        Path brokenLineBgPath = new Path();
+
+        /**实时横线的绘制*/
+
+
+        /**蜡烛图的绘制*/
+        //蜡烛图单个之间的间隙
+        float diverWidth = mCandleDiverWidthRatio * mPerX;
+
+        /**长按的绘制*/
+        //最后的最近的按下的位置
+        int finalIndex = mBeginIndex;
+        //获取距离最近按下的位置的model
+        float pressX = mMovingX;
+        //循环遍历，找到距离最短的x轴的mode
+        Quotes finalFundMode = firstQ;
+        //遍历的点距离按下的距离
+        float minXLen = Integer.MAX_VALUE;
+
+        for (int i = mBeginIndex; i < mEndIndex; i++) {
+            Quotes quotes = mQuotesList.get(i);
+            //mPerX/2.0f：为了让取点为单个单元的x的中间位置
+            float floatX = mPaddingLeft + mPerX / 2.0f + mPerX * (i - mBeginIndex);
+            float floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
+                    mClosePerY * (quotes.c - mMinColseQuotes.c));
             //记录下位置信息
-            q.floatX = floatX2;
-            q.floatY = floatY2;
-            path.lineTo(floatX2, floatY2);
-            path2.lineTo(floatX2, floatY2);
-            //最后一个点，画一个小圆点；实时横线；横线的右侧数据与背景；折线下方阴影
-            if (i == mEndIndex - 1) {
-                //这里滑动到最右端
-                if (mPullType == PullType.PULL_RIGHT_STOP) {
-                    //绘制小圆点
-                    canvas.drawCircle(floatX2, floatY2, mDotRadius, mDotPaint);
-                } else {
-                    //这里隐藏小圆点并且重新计算Y值。这里这样处理，对应现象的问题：横线划出界面。
-                    Quotes endQuotes = mQuotesList.get(mQuotesList.size() - 1);
-                    floatY2 = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
-                            mClosePerY * (endQuotes.c - mMinColseQuotes.c));
+            quotes.floatX = floatX;
+            quotes.floatY = floatY;
+
+            //边界位置修正
+            //不是在最新的位置（其实也就是最新点靠近右侧边框），并且是最后一个点则向右加一个mPerX/2.0f。
+            if(mPullType!=PullType.PULL_RIGHT_STOP){
+                if (i == mEndIndex - 1) {
+                    quotes.floatX+=mPerX/2.0f;
                 }
-
-                //实时数据展示的前提是在指定范围内。不处理对应的异常：实时横线显示在底部横线的下面...
-                if (mPaddingTop < floatY2 && floatY2 < mHeight - mPaddingBottom) {
-                    //接着画实时横线
-                    canvas.drawLine(mPaddingLeft, floatY2, mWidth - mPaddingRight, floatY2,
-                            mTimingLinePaint);
-
-                    //接着绘制实时横线的右侧数据与背景
-                    //文字高度
-                    float txtHight = getFontHeight(mTimingTxtWidth, mTimingTxtBgPaint);
-                    //绘制背景
-                    canvas.drawRect(mWidth - mPaddingRight, floatY2 - txtHight / 2, mWidth,
-                            floatY2 + txtHight / 2, mTimingTxtBgPaint);
-
-                    //绘制实时数据
-                    //距离左边的距离
-                    float leftDis = 8;
-                    canvas.drawText(FormatUtil.numFormat(q.c, mDigits),
-                            mWidth - mPaddingRight + leftDis, floatY2 + txtHight / 4,
-                            mTimingTxtPaint);
-                }
-
-                //在这里把path圈起来，添加阴影。特别注意，这里处理下方阴影和折线边框。采用两个画笔和两个Path处理的，
-                // 貌似没有一个Paint可以同时绘制边框和填充色。
-                path2.lineTo(floatX2, mHeight - mPaddingBottom);
-                path2.lineTo(mPaddingLeft, mHeight - mPaddingBottom);
-                path2.close();
             }
+            //如果是开始位置，则减去一个mPerX/2.0f
+            if(i==mBeginIndex){
+                quotes.floatX-=mPerX/2.0f;
+            }
+
+
+
+            /**分时图折现的绘制*/
+            drawTimSharingProcess(quotes, i, brokenLinePath, brokenLineBgPath);
+
+            /**实时横线的绘制*/
+            drawTimingLineProcess(canvas, quotes, i);
+
+            /**蜡烛图的绘制*/
+            drawCandleViewProcess(canvas, diverWidth, i, quotes);
+
+            /**长按的绘制*/
+            if (mDrawLongPressPaint) {
+                float abs = Math.abs(pressX - floatX);
+                if (abs < minXLen) {
+                    finalFundMode = quotes;
+                    minXLen = abs;
+                    finalIndex = i;
+                }
+            }
+
         }
-        canvas.drawPath(path, mBrokenLinePaint);
-        canvas.drawPath(path2, mBrokenLineBgPaint);
+        /**分时图折现的绘制*/
+        drawTimSharing(canvas, brokenLinePath, brokenLineBgPath);
+
+        /**长按的绘制*/
+        drawLongPress(canvas, finalIndex, finalFundMode);
+
     }
 
-    private void drawCandleView(Canvas canvas) {
+    private void drawCandleViewProcess(Canvas canvas, float diverWidth, int i, Quotes quotes) {
         if (mViewType != ViewType.CANDLE) return;
 
         float topRectY;
         float bottomRectY;
         float leftRectX;
         float rightRectX;
-
-        float topLineY;
-        float bottomLineY;
         float leftLineX;
+        float topLineY;
         float rightLineX;
-        //蜡烛图单个之间的间隙
-        float diverWidth=mCandleDiverWidthRatio*mPerX;
+        float bottomLineY;//定位蜡烛矩形的四个点
+        topRectY = (float) (mPaddingTop + mInnerTopBlankPadding +
+                mPerY * (mMaxHighQuotes.h - quotes.o));
+        bottomRectY = (float) (mPaddingTop + mInnerTopBlankPadding +
+                mPerY * (mMaxHighQuotes.h - quotes.c));
+        leftRectX = -mPerX / 2 + quotes.floatX + diverWidth / 2;
+        rightRectX = mPerX / 2 + quotes.floatX - diverWidth / 2;
 
-        for (int i = mBeginIndex; i < mEndIndex; i++) {
-            Quotes quotes = mQuotesList.get(i);
-            //定位蜡烛矩形的四个点
-            topRectY = (float) ( mPaddingTop+mInnerTopBlankPadding+
-                    mPerY * (quotes.o-mMinLowQuotes.l));
-            bottomRectY = (float) (mPaddingTop+mInnerTopBlankPadding+
-                    mPerY * (quotes.c-mMinLowQuotes.l));
-            leftRectX = mPaddingLeft + mPerX * (i - mBeginIndex)+diverWidth/2;
-            rightRectX = mPaddingLeft + mPerX * (i - mBeginIndex + 1)-diverWidth/2;
+        //定位单个蜡烛中间线的四个点
+        leftLineX = quotes.floatX;
+        topLineY = (float) (mPaddingTop + mInnerTopBlankPadding +
+                mPerY * (mMaxHighQuotes.h - quotes.h));
+        rightLineX = quotes.floatX;
+        bottomLineY = (float) (mPaddingTop + mInnerTopBlankPadding +
+                mPerY * (mMaxHighQuotes.h - quotes.l));
 
-            //定位单个蜡烛中间线的四个点
-            leftLineX= (float) (mPaddingLeft+mPerX/2.0+mPerX * (i - mBeginIndex));
-            topLineY=(float) ( mPaddingTop+mInnerTopBlankPadding+
-                    mPerY* (quotes.h-mMinLowQuotes.l));
-            rightLineX= (float) (mPaddingLeft+mPerX/2.0+mPerX * (i - mBeginIndex));
-            bottomLineY=(float) (mPaddingTop+mInnerTopBlankPadding+
-                    mPerY* (quotes.l-mMinLowQuotes.l));
-
-            RectF rectF = new RectF();
-            //Log.e(TAG, "drawCandleView: leftX:"+leftRectX+",topY:"+topRectY+",rightX:"+rightRectX+",bottomY:"+bottomRectY );
-            rectF.set(leftRectX, topRectY, rightRectX, bottomRectY);
-            //设置颜色
-            mCandlePaint.setColor(quotes.c > quotes.o ? mRedCandleColor : mGreenCandleColor);
-            canvas.drawRect(rectF, mCandlePaint);
-
-            //Log.e(TAG, "drawCandleView: leftLineX:"+leftLineX+",topLineY:"+topLineY+",rightLineX:"+rightLineX+",bottomLineY:"+bottomLineY );
-            //开始画low、high线
-            canvas.drawLine(leftLineX, topLineY,rightLineX,bottomLineY,mCandlePaint);
+        RectF rectF = new RectF();
+        //Log.e(TAG, "drawCandleView: leftX:"+leftRectX+",topY:"+topRectY+",rightX:"+rightRectX+",bottomY:"+bottomRectY );
+        //边界处理
+        if(i==mBeginIndex){
+            leftRectX=leftRectX<mPaddingLeft?mPaddingLeft:leftRectX;
+            leftLineX=leftLineX<mPaddingLeft?mPaddingLeft:leftLineX;
+        }else if(i==(mEndIndex-1)){
+            rightRectX=rightRectX>mWidth-mPaddingRight?mWidth-mPaddingRight:rightRectX;
+            rightLineX=rightLineX>mWidth-mPaddingRight?mWidth-mPaddingRight:rightLineX;
         }
+        rectF.set(leftRectX, topRectY, rightRectX, bottomRectY);
+        //设置颜色
+        mCandlePaint.setColor(quotes.c > quotes.o ? mRedCandleColor : mGreenCandleColor);
+        canvas.drawRect(rectF, mCandlePaint);
 
+        //Log.e(TAG, "drawCandleView: leftLineX:"+leftLineX+",topLineY:"+topLineY+",rightLineX:"+rightLineX+",bottomLineY:"+bottomLineY );
+        //开始画low、high线
+        canvas.drawLine(leftLineX, topLineY, rightLineX, bottomLineY, mCandlePaint);
     }
 
-    protected void drawLongPress(Canvas canvas) {
+    private void drawLongPress(Canvas canvas, int finalIndex, Quotes finalFundMode) {
         if (!mDrawLongPressPaint) return;
 
-        //最后的最近的按下的位置
-        int finalIndex;
-        //获取距离最近按下的位置的model
-        float pressX = mMovingX;
-        //循环遍历，找到距离最短的x轴的mode
-        Quotes finalFundMode = mQuotesList.get(mBeginIndex);
-        finalIndex = mBeginIndex;
-        float minXLen = Integer.MAX_VALUE;
-        for (int i = mBeginIndex; i < mEndIndex; i++) {
-            Quotes currFunMode = mQuotesList.get(i);
-            float abs = Math.abs(pressX - currFunMode.floatX);
-            if (abs < minXLen) {
-                finalFundMode = currFunMode;
-                minXLen = abs;
-                finalIndex = i;
-            }
-        }
-
+        Log.e(TAG, "drawLongPress: " + mPaddingLeft + "，"
+                + finalFundMode.floatY + "，" + (mWidth - mPaddingRight) + "," + finalFundMode.floatY);
         //x轴线
         canvas.drawLine(mPaddingLeft, finalFundMode.floatY, mWidth - mPaddingRight,
                 finalFundMode.floatY, mLongPressPaint);
@@ -583,9 +570,73 @@ public class TimeSharingView extends KView {
         }
     }
 
-    protected void drawLongPressTxt(Canvas canvas) {
-        //see:drawLongPress(Canvas canvas)
+    private void drawTimSharing(Canvas canvas, Path brokenLinePath, Path brokenLineBgPath) {
+        if (mViewType != ViewType.TIMESHARING) return;
 
+        canvas.drawPath(brokenLinePath, mBrokenLinePaint);
+        canvas.drawPath(brokenLineBgPath, mBrokenLineBgPaint);
+    }
+
+    private void drawTimingLineProcess(Canvas canvas, Quotes quotes, int i) {
+        if (i == mEndIndex - 1) {
+            //这里滑动到最右端
+            //绘制小圆点
+            if (mPullType == PullType.PULL_RIGHT_STOP) {
+                //对于蜡烛图不需要绘制小圆点，但是需要绘制实时横线
+                if (mViewType == ViewType.TIMESHARING) {
+                    canvas.drawCircle(quotes.floatX, quotes.floatY, mDotRadius, mDotPaint);
+                }
+            } else {
+                //这里隐藏小圆点并且重新计算Y值。这里这样处理，对应现象的问题：横线划出界面。
+                Quotes endQuotes = mQuotesList.get(mQuotesList.size() - 1);
+                quotes.floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
+                        mClosePerY * (endQuotes.c - mMinColseQuotes.c));
+            }
+
+            //实时数据展示的前提是在指定范围内。不处理对应的异常：实时横线显示在底部横线的下面...
+            if (mPaddingTop < quotes.floatY && quotes.floatY < mHeight - mPaddingBottom) {
+                //接着画实时横线
+                canvas.drawLine(mPaddingLeft, quotes.floatY, mWidth - mPaddingRight, quotes.floatY,
+                        mTimingLinePaint);
+
+                //接着绘制实时横线的右侧数据与背景
+                //文字高度
+                float txtHight = getFontHeight(mTimingTxtWidth, mTimingTxtBgPaint);
+                //绘制背景
+                canvas.drawRect(mWidth - mPaddingRight, quotes.floatY - txtHight / 2, mWidth,
+                        quotes.floatY + txtHight / 2, mTimingTxtBgPaint);
+
+                //绘制实时数据
+                //距离左边的距离
+                float leftDis = 8;
+                canvas.drawText(FormatUtil.numFormat(quotes.c, mDigits),
+                        mWidth - mPaddingRight + leftDis, quotes.floatY + txtHight / 4,
+                        mTimingTxtPaint);
+            }
+        }
+    }
+
+    private void drawTimSharingProcess(Quotes quotes, int i, Path path, Path path2) {
+        if (mViewType != ViewType.TIMESHARING) return;
+
+        if(i==mBeginIndex){
+            path.moveTo(quotes.floatX,quotes.floatY);
+            path2.moveTo(quotes.floatX,quotes.floatY);
+        }else{
+            //Log.e(TAG, "drawTimSharingProcess: "+quotes.floatX );
+            path.lineTo(quotes.floatX, quotes.floatY);
+            //开始绘制path
+            path2.lineTo(quotes.floatX, quotes.floatY);
+        }
+
+        //最后一个点
+        if (i == mEndIndex - 1) {
+            //在这里把path圈起来，添加阴影。特别注意，这里处理下方阴影和折线边框。采用两个画笔和两个Path处理的，
+            // 貌似没有一个Paint可以同时绘制边框和填充色。
+            path2.lineTo(quotes.floatX, mHeight - mPaddingBottom);
+            path2.lineTo(mPaddingLeft, mHeight - mPaddingBottom);
+            path2.close();
+        }
     }
 
     /**
