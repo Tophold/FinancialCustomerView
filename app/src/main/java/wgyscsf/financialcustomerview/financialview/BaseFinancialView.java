@@ -25,7 +25,7 @@ public class BaseFinancialView extends View {
     //长按阀值，默认多长时间算长按（ms）
     protected static final long DEF_LONGPRESS_LENGTH = 700;
     //单击阀值
-    protected static final long DEF_CLICKPRESS_LENGTH = 300;
+    protected static final long DEF_CLICKPRESS_LENGTH = 100;
 
 
     //控件默认宽高。当控件的宽高设置为wrap_content时会采用该参数进行默认的设置（单位：sp）。子类可以修改。

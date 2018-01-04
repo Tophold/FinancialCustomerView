@@ -42,6 +42,16 @@ public class Quotes extends BaseModel {
     public float floatX;
     public float floatY;
 
+    //MA
+    public double ma5;
+    public double ma10;
+    public double ma20;
+
+    //BOLL
+    public double mb;//上轨线
+    public double up;//中轨线
+    public double dn;//下轨线
+
     //KDJ
     public double k;
     public double d;

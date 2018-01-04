@@ -56,6 +56,19 @@
     <color name="color_timeSharing_candleRed">#ec210f</color>
     <color name="color_timeSharing_candleGreen">#12ec3a</color>
 
+    <!--主图指标-->
+    <color name="color_masterView_legendColor">#8f8a8a</color>
+
+
+    <!--MA-->
+    <color name="color_masterView_ma5Color">#dcb1ad</color>
+    <color name="color_masterView_ma10Color">#72a5e4</color>
+    <color name="color_masterView_ma20Color">#3785d9</color>
+
+    <!--boll-->
+    <color name="color_masterView_bollMbColor">#ed978f</color>
+    <color name="color_masterView_bollUpColor">#136ad6</color>
+    <color name="color_masterView_bollDnColor">#7897b9</color>
 
     <!--++++++++++++++++++副图自定义View++++++++++++++++++++-->
 

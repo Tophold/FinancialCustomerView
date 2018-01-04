@@ -190,9 +190,9 @@ public class FinancialAlgorithm {
                     }
                 }
                 //异常情况
-                if(i==0||downSum/i==0){
-                    rs6=0;
-                }else{
+                if (i == 0 || downSum / i == 0) {
+                    rs6 = 0;
+                } else {
                     rs6 = (upSum / i) / (downSum / i);
                 }
             } else {
@@ -207,9 +207,9 @@ public class FinancialAlgorithm {
                     }
                 }
                 //异常情况
-                if(downSum==0||upSum==0){
-                    rs6=0;
-                }else{
+                if (downSum == 0 || upSum == 0) {
+                    rs6 = 0;
+                } else {
                     rs6 = (upSum / xPeriod) / (downSum / xPeriod);
                 }
             }
@@ -229,9 +229,9 @@ public class FinancialAlgorithm {
                     }
                 }
                 //异常情况
-                if(i==0||downSum/i==0){
-                    rs12=0;
-                }else{
+                if (i == 0 || downSum / i == 0) {
+                    rs12 = 0;
+                } else {
                     rs12 = (upSum / i) / (downSum / i);
                 }
             } else {
@@ -246,9 +246,9 @@ public class FinancialAlgorithm {
                     }
                 }
                 //异常情况
-                if(downSum==0||upSum==0){
-                    rs12=0;
-                }else{
+                if (downSum == 0 || upSum == 0) {
+                    rs12 = 0;
+                } else {
                     rs12 = (upSum / yPeriod) / (downSum / yPeriod);
                 }
             }
@@ -268,9 +268,9 @@ public class FinancialAlgorithm {
                     }
                 }
                 //异常情况
-                if(i==0||downSum/i==0){
-                    rs24=0;
-                }else{
+                if (i == 0 || downSum / i == 0) {
+                    rs24 = 0;
+                } else {
                     rs24 = (upSum / i) / (downSum / i);
                 }
             } else {
@@ -286,9 +286,9 @@ public class FinancialAlgorithm {
                 }
 
                 //异常情况
-                if(downSum==0||upSum==0){
-                    rs24=0;
-                }else{
+                if (downSum == 0 || upSum == 0) {
+                    rs24 = 0;
+                } else {
                     rs24 = (upSum / zPeriod) / (downSum / zPeriod);
                 }
             }
@@ -296,14 +296,113 @@ public class FinancialAlgorithm {
             rsi24 = 100 * rs24 / (1 + rs24);
 
             //设置
-            quotes.rsi6=rsi6;
-            quotes.rsi12=rsi12;
-            quotes.rsi24=rsi24;
+            quotes.rsi6 = rsi6;
+            quotes.rsi12 = rsi12;
+            quotes.rsi24 = rsi24;
 
             //打印日志
-//            Log.e(TAG, "calculateRSI:rsi6 " + quotes.rsi6
-//                    + ",rsi12:" + quotes.rsi12 + ",rsi24:" + quotes.rsi24);
+            //            Log.e(TAG, "calculateRSI:rsi6 " + quotes.rsi6
+            //                    + ",rsi12:" + quotes.rsi12 + ",rsi24:" + quotes.rsi24);
         }
 
+    }
+
+    //MA算法
+
+    /**
+     * MA算法，period（周期）的MA的计算：带上今天，向前取period的收盘价之和除以period,即是今日的MA(period)。
+     * 算法很简洁，但是是对的。
+     *
+     * @param period 周期，一般是：5、10、20、30、60
+     */
+    public static void calculateMA(List<Quotes> quotesList, int period) {
+        if (quotesList == null || quotesList.isEmpty()) return;
+        if (period < 0 || period > quotesList.size() - 1) return;
+
+        double sum1 = 0;
+        for (int i = 0; i < quotesList.size(); i++) {
+            Quotes quotes = quotesList.get(i);
+            sum1 += quotes.c;
+            //边界
+            if (i < period - 1) {
+                continue;
+            }
+
+            if (i > period - 1) {
+                sum1 -= quotesList.get(i - period).c;
+            }
+
+            if (period == 5) {
+                quotes.ma5 = sum1 / period;
+            } else if (period == 10) {
+                quotes.ma10 = sum1 / period;
+            } else if (period == 20) {
+                quotes.ma20 = sum1 / period;
+            } else {
+                Log.e(TAG, "calculateMA: TODO:完善算法");
+                return;
+            }
+
+        }
+    }
+
+    /**
+     * 计算boll，当List最前面的值（index<period）怎么处理？？？现在的处理，不处理，显示：0
+     *
+     * @param quotesList
+     * @param period     周期，一般取26
+     * @param k          K为参数，可根据股票的特性来做相应的调整，一般默认为2
+     *                   <p>
+     *                   boll线
+     *                   日BOLL指标的计算过程
+     *                   （1）计算MA
+     *                   MA=N周期之和÷N
+     *                   （2）计算标准差MD
+     *                   MD=平方根N日的（C－MA）的两次方之和除以N
+     *                   （3）计算MB、UP、DN线
+     *                   MB=（N－1）日的MA
+     *                   UP=MB＋2×MD
+     *                   DN=MB－2×MD
+     */
+    public static void calculateBOLL(List<Quotes> quotesList, int period, int k) {
+        if (quotesList == null || quotesList.isEmpty()) return;
+        if (period < 0 || period > quotesList.size() - 1) return;
+
+        double mb;//上轨线
+        double up;//中轨线
+        double dn;//下轨线
+
+        double ma = 0;//N-1日
+        double md = 0;
+        double sum = 0;
+
+        for (int i = 0; i < quotesList.size(); i++) {
+            Quotes quotes = quotesList.get(i);
+            sum += quotes.c;
+            //这个范围不计算
+            if (i < period - 1)
+                continue;
+
+            md = 0;
+            if (i > period - 1)
+                sum -= quotesList.get(i - period).c;//特别特别注意，这个算的是（N-1）日的，因为把今天的减去了。
+            ma = sum / period;
+            for (int j = i + 1 - period; j <= i; j++) {
+                md += Math.pow(quotesList.get(j).c - ma, 2);
+            }
+            md = Math.sqrt(md / period);
+
+            mb = ma;
+            up = mb + 2 * md;
+            dn = mb - 2 * md;
+
+            quotes.mb = mb;
+            quotes.up = up;
+            quotes.dn = dn;
+        }
+    }
+
+    public static void calculateBOLL(List<Quotes> quotesList) {
+        calculateBOLL(quotesList, 26, 2);
     }
 }
