@@ -43,3 +43,18 @@
 
 ![https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E5%85%AD%E9%98%B6%E6%AE%B5_%E7%BC%A9%E6%94%BE-%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96-%E6%B3%A8%E9%87%8A.gif?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E5%85%AD%E9%98%B6%E6%AE%B5_%E7%BC%A9%E6%94%BE-%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96-%E6%B3%A8%E9%87%8A.gif?raw=true)
 
+
+#### CanldeView.view
+
+> 股票、外汇等交易类的蜡烛图。版本不稳定，正在完善中，相关代码在'feature_candleview'分支
+
+* 第一阶段，代码的大量重构，抽出父类，减少子类代码量。代码优化，减少for循环层次。
+* 第二阶段，完成MA、BOLL相关算法。
+* 第三阶段，完成蜡烛图。
+
+![https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E5%85%AD%E9%98%B6%E6%AE%B5_%E7%BC%A9%E6%94%BE-%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96-%E6%B3%A8%E9%87%8A.gif?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E5%85%AD%E9%98%B6%E6%AE%B5_%E7%BC%A9%E6%94%BE-%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96-%E6%B3%A8%E9%87%8A.gif?raw=true)
+
+
+* 第四阶段，MA指标图、BOLL指标图、蜡烛图长按处理
+
+![https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E5%85%AD%E9%98%B6%E6%AE%B5_%E7%BC%A9%E6%94%BE-%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96-%E6%B3%A8%E9%87%8A.gif?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E5%85%AD%E9%98%B6%E6%AE%B5_%E7%BC%A9%E6%94%BE-%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96-%E6%B3%A8%E9%87%8A.gif?raw=true)
