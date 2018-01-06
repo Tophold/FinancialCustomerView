@@ -12,11 +12,11 @@
 * 知其然，知其所以然。
 
 ## 效果图与demo
-* 效果图：[https://github.com/scsfwgy/FinancialCustomerView/blob/master/%E8%B5%84%E6%96%99%E4%B8%8E%E6%96%87%E6%A1%A3/%E6%95%88%E6%9E%9C%E5%9B%BE%E5%92%8C%E8%BF%9B%E5%BA%A6.md](https://github.com/scsfwgy/FinancialCustomerView/blob/master/%E8%B5%84%E6%96%99%E4%B8%8E%E6%96%87%E6%A1%A3/%E6%95%88%E6%9E%9C%E5%9B%BE%E5%92%8C%E8%BF%9B%E5%BA%A6.md)
-* demo:[https://github.com/scsfwgy/FinancialCustomerView/tree/master/apk](https://github.com/scsfwgy/FinancialCustomerView/tree/master/apk)
+* 效果图：[效果图](https://github.com/scsfwgy/FinancialCustomerView/blob/master/%E8%B5%84%E6%96%99%E4%B8%8E%E6%96%87%E6%A1%A3/%E6%95%88%E6%9E%9C%E5%9B%BE%E5%92%8C%E8%BF%9B%E5%BA%A6.md)
+* demo:[demo](https://github.com/scsfwgy/FinancialCustomerView/tree/master/apk)
 
 ## 资料与博客
-* 资料：[https://github.com/scsfwgy/FinancialCustomerView/tree/master/%E8%B5%84%E6%96%99%E4%B8%8E%E6%96%87%E6%A1%A3](https://github.com/scsfwgy/FinancialCustomerView/tree/master/%E8%B5%84%E6%96%99%E4%B8%8E%E6%96%87%E6%A1%A3)
+* 资料和博客：[资料和博客](https://github.com/scsfwgy/FinancialCustomerView/tree/master/%E8%B5%84%E6%96%99%E4%B8%8E%E6%96%87%E6%A1%A3)
 
 ## 进度
 * 基金收益图开发完毕，在master分支。
