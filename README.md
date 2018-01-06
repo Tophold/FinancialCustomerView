@@ -1,75 +1,34 @@
-## 金融类自定义view
+# 金融类自定义view
 
-#### FundView.view
+## 介绍
+> 本项目会对金融交易软件中存在的各种View进行模仿绘制，提供详细的实现思路，收集整理相关算法、文档以及专业资料。
 
-> 仿蚂蚁金服基金收益趋势图
+## 存在的意义
+> 可能有同学会说，有很成熟的第三方图形图啊，干嘛还去自己实现？
 
-* 贡献代码
+* 知道如何编写绘制，更方便的扩展第三库图形库。
+* 了解实现原理，如果第三方实现不了，可以从容的自己撸一个。
+* 金融交易中各种算法、各种指标很多，但是网上相关资料很少。希望可以给金融相关软件从业者提供一点点帮助~
+* 知其然，知其所以然。
 
-    新建分支
+## 效果图与demo
+* 效果图：[效果图](https://github.com/scsfwgy/FinancialCustomerView/blob/master/%E8%B5%84%E6%96%99%E4%B8%8E%E6%96%87%E6%A1%A3/%E6%95%88%E6%9E%9C%E5%9B%BE%E5%92%8C%E8%BF%9B%E5%BA%A6.md)
+* demo:[demo](https://github.com/scsfwgy/FinancialCustomerView/tree/master/apk)
 
-* v1.0 完成x轴日期提示文字、y轴收益提示文字、x轴虚线、折线图
+## 资料与博客
+* 资料和博客：[资料和博客](https://github.com/scsfwgy/FinancialCustomerView/tree/master/%E8%B5%84%E6%96%99%E4%B8%8E%E6%96%87%E6%A1%A3)
 
-![https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/v1.0_img1.png?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/v1.0_img1.png?raw=true)
+## 进度
+* 基金收益图开发完毕，在master分支。
+* 分时图开发完毕，在master分支。
+* 蜡烛图（带MA、BOLL指标）正在开发，在feature_candleview分支。
+* 代码重构正在处理，在feature_candleview分支。
+* 副图部分，暂停开发，当主图（分时图、蜡烛图、主图指标）开发完毕再进行副图部分，在feature_minor分支。
 
-* v1.1 完成长按显示距离按下焦点最近的日期以及对应收益点十字、默认上方提示收益、按下上方显示对应点的时间和累计收益、延迟消失十字效果（仿蚂蚁金融）
+## 贡献代码
+* 直接建立新的分支，PR即可。
 
-![https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/v1.1_img_nopress.png?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/v1.1_img_nopress.png?raw=true)
-
-![https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/v1.1_img_press.png?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/v1.1_img_press.png?raw=true)
-
-#### TimeSharingView.view
-
-> 股票、外汇等交易类的分时图。版本已稳定。
-
-* 贡献代码
-
-    提交到[timesharing]分支
-
-* 第一阶段，参数准备，外边框、内虚线、折线图等的绘制
-
-![https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/v1.2_%E5%88%86%E6%97%B6%E5%9B%BE_%E6%8A%98%E7%BA%BF%E5%9B%BE%E9%9B%8F%E5%BD%A2.png?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/v1.2_%E5%88%86%E6%97%B6%E5%9B%BE_%E6%8A%98%E7%BA%BF%E5%9B%BE%E9%9B%8F%E5%BD%A2.png?raw=true)
-
-* 第二阶段，x、y文字、实时横线和实时数据、下方透明阴影
-
-![https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/timesharing/img/v1.2_%E5%88%86%E6%97%B6%E5%9B%BE_%E6%8A%98%E7%BA%BF%E5%9B%BE%E9%9B%8F%E5%BD%A2_%E5%AE%8C%E5%96%84.png](https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/timesharing/img/v1.2_%E5%88%86%E6%97%B6%E5%9B%BE_%E6%8A%98%E7%BA%BF%E5%9B%BE%E9%9B%8F%E5%BD%A2_%E5%AE%8C%E5%96%84.png)
-
-* 第三阶段，实时数据更新分时图
-
-![https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5_%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E6%98%BE%E7%A4%BA.gif](https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5_%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E6%98%BE%E7%A4%BA.gif)
-
-* 第四阶段，长按十字线，左右移动分时图
-
-![https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E5%8F%AF%E4%BB%A5%E9%95%BF%E6%8C%89_%E5%8F%AF%E4%BB%A5%E5%B7%A6%E5%8F%B3%E6%8B%96%E5%8A%A8.gif?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E5%8F%AF%E4%BB%A5%E9%95%BF%E6%8C%89_%E5%8F%AF%E4%BB%A5%E5%B7%A6%E5%8F%B3%E6%8B%96%E5%8A%A8.gif?raw=true)
-
-* 第五阶段，长按实时显示详细数据、加载更多处理、实时横线优化、滑动优化
-
-![https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/dev/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E4%BA%94%E9%98%B6%E6%AE%B5_%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9A.gif](https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/dev/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E4%BA%94%E9%98%B6%E6%AE%B5_%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9A.gif)
-
-* 第六阶段，缩放、代码整理、注释
-
-![https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E5%85%AD%E9%98%B6%E6%AE%B5_%E7%BC%A9%E6%94%BE-%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96-%E6%B3%A8%E9%87%8A.gif?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/timesharing/img/%E5%88%86%E6%97%B6%E5%9B%BE_%E7%AC%AC%E5%85%AD%E9%98%B6%E6%AE%B5_%E7%BC%A9%E6%94%BE-%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96-%E6%B3%A8%E9%87%8A.gif?raw=true)
-
-
-#### CanldeView.view
-
-> 股票、外汇等交易类的蜡烛图。版本不稳定，正在完善中，相关代码在'feature_candleview'分支
-
-* 贡献代码
-
-    提交到[feature_candleview]分支
-
-* 第一阶段，代码的大量重构，抽出父类，减少子类代码量。代码优化，减少for循环层次。
-* 第二阶段，完成MA、BOLL相关算法。
-* 第三阶段，完成蜡烛图。
-
-![https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5_%E8%9C%A1%E7%83%9B%E5%9B%BE.png](https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5_%E8%9C%A1%E7%83%9B%E5%9B%BE.png)
-
-
-* 第四阶段，MA指标图、BOLL指标图、蜡烛图长按处理
-
-![https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5_ma_nopress.png](https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5_ma_nopress.png)
-
-![https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5_ma_press.png](https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5_ma_press.png)
-
-![https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5_gif.gif](https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5_gif.gif)
+## 知名第三方图形库
+* MPAndroidChart：[https://github.com/PhilJay/MPAndroidChart](https://github.com/PhilJay/MPAndroidChart)
+* AndroidCharts：[https://github.com/HackPlan/AndroidCharts](https://github.com/HackPlan/AndroidCharts)
+* Android-Charts：[https://github.com/limccn/Android-Charts](https://github.com/limccn/Android-Charts)
