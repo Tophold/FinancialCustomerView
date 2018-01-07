@@ -8,7 +8,7 @@
     android:background="#000"
 
     >
-    <wgyscsf.financialcustomerview.fund.FundView
+    <wgyscsf.financialcustomerview.financialview.fund.FundView
         android:id="@+id/af_fv_fundview"
         android:layout_width="match_parent"
         android:layout_height="300dp"
