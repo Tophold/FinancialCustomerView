@@ -550,6 +550,10 @@ public class KView extends BaseFinancialView {
     }
 
     public void setViewType(ViewType viewType) {
+        if(viewType==mViewType)return;
         mViewType = viewType;
+
+        //重绘
+        invalidate();
     }
 }

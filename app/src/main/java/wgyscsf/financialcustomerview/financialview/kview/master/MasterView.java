@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.financialview.kview.timesharing;
+package wgyscsf.financialcustomerview.financialview.kview.master;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -8,7 +8,6 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
@@ -47,7 +46,7 @@ import wgyscsf.financialcustomerview.utils.TimeUtils;
  * <p>
  * ============================================================
  **/
-public class TimeSharingView extends KView {
+public class MasterView extends KView {
 
     /**
      * 各种画笔及其参数
@@ -170,15 +169,15 @@ public class TimeSharingView extends KView {
     int mBollDnColor;
 
 
-    public TimeSharingView(Context context) {
+    public MasterView(Context context) {
         this(context, null);
     }
 
-    public TimeSharingView(Context context, @Nullable AttributeSet attrs) {
+    public MasterView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public TimeSharingView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public MasterView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initAttrs();
     }
@@ -1150,6 +1149,8 @@ public class TimeSharingView extends KView {
         FinancialAlgorithm.calculateBOLL(mQuotesList);
         invalidate();
     }
+
+
 
     //缩放手势监听
     ScaleGestureDetector.OnScaleGestureListener mOnScaleGestureListener =

@@ -5,7 +5,7 @@ import android.view.View;
 
 import wgyscsf.financialcustomerview.financialview.fund.FundActivity;
 import wgyscsf.financialcustomerview.financialview.kview.minor.MinorActivity;
-import wgyscsf.financialcustomerview.financialview.kview.timesharing.TimeSharingActivity;
+import wgyscsf.financialcustomerview.financialview.kview.master.MasterViewActivity;
 
 public class MainActivity extends BaseActivity {
 
@@ -20,8 +20,8 @@ public class MainActivity extends BaseActivity {
 
     }
 
-    public void goTimeShring(View view) {
-        go(TimeSharingActivity.class);
+    public void goMasterView(View view) {
+        go(MasterViewActivity.class);
     }
 
     public void goMinor(View view) {

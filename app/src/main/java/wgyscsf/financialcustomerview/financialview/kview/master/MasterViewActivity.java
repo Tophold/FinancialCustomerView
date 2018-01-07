@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.financialview.kview.timesharing;
+package wgyscsf.financialcustomerview.financialview.kview.master;
 
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
@@ -35,8 +35,8 @@ import wgyscsf.financialcustomerview.utils.TimeUtils;
  * timesharing1：模拟的是api请求的数据集合，注意：一次加载完毕，模拟的是第一次加载的数据
  * timesharing2：模拟的是实时**推送**的数据，注意：会分段取，一次取一个。
  */
-public class TimeSharingActivity extends KViewBaseActivity {
-    TimeSharingView mTimeSharingView;
+public class MasterViewActivity extends KViewBaseActivity {
+    MasterView mMasterView;
     private LinearLayout ats_ll_container;
     private TextView mAtsTvH;
     private TextView mAtsTvO;
@@ -51,11 +51,11 @@ public class TimeSharingActivity extends KViewBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_time_sharing);
+        setContentView(R.layout.activity_master_view);
         bindView();
         loadData();
         pushData();
-        mTimeSharingView.setOnClickListener(new View.OnClickListener() {
+        mMasterView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -84,7 +84,7 @@ public class TimeSharingActivity extends KViewBaseActivity {
 
     private void bindView() {
         ats_ll_container = (LinearLayout) findViewById(R.id.ats_ll_container);
-        mTimeSharingView = (TimeSharingView) findViewById(R.id.tsv);
+        mMasterView = (MasterView) findViewById(R.id.tsv);
         mAtsTvH = (TextView) findViewById(R.id.ats_tv_h);
         mAtsTvO = (TextView) findViewById(R.id.ats_tv_o);
         mAtsTvL = (TextView) findViewById(R.id.ats_tv_l);
@@ -128,7 +128,7 @@ public class TimeSharingActivity extends KViewBaseActivity {
                     @Override
                     public void call(List<Quotes> o) {
                         if (o != null) {
-                            mTimeSharingView.setTimeSharingData(o, new KView.TimeSharingListener() {
+                            mMasterView.setTimeSharingData(o, new KView.TimeSharingListener() {
 
                                 @Override
                                 public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
@@ -251,7 +251,7 @@ public class TimeSharingActivity extends KViewBaseActivity {
                 .subscribe(new Action1<Quotes>() {
                     @Override
                     public void call(Quotes o) {
-                       mTimeSharingView.pushingTimeSharingData(o);
+                       mMasterView.pushingTimeSharingData(o);
                     }
                 });
 
@@ -276,7 +276,7 @@ public class TimeSharingActivity extends KViewBaseActivity {
                 int loadSize = StringUtils.getRadomNum(min, max);
                 if (index == loadSize) {
                     //没有更多数据了
-                    mTimeSharingView.loadMoreNoData();
+                    mMasterView.loadMoreNoData();
                 }
                 if ((index + loadSize) > mLoadMoreList.size()) {
                     loadSize = mLoadMoreList.size();
@@ -290,17 +290,25 @@ public class TimeSharingActivity extends KViewBaseActivity {
                 .subscribe(new Action1<List<Quotes>>() {
                     @Override
                     public void call(List<Quotes> integer) {
-                        mTimeSharingView.loadMoreTimeSharingData(integer);
+                        mMasterView.loadMoreTimeSharingData(integer);
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
                         Log.e(TAG, "call: 加载更多出现了异常");
-                        mTimeSharingView.loadMoreError();
+                        mMasterView.loadMoreError();
                     }
                 });
 
         //及时回收，防止泄露
         addGcManagerSubscription(subscribe);
+    }
+
+    public void showTimeSharing(View view) {
+        mMasterView.setViewType(KView.ViewType.TIMESHARING);
+    }
+
+    public void showCandle(View view) {
+        mMasterView.setViewType(KView.ViewType.CANDLE);
     }
 }
