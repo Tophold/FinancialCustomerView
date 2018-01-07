@@ -1163,6 +1163,9 @@ public class MasterView extends KView {
 
         //boll
         FinancialAlgorithm.calculateBOLL(mQuotesList);
+
+
+        //重绘
         invalidate();
     }
 
