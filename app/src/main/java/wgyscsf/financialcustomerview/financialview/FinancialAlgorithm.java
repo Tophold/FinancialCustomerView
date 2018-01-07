@@ -379,7 +379,7 @@ public class FinancialAlgorithm {
         for (int i = 0; i < quotesList.size(); i++) {
             Quotes quotes = quotesList.get(i);
             sum += quotes.c;
-            //这个范围不计算
+            //这个范围不计算，在View上的反应就是不显示这个范围的boll线
             if (i < period - 1)
                 continue;
 

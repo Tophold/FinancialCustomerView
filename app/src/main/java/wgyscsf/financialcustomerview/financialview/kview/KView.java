@@ -525,8 +525,8 @@ public class KView extends BaseFinancialView {
         }
 
 
-        //刷新界面
-        invalidate();
+        //刷新界面,子类继续实现逻辑，然后子类去刷新页面
+        //invalidate();
     }
 
     public boolean isShowInnerX() {

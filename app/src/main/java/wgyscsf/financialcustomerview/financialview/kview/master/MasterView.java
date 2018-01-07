@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
+import android.text.format.Time;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -923,8 +924,8 @@ public class MasterView extends KView {
     private void drawLongPress(Canvas canvas, int finalIndex, Quotes finalFundMode) {
         if (!mDrawLongPress) return;
 
-//        Log.e(TAG, "drawLongPress: " + mPaddingLeft + "，"
-//                + finalFundMode.floatY + "，" + (mWidth - mPaddingRight) + "," + finalFundMode.floatY);
+        //        Log.e(TAG, "drawLongPress: " + mPaddingLeft + "，"
+        //                + finalFundMode.floatY + "，" + (mWidth - mPaddingRight) + "," + finalFundMode.floatY);
         //x轴线
         canvas.drawLine(mPaddingLeft, finalFundMode.floatY, mWidth - mPaddingRight,
                 finalFundMode.floatY, mLongPressPaint);
@@ -1000,8 +1001,15 @@ public class MasterView extends KView {
             } else {
                 //这里隐藏小圆点并且重新计算Y值。这里这样处理，对应现象的问题：横线划出界面。
                 Quotes endQuotes = mQuotesList.get(mQuotesList.size() - 1);
-                quotes.floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
-                        mClosePerY * (endQuotes.c - mMinColseQuotes.c));
+                //分时图
+                if (mViewType == ViewType.TIMESHARING) {
+                    quotes.floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
+                            mClosePerY * (endQuotes.c - mMinColseQuotes.c));
+                } else {
+                    //蜡烛图
+                    quotes.floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
+                            mPerY * (endQuotes.c - mMinLowQuotes.l));
+                }
             }
 
             //实时数据展示的前提是在指定范围内。不处理对应的异常：实时横线显示在底部横线的下面...
@@ -1075,9 +1083,17 @@ public class MasterView extends KView {
 
         double yDis = (mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding -
                 mInnerBottomBlankPadding);
+        //double yDis = mHeight;
         double perY = dataDis / yDis;
-        minBorderData = mMinColseQuotes.c - mInnerBottomBlankPadding * perY;
-        maxBorderData = mMinColseQuotes.c + mInnerTopBlankPadding * perY;
+
+        if (mViewType == ViewType.TIMESHARING) {
+            minBorderData = mMinColseQuotes.c - mInnerBottomBlankPadding * perY;
+            maxBorderData = mMaxCloseQuotes.c + mInnerTopBlankPadding * perY;
+        } else {
+            minBorderData = mMinLowQuotes.l - mInnerBottomBlankPadding * perY;
+            maxBorderData = mMaxHighQuotes.h + mInnerTopBlankPadding * perY;
+        }
+
 
         halfTxtHight = getFontHeight(mXYTxtSize, mXYTxtPaint) / 4;//应该/2的，但是不准确，原因不明
         //halfTxtHight = 0;
@@ -1151,15 +1167,14 @@ public class MasterView extends KView {
     }
 
 
-
     //缩放手势监听
     ScaleGestureDetector.OnScaleGestureListener mOnScaleGestureListener =
             new ScaleGestureDetector.SimpleOnScaleGestureListener() {
                 @Override
                 public boolean onScale(ScaleGestureDetector detector) {
-//                    Log.e(TAG, "onScale: mFingerPressedCount:" + mFingerPressedCount +
-//                            ",mShownMaxCount == mQuotesList.size():" + (mShownMaxCount == mQuotesList.size()) +
-//                            ",mShownMaxCount:" + mShownMaxCount);
+                    //                    Log.e(TAG, "onScale: mFingerPressedCount:" + mFingerPressedCount +
+                    //                            ",mShownMaxCount == mQuotesList.size():" + (mShownMaxCount == mQuotesList.size()) +
+                    //                            ",mShownMaxCount:" + mShownMaxCount);
                     //没有缩放
                     if (detector.getScaleFactor() == 1) return true;
 
@@ -1206,8 +1221,8 @@ public class MasterView extends KView {
 
                     mEndIndex = mBeginIndex + mShownMaxCount;
 
-//                    Log.e(TAG, "onScaleBegin:mBeginIndex: " + mBeginIndex + ",mEndIndex:"
-//                            + mEndIndex + ",changeNum:" + changeNum + ",mShownMaxCount:" + mShownMaxCount);
+                    //                    Log.e(TAG, "onScaleBegin:mBeginIndex: " + mBeginIndex + ",mEndIndex:"
+                    //                            + mEndIndex + ",changeNum:" + changeNum + ",mShownMaxCount:" + mShownMaxCount);
 
                     //只要找好起始点和结束点就可以交给处理重绘的方法就好啦~
                     seekAndCalculateCellData();
@@ -1216,7 +1231,7 @@ public class MasterView extends KView {
 
                 @Override
                 public boolean onScaleBegin(ScaleGestureDetector detector) {
-                   // Log.e(TAG, "onScaleBegin: " + detector.getFocusX());
+                    // Log.e(TAG, "onScaleBegin: " + detector.getFocusX());
                     //指头数量
                     if (mFingerPressedCount != 2) return true;
                     return true;
