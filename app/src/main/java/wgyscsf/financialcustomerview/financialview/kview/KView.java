@@ -23,7 +23,7 @@ import wgyscsf.financialcustomerview.R;
  * 描 述 ：
  * ============================================================
  **/
-public class KView extends BaseFinancialView {
+public abstract class KView extends BaseFinancialView {
 
     /**
      * 默认参数及常量
@@ -75,7 +75,7 @@ public class KView extends BaseFinancialView {
     protected boolean mCanLoadMore = true;
 
     //view类型：是分时图还是蜡烛图
-    protected ViewType mViewType=ViewType.TIMESHARING;
+    protected ViewType mViewType = ViewType.TIMESHARING;
 
     /**
      * 绘制分时图：
@@ -93,23 +93,6 @@ public class KView extends BaseFinancialView {
     protected Quotes mBeginQuotes;
     protected Quotes mEndQuotes;
 
-
-    /**
-     * 绘制蜡烛图：y轴，可以根据可视范围内的最大high值（A）和最小low值（B）以及有效y轴高度（C）计算出
-     * 单位高度mPerY(D),D=C/(A-B)。
-     * x轴暂时直接先取mPerX作为宽度，不留间隙。
-     * 那么，蜡烛图就可以根据当前位置的high、low两个值绘制最大最小值；
-     * 然后根据open和close绘制蜡烛图的上起点和下结束点。
-     * 至于颜色，当当前值为的Quote的close大于open,为红色；反之为绿色。
-     *
-     */
-    //根据可见范围内最大的high价格和最小的low价格计算的y单位长度
-    protected float mPerY;
-    //Y轴：根据可见范围内最大的high价格和最小的low价格分别对应的model
-    protected Quotes mMaxHighQuotes;
-    protected Quotes mMinLowQuotes;
-    //蜡烛图间隙，大小以单个蜡烛图的宽度的比例算。可修改。
-    protected float mCandleDiverWidthRatio=0.1f;
 
     /**
      * 左右拖动思路：这里开始处理分时图的左右移动问题，思路：当手指移动时，会有移动距离（A），我们又有x轴的单位距离(B)，
@@ -347,7 +330,7 @@ public class KView extends BaseFinancialView {
         PULL_LEFT_STOP,//滑动到最左边
     }
 
-    public enum ViewType{
+    public enum ViewType {
         TIMESHARING,
         CANDLE
     }
@@ -468,66 +451,10 @@ public class KView extends BaseFinancialView {
 
     /**
      * 寻找边界和计算单元数据大小。寻找:x轴开始位置数据和结束位置的model、y轴的最大数据和最小数据对应的model；
-     * 计算x/y轴数据单元大小
+     * 计算x/y轴数据单元大小。这个交给子类去实现，一般情况下寻找边界需要遍历，在父类中遍历没有意义，
+     * 因为不知道子类还有什么遍历需求。因此改为抽象方法，子类实现。子类必须完成寻找边界的任务。
      */
-    protected void seekAndCalculateCellData() {
-        //找到close最大值和最小值
-        double tempMinClosePrice = Integer.MAX_VALUE;
-        double tempMaxClosePrice = Integer.MIN_VALUE;
-
-        //找到可见范围之内的最大的high价格和最小的low价格
-        double tempMaxHighPrice=Integer.MIN_VALUE;
-        double tempMinLowPrice=Integer.MAX_VALUE;
-
-        //最终确定的最大high值和最小low值
-        mMaxHighQuotes=mQuotesList.get(mBeginIndex);
-        mMinLowQuotes=mQuotesList.get(mBeginIndex);
-
-        for (int i = mBeginIndex; i < mEndIndex; i++) {
-            Quotes quotes = mQuotesList.get(i);
-            if (i == mBeginIndex) {
-                mBeginQuotes = quotes;
-            }
-            if (i == mEndIndex - 1) {
-                mEndQuotes = quotes;
-            }
-            if (quotes.c <= tempMinClosePrice) {
-                tempMinClosePrice = quotes.c;
-                mMinColseQuotes = quotes;
-            }
-            if (quotes.c >= tempMaxClosePrice) {
-                tempMaxClosePrice = quotes.c;
-                mMaxCloseQuotes = quotes;
-            }
-
-            //蜡烛图
-            if (mViewType==ViewType.CANDLE){
-                if(quotes.h>tempMaxHighPrice){
-                    tempMaxHighPrice=quotes.h;
-                    mMaxHighQuotes=quotes;
-                }
-
-                if(quotes.l<tempMinLowPrice){
-                    tempMinLowPrice=quotes.l;
-                    mMinLowQuotes=quotes;
-                }
-            }
-        }
-        mPerX = (mWidth - mPaddingLeft - mPaddingRight - mInnerRightBlankPadding)
-                / (mShownMaxCount);
-        //不要忘了减去内部的上下Padding
-        mClosePerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
-                - mInnerBottomBlankPadding) / (mMaxCloseQuotes.c - mMinColseQuotes.c));
-
-        if(mViewType==ViewType.CANDLE){
-            mPerY=(float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
-                    - mInnerBottomBlankPadding) / (mMaxHighQuotes.h- mMinLowQuotes.l));
-        }
-
-
-        //刷新界面,子类继续实现逻辑，然后子类去刷新页面
-        //invalidate();
-    }
+    protected abstract void seekAndCalculateCellData();
 
     public boolean isShowInnerX() {
         return mIsShowInnerX;
@@ -550,7 +477,7 @@ public class KView extends BaseFinancialView {
     }
 
     public void setViewType(ViewType viewType) {
-        if(viewType==mViewType)return;
+        if (viewType == mViewType) return;
         mViewType = viewType;
 
         //重绘

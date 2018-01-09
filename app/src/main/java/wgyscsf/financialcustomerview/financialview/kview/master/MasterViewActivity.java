@@ -36,6 +36,9 @@ import wgyscsf.financialcustomerview.utils.TimeUtils;
  * timesharing2：模拟的是实时**推送**的数据，注意：会分段取，一次取一个。
  */
 public class MasterViewActivity extends KViewBaseActivity {
+    public static final String KEY_INTENT = "KEY_INTENT";
+
+
     MasterView mMasterView;
     private LinearLayout ats_ll_container;
     private TextView mAtsTvH;
@@ -47,6 +50,14 @@ public class MasterViewActivity extends KViewBaseActivity {
 
     List<Quotes> mLoadMoreList;
     int index = 0;//加载更多，加载到哪儿了。因为真实应用中，也存在加载完毕的情况。这里对应加载到list的最后
+
+    boolean isTimeShring;
+
+    @Override
+    protected void getBundleExtras(Bundle extras) {
+        super.getBundleExtras(extras);
+        isTimeShring = extras.getBoolean(KEY_INTENT, false);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +102,12 @@ public class MasterViewActivity extends KViewBaseActivity {
         mAtsTvC = (TextView) findViewById(R.id.ats_tv_c);
         mAtsTvP = (TextView) findViewById(R.id.ats_tv_p);
         ats_tv_time = (TextView) findViewById(R.id.ats_tv_time);
+
+        if (isTimeShring) {
+            mMasterView.setViewType(KView.ViewType.TIMESHARING);
+        } else {
+            mMasterView.setViewType(KView.ViewType.CANDLE);
+        }
     }
 
 
@@ -251,7 +268,7 @@ public class MasterViewActivity extends KViewBaseActivity {
                 .subscribe(new Action1<Quotes>() {
                     @Override
                     public void call(Quotes o) {
-                       mMasterView.pushingTimeSharingData(o);
+                        mMasterView.pushingTimeSharingData(o);
                     }
                 });
 
@@ -304,11 +321,4 @@ public class MasterViewActivity extends KViewBaseActivity {
         addGcManagerSubscription(subscribe);
     }
 
-    public void showTimeSharing(View view) {
-        mMasterView.setViewType(KView.ViewType.TIMESHARING);
-    }
-
-    public void showCandle(View view) {
-        mMasterView.setViewType(KView.ViewType.CANDLE);
-    }
 }

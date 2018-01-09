@@ -9,6 +9,7 @@ import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.text.format.Time;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
@@ -21,6 +22,7 @@ import wgyscsf.financialcustomerview.financialview.FinancialAlgorithm;
 import wgyscsf.financialcustomerview.financialview.kview.KView;
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.utils.FormatUtil;
+import wgyscsf.financialcustomerview.utils.StringUtils;
 import wgyscsf.financialcustomerview.utils.TimeUtils;
 
 /**
@@ -169,6 +171,26 @@ public class MasterView extends KView {
     Paint mBollDnPaint;
     int mBollDnColor;
 
+    /**
+     * 绘制蜡烛图：y轴，可以根据可视范围内的最大high值（A）和最小low值（B）以及有效y轴高度（C）计算出
+     * 单位高度mPerY(D),D=C/(A-B)。
+     * x轴暂时直接先取mPerX作为宽度，不留间隙。
+     * 那么，蜡烛图就可以根据当前位置的high、low两个值绘制最大最小值；
+     * 然后根据open和close绘制蜡烛图的上起点和下结束点。
+     * 至于颜色，当当前值为的Quote的close大于open,为红色；反之为绿色。
+     */
+    //根据可见范围内最大的high价格和最小的low价格计算的y单位长度
+    protected float mPerY;
+    /**
+     * 蜡烛图：整个视图的最大值和最小值（y轴边界值），不管视图中是分时图、蜡烛图（以及蜡烛图中的指标）必须找到上下边界，
+     * 然后根据该边界值会绘制，不然会出现绘制超过边界的情况。特别明显的一种情况：蜡烛图模式下，存在不存在BOLL线，
+     * 蜡烛的高度显示是不一样的，因为一般情况下BOLL的上边界会比蜡烛图大。
+     */
+    protected double mCandleMinY;
+    protected double mCandleMaxY;
+    //蜡烛图间隙，大小以单个蜡烛图的宽度的比例算。可修改。
+    protected float mCandleDiverWidthRatio = 0.1f;
+
 
     public MasterView(Context context) {
         this(context, null);
@@ -278,8 +300,8 @@ public class MasterView extends KView {
             } else if (mMasterType == MasterType.MA_BOLL) {
                 mMasterType = MasterType.NONE;
             }
-            //刷新界面
-            invalidate();
+            //刷新界面,重绘前需要么重新计算y的边界
+            seekAndCalculateCellData();
         }
     }
 
@@ -361,7 +383,7 @@ public class MasterView extends KView {
         //手势
         mScaleGestureDetector = new ScaleGestureDetector(mContext, mOnScaleGestureListener);
 
-        //是分时图还是蜡烛图
+        //是分时图还是蜡烛图,def
         setViewType(ViewType.CANDLE);
     }
 
@@ -571,7 +593,7 @@ public class MasterView extends KView {
                         mClosePerY * (quotes.c - mMinColseQuotes.c));
             } else if (mViewType == ViewType.CANDLE) {
                 floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
-                        mPerY * (quotes.c - mMinLowQuotes.l));
+                        mPerY * (quotes.c - mCandleMinY));
             }
 
 
@@ -791,22 +813,22 @@ public class MasterView extends KView {
         double v = 0;
         //ma
         if (maType == MasterDetailType.MA5) {
-            v = quotes.ma5 - mMinLowQuotes.l;
+            v = quotes.ma5 - mCandleMinY;
         } else if (maType == MasterDetailType.MA10) {
-            v = quotes.ma10 - mMinLowQuotes.l;
+            v = quotes.ma10 - mCandleMinY;
         } else if (maType == MasterDetailType.MA20) {
-            v = quotes.ma20 - mMinLowQuotes.l;
+            v = quotes.ma20 - mCandleMinY;
         }
         //boll
         else if (maType == MasterDetailType.BOLLMB) {
-            v = quotes.mb - mMinLowQuotes.l;
+            v = quotes.mb - mCandleMinY;
         } else if (maType == MasterDetailType.BOLLUP) {
-            v = quotes.up - mMinLowQuotes.l;
+            v = quotes.up - mCandleMinY;
         } else if (maType == MasterDetailType.BOLLDN) {
-            v = quotes.dn - mMinLowQuotes.l;
+            v = quotes.dn - mCandleMinY;
         }
         //异常，当不存在ma值时的处理
-        if (v + mMinLowQuotes.l == 0) return -1;
+        if (v + mCandleMinY == 0) return -1;
 
         double h = v * mPerY;
         float y = (float) (mHeight - h - mPaddingBottom - mInnerBottomBlankPadding);
@@ -885,21 +907,22 @@ public class MasterView extends KView {
         float leftLineX;
         float topLineY;
         float rightLineX;
-        float bottomLineY;//定位蜡烛矩形的四个点
+        float bottomLineY;
+        //定位蜡烛矩形的四个点
         topRectY = (float) (mPaddingTop + mInnerTopBlankPadding +
-                mPerY * (mMaxHighQuotes.h - quotes.o));
+                mPerY * (mCandleMaxY - quotes.o));
         bottomRectY = (float) (mPaddingTop + mInnerTopBlankPadding +
-                mPerY * (mMaxHighQuotes.h - quotes.c));
+                mPerY * (mCandleMaxY - quotes.c));
         leftRectX = -mPerX / 2 + quotes.floatX + diverWidth / 2;
         rightRectX = mPerX / 2 + quotes.floatX - diverWidth / 2;
 
         //定位单个蜡烛中间线的四个点
         leftLineX = quotes.floatX;
         topLineY = (float) (mPaddingTop + mInnerTopBlankPadding +
-                mPerY * (mMaxHighQuotes.h - quotes.h));
+                mPerY * (mCandleMaxY - quotes.h));
         rightLineX = quotes.floatX;
         bottomLineY = (float) (mPaddingTop + mInnerTopBlankPadding +
-                mPerY * (mMaxHighQuotes.h - quotes.l));
+                mPerY * (mCandleMaxY - quotes.l));
 
         RectF rectF = new RectF();
         //Log.e(TAG, "drawCandleView: leftX:"+leftRectX+",topY:"+topRectY+",rightX:"+rightRectX+",bottomY:"+bottomRectY );
@@ -1008,7 +1031,7 @@ public class MasterView extends KView {
                 } else {
                     //蜡烛图
                     quotes.floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
-                            mPerY * (endQuotes.c - mMinLowQuotes.l));
+                            mPerY * (endQuotes.c - mCandleMinY));
                 }
             }
 
@@ -1078,7 +1101,7 @@ public class MasterView extends KView {
         if (mViewType == ViewType.TIMESHARING) {
             dataDis = mMaxCloseQuotes.c - mMinColseQuotes.c;
         } else if (mViewType == ViewType.CANDLE) {
-            dataDis = mMaxHighQuotes.h - mMinLowQuotes.l;
+            dataDis = mCandleMaxY - mCandleMinY;
         }
 
         double yDis = (mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding -
@@ -1090,8 +1113,8 @@ public class MasterView extends KView {
             minBorderData = mMinColseQuotes.c - mInnerBottomBlankPadding * perY;
             maxBorderData = mMaxCloseQuotes.c + mInnerTopBlankPadding * perY;
         } else {
-            minBorderData = mMinLowQuotes.l - mInnerBottomBlankPadding * perY;
-            maxBorderData = mMaxHighQuotes.h + mInnerTopBlankPadding * perY;
+            minBorderData = mCandleMinY - mInnerBottomBlankPadding * perY;
+            maxBorderData = mCandleMaxY + mInnerTopBlankPadding * perY;
         }
 
 
@@ -1155,15 +1178,71 @@ public class MasterView extends KView {
 
     @Override
     protected void seekAndCalculateCellData() {
-        super.seekAndCalculateCellData();
-        //ma
-        FinancialAlgorithm.calculateMA(mQuotesList, 5);
-        FinancialAlgorithm.calculateMA(mQuotesList, 10);
-        FinancialAlgorithm.calculateMA(mQuotesList, 20);
+        if (mQuotesList.isEmpty()) return;
 
-        //boll
-        FinancialAlgorithm.calculateBOLL(mQuotesList);
+        //这里可以判断是否需要ma和boll指标，正是环境中一般不需要切换分时图和蜡烛图。这里先不进行判断，方便切换。
+        if (mViewType == ViewType.CANDLE) {
+            //ma
+            FinancialAlgorithm.calculateMA(mQuotesList, 5);
+            FinancialAlgorithm.calculateMA(mQuotesList, 10);
+            FinancialAlgorithm.calculateMA(mQuotesList, 20);
+            //boll
+            FinancialAlgorithm.calculateBOLL(mQuotesList);
 
+            //最终确定的最大high值和最小low值
+            mCandleMaxY = mQuotesList.get(mBeginIndex).h;
+            mCandleMinY = mQuotesList.get(mBeginIndex).l;
+        }
+
+
+        //找到close最大值和最小值
+        double tempMinClosePrice = Integer.MAX_VALUE;
+        double tempMaxClosePrice = Integer.MIN_VALUE;
+
+
+        for (int i = mBeginIndex; i < mEndIndex; i++) {
+            Quotes quotes = mQuotesList.get(i);
+            if (i == mBeginIndex) {
+                mBeginQuotes = quotes;
+            }
+            if (i == mEndIndex - 1) {
+                mEndQuotes = quotes;
+            }
+            if (quotes.c <= tempMinClosePrice) {
+                tempMinClosePrice = quotes.c;
+                mMinColseQuotes = quotes;
+            }
+            if (quotes.c >= tempMaxClosePrice) {
+                tempMaxClosePrice = quotes.c;
+                mMaxCloseQuotes = quotes;
+            }
+
+            //蜡烛图
+            if (mViewType == ViewType.CANDLE) {
+                double max = FinancialAlgorithm.getMasterMaxY(quotes,mMasterType);
+                if (max > mCandleMaxY) {
+                    mCandleMaxY = max;
+                    Log.e(TAG, "seekAndCalculateCellData:mCandleMaxY "+mCandleMaxY +",");
+                }
+                double min = FinancialAlgorithm.getMasterMinY(quotes,mMasterType);
+                if (min < mCandleMinY) {
+                    mCandleMinY = min;
+                    Log.e(TAG, "seekAndCalculateCellData:mCandleMinY "+mCandleMinY +",");
+                }
+            }
+        }
+
+        Log.e(TAG, "seekAndCalculateCellData: ---->>"+mCandleMaxY+","+mCandleMinY+"==>"+(mCandleMaxY-mCandleMinY) );
+        mPerX = (mWidth - mPaddingLeft - mPaddingRight - mInnerRightBlankPadding)
+                / (mShownMaxCount);
+        //不要忘了减去内部的上下Padding
+        mClosePerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
+                - mInnerBottomBlankPadding) / (mMaxCloseQuotes.c - mMinColseQuotes.c));
+
+        if (mViewType == ViewType.CANDLE) {
+            mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
+                    - mInnerBottomBlankPadding) / (mCandleMaxY - mCandleMinY));
+        }
 
         //重绘
         invalidate();

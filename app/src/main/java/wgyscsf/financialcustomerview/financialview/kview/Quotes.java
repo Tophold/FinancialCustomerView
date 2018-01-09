@@ -141,6 +141,10 @@ public class Quotes extends BaseModel {
         return max;
     }
 
+
+
+
+
     @Override
     public String toString() {
         return "Quotes{" +

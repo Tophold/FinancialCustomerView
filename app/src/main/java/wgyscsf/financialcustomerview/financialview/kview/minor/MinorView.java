@@ -10,6 +10,7 @@ import android.widget.Toast;
 import java.util.List;
 
 import wgyscsf.financialcustomerview.R;
+import wgyscsf.financialcustomerview.financialview.FinancialAlgorithm;
 import wgyscsf.financialcustomerview.financialview.kview.KView;
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 
@@ -148,6 +149,44 @@ public class MinorView extends KView {
 
         //执行寻找最大最小值
         proformMinMaxData();
+    }
+
+    @Override
+    protected void seekAndCalculateCellData() {
+
+        //找到close最大值和最小值
+        double tempMinClosePrice = Integer.MAX_VALUE;
+        double tempMaxClosePrice = Integer.MIN_VALUE;
+
+
+        for (int i = mBeginIndex; i < mEndIndex; i++) {
+            Quotes quotes = mQuotesList.get(i);
+            if (i == mBeginIndex) {
+                mBeginQuotes = quotes;
+            }
+            if (i == mEndIndex - 1) {
+                mEndQuotes = quotes;
+            }
+            if (quotes.c <= tempMinClosePrice) {
+                tempMinClosePrice = quotes.c;
+                mMinColseQuotes = quotes;
+            }
+            if (quotes.c >= tempMaxClosePrice) {
+                tempMaxClosePrice = quotes.c;
+                mMaxCloseQuotes = quotes;
+            }
+
+        }
+
+
+        mPerX = (mWidth - mPaddingLeft - mPaddingRight - mInnerRightBlankPadding)
+                / (mShownMaxCount);
+        //不要忘了减去内部的上下Padding
+        mClosePerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
+                - mInnerBottomBlankPadding) / (mMaxCloseQuotes.c - mMinColseQuotes.c));
+
+        //重绘
+        invalidate();
     }
 
     /**

@@ -1,10 +1,12 @@
 package wgyscsf.financialcustomerview.financialview;
 
+import android.support.annotation.IntDef;
 import android.util.Log;
 
 import java.util.List;
 
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
+import wgyscsf.financialcustomerview.financialview.kview.master.MasterView;
 
 /**
  * ============================================================
@@ -405,4 +407,98 @@ public class FinancialAlgorithm {
     public static void calculateBOLL(List<Quotes> quotesList) {
         calculateBOLL(quotesList, 26, 2);
     }
+
+    /**
+     * 找到单个报价中的最小值
+     *
+     * @param quotes
+     * @param masterType
+     * @return
+     */
+    public static double getMasterMinY(Quotes quotes, MasterView.MasterType masterType) {
+        double min = Integer.MAX_VALUE;
+        //ma
+        if (masterType == MasterView.MasterType.MA || masterType == MasterView.MasterType.MA_BOLL) {
+            if (quotes.ma5 != 0 && quotes.ma5 < min) {
+                min = quotes.ma5;
+            }
+            if (quotes.ma10 != 0 && quotes.ma10 < min) {
+                min = quotes.ma10;
+            }
+            if (quotes.ma20 != 0 && quotes.ma20 < min) {
+                min = quotes.ma20;
+            }
+        }
+        //boll
+        if (masterType == MasterView.MasterType.BOLL || masterType == MasterView.MasterType.MA_BOLL) {
+            //boll
+            if (quotes.mb != 0 && quotes.mb < min) {
+                min = quotes.mb;
+            }
+            if (quotes.up != 0 && quotes.up < min) {
+                min = quotes.up;
+            }
+            if (quotes.dn != 0 && quotes.dn < min) {
+                min = quotes.dn;
+            }
+        }
+        //quotes
+        if (quotes.l != 0 && quotes.l < min) {
+            min = quotes.l;
+        }
+        //没有找到
+        if (min == Integer.MAX_VALUE) {
+            min = 0;
+        }
+        return min;
+
+    }
+
+    /**
+     * 找到单个报价中的最大值
+     *
+     * @param quotes
+     * @param masterType
+     * @return
+     */
+    public static double getMasterMaxY(Quotes quotes, MasterView.MasterType masterType) {
+        double max = Integer.MIN_VALUE;
+        //ma
+        //只有在存在ma的情况下才计算
+        if (masterType == MasterView.MasterType.MA || masterType == MasterView.MasterType.MA_BOLL) {
+            if (quotes.ma5 != 0 && quotes.ma5 > max) {
+                max = quotes.ma5;
+            }
+            if (quotes.ma10 != 0 && quotes.ma10 > max) {
+                max = quotes.ma10;
+            }
+            if (quotes.ma20 != 0 && quotes.ma20 > max) {
+                max = quotes.ma20;
+            }
+        }
+
+        //boll
+        if (masterType == MasterView.MasterType.BOLL || masterType == MasterView.MasterType.MA_BOLL) {
+            if (quotes.mb != 0 && quotes.mb > max) {
+                max = quotes.mb;
+            }
+            if (quotes.up != 0 && quotes.up > max) {
+                max = quotes.up;
+            }
+            if (quotes.dn != 0 && quotes.dn > max) {
+                max = quotes.dn;
+            }
+        }
+        //quotes
+        if (quotes.h != 0 && quotes.h > max) {
+            max = quotes.h;
+        }
+        //没有找到
+        if (max == Integer.MIN_VALUE) {
+            max = 0;
+        }
+        return max;
+
+    }
+
 }
