@@ -3,8 +3,10 @@ package wgyscsf.financialcustomerview;
 import android.os.Bundle;
 import android.view.View;
 
-import wgyscsf.financialcustomerview.fund.FundActivity;
-import wgyscsf.financialcustomerview.timesharing.TimeSharingActivity;
+import wgyscsf.financialcustomerview.financialview.fund.FundActivity;
+import wgyscsf.financialcustomerview.financialview.kview.master.MasterView;
+import wgyscsf.financialcustomerview.financialview.kview.minor.MinorActivity;
+import wgyscsf.financialcustomerview.financialview.kview.master.MasterViewActivity;
 
 public class MainActivity extends BaseActivity {
 
@@ -19,7 +21,20 @@ public class MainActivity extends BaseActivity {
 
     }
 
-    public void goTimeShring(View view) {
-        go(TimeSharingActivity.class);
+
+    public void goMinor(View view) {
+        go(MinorActivity.class);
+    }
+
+    public void goTimeShringView(View view) {
+        Bundle bundle=new Bundle();
+        bundle.putBoolean(MasterViewActivity.KEY_INTENT,true);
+        go(MasterViewActivity.class,bundle);
+    }
+
+    public void goCandleView(View view) {
+        Bundle bundle=new Bundle();
+        bundle.putBoolean(MasterViewActivity.KEY_INTENT,false);
+        go(MasterViewActivity.class,bundle);
     }
 }

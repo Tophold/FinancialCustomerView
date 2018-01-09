@@ -16,8 +16,25 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="goTimeShring"
-        android:text="去分时图页面"
+        android:onClick="goTimeShringView"
+        android:layout_marginTop="10dp"
+        android:text="去主图页面_分时图"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="goCandleView"
+        android:layout_marginTop="10dp"
+        android:text="去主图页面_蜡烛图"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="goMinor"
+        android:layout_marginTop="10dp"
+        android:text="去副图页面"
         />
 
 
