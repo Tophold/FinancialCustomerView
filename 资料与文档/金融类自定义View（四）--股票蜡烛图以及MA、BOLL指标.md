@@ -259,7 +259,7 @@
 			    
 * 代码继承关系整好之后，一些线基本就OK了，下面是副图的截图，基本没有做任何处理，就可以直接显示了
 
-
+![https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/%E5%89%AF%E5%9B%BE_def.png?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/%E5%89%AF%E5%9B%BE_def.png?raw=true)
 			    
 * 而一些父类没法实现具体逻辑的，可以直接声明为抽象类，让子类去实现即可。
 
@@ -303,6 +303,7 @@
 	* 绘制各种金融类的自定义View。
 	* 提供金融类自定义View的实现思路。
 	* 收集整理相关算法、文档以及专业资料。
+	* 代码进行了大量重构。
 	* 蜡烛图绘制完毕。	
 	
 	
