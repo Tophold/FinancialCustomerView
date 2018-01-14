@@ -256,6 +256,10 @@ public abstract class KView extends BaseFinancialView {
                 mWidth - mPaddingRight, mHeight - mPaddingBottom, mOuterPaint);
     }
 
+    /**
+     * 绘制内部x/y轴虚线
+     * @param canvas
+     */
     protected void drawInnerXy(Canvas canvas) {
         if (isShowInnerX())
             drawInnerX(canvas);

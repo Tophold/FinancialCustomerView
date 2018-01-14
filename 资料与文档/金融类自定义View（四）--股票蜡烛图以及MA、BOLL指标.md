@@ -7,6 +7,25 @@
 
 ## 效果图
 
+#### 蜡烛图【MasterView.java】
+
+* 默认蜡烛图
+
+![https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5_%E8%9C%A1%E7%83%9B%E5%9B%BE.png](https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5_%E8%9C%A1%E7%83%9B%E5%9B%BE.png)
+
+* MA指标（BOLL类似）
+
+![https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5_ma_nopress.png](https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5_ma_nopress.png)
+
+* 蜡烛图长按
+
+![https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5_ma_press.png](https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5_ma_press.png)
+
+* gif
+
+![https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5_gif.gif](https://raw.githubusercontent.com/scsfwgy/FinancialCustomerView/feature_candleview/img/%E8%9C%A1%E7%83%9B%E5%9B%BE_%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5_gif.gif)
+
+
 ## 蜡烛图绘制
 #### 命名
 * 主流的交易曲线图会包含两个大部分，上面一大块是走势图，包含分时图、5分图、15分图、日k、周k、月k等；下面一小块是指标，包含成交量、MACD、KDJ、RSI等。如下图，是同花顺的交易曲线图，基本也是这样构成的：
@@ -223,7 +242,60 @@
 * 在开始绘制绘制蜡烛图之前，对代码进行了大量的重构，将一些公共的逻辑抽离到了父类，尽可能减少子类中的业务逻辑。什么是公共的逻辑？比如边距、单机长按阀值、背景、边框等等很多属性其实主图和副图都是一样的，也有部分一样的，可以分开对待，比如主图需要绘制x/y内虚线，而副图只需要绘制y轴的虚线即可。当然，还有一些父类没法实现的，可以考虑将方法抽象化，让子类去实现业务逻辑。
 * 整个继承关系如下
 
-![]()
+![https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/view%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB.png?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/view%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB.png?raw=true)
+
+* 在处理的时候，把和业务没有关系的View逻辑放到了BaseFinancialView中，比如各种常量的获取、View宽高的测量、以及View的工具类等。而在KView.java中则是处理主图和副图全部都有（或者部分有）的共有属性。对于部分有的特性，比如副图没有x轴的虚线绘制，可以用一个开关在父类中处理是否绘制，开关可以由子类控制。
+
+			    /**
+			     * 绘制内部x/y轴虚线
+			     * @param canvas
+			     */
+			    protected void drawInnerXy(Canvas canvas) {
+			        if (isShowInnerX())
+			            drawInnerX(canvas);
+			        if (isShowInnerY())
+			            drawInnerY(canvas);
+			    }
+			    
+* 代码继承关系整好之后，一些线基本就OK了，下面是副图的截图，基本没有做任何处理，就可以直接显示了
+
+
+			    
+* 而一些父类没法实现具体逻辑的，可以直接声明为抽象类，让子类去实现即可。
+
+		   /**
+		     * 父类：寻找边界和计算单元数据大小。寻找:x轴开始位置数据和结束位置的model、y轴的最大数据和最小数据对应的model；
+		     * 计算x/y轴数据单元大小。这个交给子类去实现，一般情况下寻找边界需要遍历，在父类中遍历没有意义，
+		     * 因为不知道子类还有什么遍历需求。因此改为抽象方法，子类实现。子类必须完成寻找边界的任务。
+		     */
+		    protected abstract void seekAndCalculateCellData();
+    
+ 			-------------------------------------------------------   
+    
+    		//MasterView实现具体逻辑。
+		 	@Override
+		    protected void seekAndCalculateCellData() {
+		        if (mQuotesList.isEmpty()) return;
+		
+		        //对于蜡烛图，需要计算以下指标。
+		        if (mViewType == ViewType.CANDLE) {
+		           //指标算法
+		           ...
+		        }
+		
+		
+		        //寻找边界和计算单元数据大小
+		        ...
+		        
+		        //计算mPerX、mPerY		
+		       ...
+		       		
+		        //重绘
+		        invalidate();
+	    		}
+
+* 通过代码重构的手段，实现了在分时图、蜡烛图以及蜡烛图对应指标、其它各种交互共存的情况下，MasterView的代码行数还是维持在1000多行，MasterView基本没有增加代码量。现在存在的问题是，仍然存在各种各样的属性散列在View中，感觉难以控制。MP作者PhilJay在处理这个问题是将所有属性聚合成一个对象，在使用时可能会有很多层调用，但是在使用者（开发者）层面，看到的只有一个对象，然后控制着View的各种表现。在下一阶段重构的过程中，会考虑属性的处理方式是否也采用这种方式。
+
 
 #### code
 * [`https://github.com/scsfwgy/FinancialCustomerView`](https://github.com/scsfwgy/FinancialCustomerView "https://github.com/scsfwgy/FinancialCustomerView")
@@ -231,7 +303,7 @@
 	* 绘制各种金融类的自定义View。
 	* 提供金融类自定义View的实现思路。
 	* 收集整理相关算法、文档以及专业资料。
-* 另，蜡烛图（包括主图指标）大部分功能已经绘制出来啦，代码也进行了大量的重构。在分支：feature_candleview	
+	* 蜡烛图绘制完毕。	
 	
 	
 	
