@@ -157,10 +157,9 @@
         </LinearLayout>
     </LinearLayout>
 
-    <wgyscsf.financialcustomerview.timesharing.TimeSharingView
+    <wgyscsf.financialcustomerview.financialview.kview.master.MasterView
         android:id="@+id/tsv"
         android:layout_width="match_parent"
         android:layout_height="400dp"
         android:background="#fff0ae"/>
-
 </LinearLayout>
