@@ -21,9 +21,9 @@
 ## 进度
 * 基金收益图开发完毕，在master分支。
 * 分时图开发完毕，在master分支。
-* 蜡烛图（带MA、BOLL指标）正在开发，在feature_candleview分支。
-* 代码重构正在处理，在feature_candleview分支。
-* 副图部分，暂停开发，当主图（分时图、蜡烛图、主图指标）开发完毕再进行副图部分，在feature_minor分支。
+* 蜡烛图（带MA、BOLL指标）开发完毕，在master分支。
+* 代码重构完毕，在master分支。后期会不断重构代码。
+* 副图部分，正在开发，在feature_minor分支。
 
 ## 贡献代码
 * 直接建立新的分支，PR即可。
