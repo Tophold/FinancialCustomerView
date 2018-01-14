@@ -158,10 +158,13 @@
 		    }    	
 
     	
-    	
+ ![https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/MA%E6%8C%87%E6%A0%87%E8%BE%B9%E7%95%8C.png?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/MA%E6%8C%87%E6%A0%87%E8%BE%B9%E7%95%8C.png?raw=true)
     	
 
 #### 越界问题
+* 在开始之前看以下两个截图，对于同一个时刻一个不展示BOLL线，一个展示
+
+
 
 ## 代码重构
 #### 长按回调
