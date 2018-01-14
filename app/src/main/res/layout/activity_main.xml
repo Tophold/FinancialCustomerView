@@ -3,37 +3,47 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
+    android:gravity="center_horizontal"
     android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/version"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:layout_gravity="top"
+        android:gravity="center"
+        android:text="verisonName:1.4,versionCode(git head):"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="goFundView"
         android:text="去自定义基金页面"
+        android:layout_marginTop="160dp"
         />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="goTimeShringView"
         android:layout_marginTop="10dp"
+        android:onClick="goTimeShringView"
         android:text="去主图页面_分时图"
         />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="goCandleView"
         android:layout_marginTop="10dp"
+        android:onClick="goCandleView"
         android:text="去主图页面_蜡烛图"
         />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="goMinor"
         android:layout_marginTop="10dp"
+        android:onClick="goMinor"
         android:text="去副图页面"
         />
 
