@@ -1,15 +1,12 @@
-package wgyscsf.financialcustomerview.timesharing;
+package wgyscsf.financialcustomerview.financialview.kview.minor;
 
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
 import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.google.gson.reflect.TypeToken;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,25 +18,15 @@ import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import wgyscsf.financialcustomerview.BaseActivity;
 import wgyscsf.financialcustomerview.R;
-import wgyscsf.financialcustomerview.utils.FormatUtil;
+import wgyscsf.financialcustomerview.financialview.kview.KView;
+import wgyscsf.financialcustomerview.financialview.kview.OriginQuotes;
+import wgyscsf.financialcustomerview.financialview.kview.Quotes;
+import wgyscsf.financialcustomerview.financialview.kview.SimulateNetAPI;
 import wgyscsf.financialcustomerview.utils.GsonUtil;
 import wgyscsf.financialcustomerview.utils.StringUtils;
-import wgyscsf.financialcustomerview.utils.TimeUtils;
 
-/**
- * timesharing0:模拟的是加载更多的数据，注意，会分段取，模拟的是多次加载更多
- * timesharing1：模拟的是api请求的数据集合，注意：一次加载完毕，模拟的是第一次加载的数据
- * timesharing2：模拟的是实时**推送**的数据，注意：会分段取，一次取一个。
- */
-public class TimeSharingActivity extends BaseActivity {
-    TimeSharingView mTimeSharingView;
-    private LinearLayout ats_ll_container;
-    private TextView mAtsTvH;
-    private TextView mAtsTvO;
-    private TextView mAtsTvL;
-    private TextView mAtsTvC;
-    private TextView mAtsTvP;
-    private TextView ats_tv_time;
+public class MinorActivity extends BaseActivity {
+    MinorView mMinorView;
 
     List<Quotes> mLoadMoreList;
     int index = 0;//加载更多，加载到哪儿了。因为真实应用中，也存在加载完毕的情况。这里对应加载到list的最后
@@ -47,11 +34,11 @@ public class TimeSharingActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_time_sharing);
+        setContentView(R.layout.activity_minor);
         bindView();
         loadData();
         pushData();
-        mTimeSharingView.setOnClickListener(new View.OnClickListener() {
+        mMinorView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -79,14 +66,7 @@ public class TimeSharingActivity extends BaseActivity {
     }
 
     private void bindView() {
-        ats_ll_container = (LinearLayout) findViewById(R.id.ats_ll_container);
-        mTimeSharingView = (TimeSharingView) findViewById(R.id.tsv);
-        mAtsTvH = (TextView) findViewById(R.id.ats_tv_h);
-        mAtsTvO = (TextView) findViewById(R.id.ats_tv_o);
-        mAtsTvL = (TextView) findViewById(R.id.ats_tv_l);
-        mAtsTvC = (TextView) findViewById(R.id.ats_tv_c);
-        mAtsTvP = (TextView) findViewById(R.id.ats_tv_p);
-        ats_tv_time = (TextView) findViewById(R.id.ats_tv_time);
+        mMinorView = (MinorView) findViewById(R.id.am_mv_minorView);
     }
 
 
@@ -124,16 +104,15 @@ public class TimeSharingActivity extends BaseActivity {
                     @Override
                     public void call(List<Quotes> o) {
                         if (o != null) {
-                            mTimeSharingView.setTimeSharingData(o, new TimeSharingView.TimeSharingListener() {
+                            mMinorView.setTimeSharingData(o, new KView.TimeSharingListener() {
 
                                 @Override
                                 public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
-                                    showContanier(preQuotes, currentQuotes);
+                                    //showContanier(preQuotes, currentQuotes);
                                 }
 
                                 @Override
                                 public void onUnLongTouch() {
-                                    ats_ll_container.setVisibility(View.INVISIBLE);
                                 }
 
                                 @Override
@@ -149,39 +128,6 @@ public class TimeSharingActivity extends BaseActivity {
                 });
         //及时回收，防止泄露
         addGcManagerSubscription(subscribeApi);
-    }
-
-    private void showContanier(Quotes preQuotes, Quotes currentQuotes) {
-        ats_ll_container.setVisibility(View.VISIBLE);
-        int digits = 4;
-        boolean isPositive;
-        String precent;
-        double dis = (currentQuotes.c - preQuotes.c) / currentQuotes.c * 100;
-        isPositive = dis >= 0;
-        precent = FormatUtil.formatBySubString(dis, 2);
-        precent += "%";
-
-        //
-        mAtsTvH.setText(FormatUtil.numFormat(currentQuotes.h, digits));
-        mAtsTvO.setText(FormatUtil.numFormat(currentQuotes.o, digits));
-        mAtsTvL.setText(FormatUtil.numFormat(currentQuotes.l, digits));
-        mAtsTvC.setText(FormatUtil.numFormat(currentQuotes.c, digits));
-        mAtsTvP.setText(precent);
-        ats_tv_time.setText(TimeUtils.millis2String(currentQuotes.t, new SimpleDateFormat("MM-dd HH:mm")));
-
-        if (isPositive) {
-            mAtsTvH.setTextColor(getMyColor(R.color.color_timeSharing_callBackRed));
-            mAtsTvO.setTextColor(getMyColor(R.color.color_timeSharing_callBackRed));
-            mAtsTvL.setTextColor(getMyColor(R.color.color_timeSharing_callBackRed));
-            mAtsTvC.setTextColor(getMyColor(R.color.color_timeSharing_callBackRed));
-            mAtsTvP.setTextColor(getMyColor(R.color.color_timeSharing_callBackRed));
-        } else {
-            mAtsTvH.setTextColor(getMyColor(R.color.color_timeSharing_callBackGreen));
-            mAtsTvO.setTextColor(getMyColor(R.color.color_timeSharing_callBackGreen));
-            mAtsTvL.setTextColor(getMyColor(R.color.color_timeSharing_callBackGreen));
-            mAtsTvC.setTextColor(getMyColor(R.color.color_timeSharing_callBackGreen));
-            mAtsTvP.setTextColor(getMyColor(R.color.color_timeSharing_callBackGreen));
-        }
     }
 
     private List<Quotes> adapterData(List<OriginQuotes> originFundModeList) {
@@ -247,7 +193,7 @@ public class TimeSharingActivity extends BaseActivity {
                 .subscribe(new Action1<Quotes>() {
                     @Override
                     public void call(Quotes o) {
-                       mTimeSharingView.pushingTimeSharingData(o);
+                        mMinorView.pushingTimeSharingData(o);
                     }
                 });
 
@@ -272,7 +218,7 @@ public class TimeSharingActivity extends BaseActivity {
                 int loadSize = StringUtils.getRadomNum(min, max);
                 if (index == loadSize) {
                     //没有更多数据了
-                    mTimeSharingView.loadMoreNoData();
+                    mMinorView.loadMoreNoData();
                 }
                 if ((index + loadSize) > mLoadMoreList.size()) {
                     loadSize = mLoadMoreList.size();
@@ -286,13 +232,13 @@ public class TimeSharingActivity extends BaseActivity {
                 .subscribe(new Action1<List<Quotes>>() {
                     @Override
                     public void call(List<Quotes> integer) {
-                        mTimeSharingView.loadMoreTimeSharingData(integer);
+                        mMinorView.loadMoreTimeSharingData(integer);
                     }
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
                         Log.e(TAG, "call: 加载更多出现了异常");
-                        mTimeSharingView.loadMoreError();
+                        mMinorView.loadMoreError();
                     }
                 });
 

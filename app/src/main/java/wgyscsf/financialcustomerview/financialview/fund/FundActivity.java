@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.fund;
+package wgyscsf.financialcustomerview.financialview.fund;
 
 import android.os.Bundle;
 import android.os.Handler;
