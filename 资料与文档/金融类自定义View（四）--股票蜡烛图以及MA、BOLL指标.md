@@ -162,12 +162,68 @@
     	
 
 #### 越界问题
-* 在开始之前看以下两个截图，对于同一个时刻一个不展示BOLL线，一个展示
+* 在开始之前看以下两个截图，对于同一个时刻一个不展示BOLL线，一个展示BOLL线，绘制出来的蜡烛图折线图是“不一样”的。
 
+ ![https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/%E6%9C%89boll%E5%92%8C%E6%B2%A1%E6%9C%89boll%E5%AF%B9%E6%AF%94%E5%9B%BE.png?raw=true](https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/%E6%9C%89boll%E5%92%8C%E6%B2%A1%E6%9C%89boll%E5%AF%B9%E6%AF%94%E5%9B%BE.png?raw=true)
+ 
+ * 这并不是绘制错误，而是特意的处理。在绘制分时图的时候，我们对于Y轴的mPerY的计算是根据可视范围内数据集合的收盘价最大值和最小值以及Y轴有效高度计算的。这样的处理可以保证无论分时图浮动多大，可以保证分时图不会绘制出边界。分时图“值”比较单一，只需要考虑一个收盘价即可。可是，对于蜡烛图需要考虑的就比较多了，如果还是仅仅通过收盘价计算最小值和最大值，就会导致如果计算出来的“待显示的点”如果远远大于收盘价，就会导致“越界”！并且，这种情况，确实在开发过程中遇到了。因此，对于蜡烛图最大值和最小值的判断，需要遍历单个Quotes,寻找到最大和最小值。通过观察线上应用【天厚实盘】以及同花顺基本上都是这样处理的：随着主图上指标的变化，蜡烛图显示的高度并不一致，为的就是保证“不越界”。以下是寻找单个Quotes中最大值的过程，特别注意，if判断逻辑不能用`else if`，这个错误调试了几个小时才找到！
+
+ 
+			  /**
+			     * 找到单个报价中的最大值
+			     *
+			     * @param quotes
+			     * @param masterType
+			     * @return
+			     */
+			    public static double getMasterMaxY(Quotes quotes, MasterView.MasterType masterType) {
+			        double max = Integer.MIN_VALUE;
+			        //ma
+			        //只有在存在ma的情况下才计算
+			        if (masterType == MasterView.MasterType.MA || masterType == MasterView.MasterType.MA_BOLL) {
+			            if (quotes.ma5 != 0 && quotes.ma5 > max) {
+			                max = quotes.ma5;
+			            }
+			            if (quotes.ma10 != 0 && quotes.ma10 > max) {
+			                max = quotes.ma10;
+			            }
+			            if (quotes.ma20 != 0 && quotes.ma20 > max) {
+			                max = quotes.ma20;
+			            }
+			        }
+			
+			        //boll
+			        if (masterType == MasterView.MasterType.BOLL || masterType == MasterView.MasterType.MA_BOLL) {
+			            if (quotes.mb != 0 && quotes.mb > max) {
+			                max = quotes.mb;
+			            }
+			            if (quotes.up != 0 && quotes.up > max) {
+			                max = quotes.up;
+			            }
+			            if (quotes.dn != 0 && quotes.dn > max) {
+			                max = quotes.dn;
+			            }
+			        }
+			        //quotes
+			        if (quotes.h != 0 && quotes.h > max) {
+			            max = quotes.h;
+			        }
+			        //没有找到
+			        if (max == Integer.MIN_VALUE) {
+			            max = 0;
+			        }
+			        return max;
+			
+			    } 
 
 
 ## 代码重构
-#### 长按回调
+* 其实在分时图绘制完毕之后打算先整副图部分的，后来发现各种指标算法比较烦人，就直接上手蜡烛图了。
+* 随着View功能、交互的的增加，代码量也大量激增，在分时图功能完成时整个View的代码行数已经过1000行了，感觉多的都没法维护了=。=，因此考虑对代码进行重构。
+* 在开始绘制绘制蜡烛图之前，对代码进行了大量的重构，将一些公共的逻辑抽离到了父类，尽可能减少子类中的业务逻辑。什么是公共的逻辑？比如边距、单机长按阀值、背景、边框等等很多属性其实主图和副图都是一样的，也有部分一样的，可以分开对待，比如主图需要绘制x/y内虚线，而副图只需要绘制y轴的虚线即可。当然，还有一些父类没法实现的，可以考虑将方法抽象化，让子类去实现业务逻辑。
+* 整个继承关系如下
+
+![]()
 
 #### code
 * [`https://github.com/scsfwgy/FinancialCustomerView`](https://github.com/scsfwgy/FinancialCustomerView "https://github.com/scsfwgy/FinancialCustomerView")
