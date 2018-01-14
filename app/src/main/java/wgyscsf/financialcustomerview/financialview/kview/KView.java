@@ -84,8 +84,11 @@ public abstract class KView extends BaseFinancialView {
     //每一个x、y轴的一个单元的的宽和高
     //根据可见数量和有效宽度计算单位x大小
     protected float mPerX;
-    //根据最大最小close价格计算的的单位y大小。
-    protected float mClosePerY;
+    //根据最大最小close价格计算的的单位y大小。该参数已废弃，统一采用mPerY。
+    //protected float mClosePerY;
+    //该参数的具体逻辑由子类去实现
+    protected float mPerY;
+
     //Y轴：close价格最小值和最大值对应的Model。这里最小最大是根据close价格算的，用于分时图。
     protected Quotes mMinColseQuotes;
     protected Quotes mMaxCloseQuotes;

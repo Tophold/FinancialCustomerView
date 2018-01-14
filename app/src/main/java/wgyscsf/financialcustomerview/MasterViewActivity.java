@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.financialview.kview.master;
+package wgyscsf.financialcustomerview;
 
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
@@ -25,6 +25,7 @@ import wgyscsf.financialcustomerview.financialview.kview.KView;
 import wgyscsf.financialcustomerview.financialview.kview.OriginQuotes;
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.financialview.kview.SimulateNetAPI;
+import wgyscsf.financialcustomerview.financialview.kview.master.MasterView;
 import wgyscsf.financialcustomerview.utils.FormatUtil;
 import wgyscsf.financialcustomerview.utils.GsonUtil;
 import wgyscsf.financialcustomerview.utils.StringUtils;

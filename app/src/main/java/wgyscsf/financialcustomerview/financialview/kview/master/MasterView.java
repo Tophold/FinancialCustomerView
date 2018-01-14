@@ -179,8 +179,8 @@ public class MasterView extends KView {
      * 然后根据open和close绘制蜡烛图的上起点和下结束点。
      * 至于颜色，当当前值为的Quote的close大于open,为红色；反之为绿色。
      */
-    //根据可见范围内最大的high价格和最小的low价格计算的y单位长度
-    protected float mPerY;
+    //根据可见范围内最大的high价格和最小的low价格计算的y单位长度。该参数父类已经定义。
+    //protected float mPerY;
     /**
      * 蜡烛图：整个视图的最大值和最小值（y轴边界值），不管视图中是分时图、蜡烛图（以及蜡烛图中的指标）必须找到上下边界，
      * 然后根据该边界值会绘制，不然会出现绘制超过边界的情况。特别明显的一种情况：蜡烛图模式下，存在不存在BOLL线，
@@ -590,7 +590,7 @@ public class MasterView extends KView {
             //分时图和蜡烛图要分开对待，测量标准不一致。只要有测量的，全部要区分对待。
             if (mViewType == ViewType.TIMESHARING) {
                 floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
-                        mClosePerY * (quotes.c - mMinColseQuotes.c));
+                        mPerY * (quotes.c - mMinColseQuotes.c));
             } else if (mViewType == ViewType.CANDLE) {
                 floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
                         mPerY * (quotes.c - mCandleMinY));
@@ -1027,7 +1027,7 @@ public class MasterView extends KView {
                 //分时图
                 if (mViewType == ViewType.TIMESHARING) {
                     quotes.floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
-                            mClosePerY * (endQuotes.c - mMinColseQuotes.c));
+                            mPerY * (endQuotes.c - mMinColseQuotes.c));
                 } else {
                     //蜡烛图
                     quotes.floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
@@ -1180,7 +1180,7 @@ public class MasterView extends KView {
     protected void seekAndCalculateCellData() {
         if (mQuotesList.isEmpty()) return;
 
-        //这里可以判断是否需要ma和boll指标，正是环境中一般不需要切换分时图和蜡烛图。这里先不进行判断，方便切换。
+        //对于蜡烛图，需要计算以下指标。
         if (mViewType == ViewType.CANDLE) {
             //ma
             FinancialAlgorithm.calculateMA(mQuotesList, 5);
@@ -1219,27 +1219,27 @@ public class MasterView extends KView {
 
             //蜡烛图
             if (mViewType == ViewType.CANDLE) {
-                double max = FinancialAlgorithm.getMasterMaxY(quotes,mMasterType);
+                double max = FinancialAlgorithm.getMasterMaxY(quotes, mMasterType);
                 if (max > mCandleMaxY) {
                     mCandleMaxY = max;
-                    Log.e(TAG, "seekAndCalculateCellData:mCandleMaxY "+mCandleMaxY +",");
+                    //Log.e(TAG, "seekAndCalculateCellData:mCandleMaxY " + mCandleMaxY + ",");
                 }
-                double min = FinancialAlgorithm.getMasterMinY(quotes,mMasterType);
+                double min = FinancialAlgorithm.getMasterMinY(quotes, mMasterType);
                 if (min < mCandleMinY) {
                     mCandleMinY = min;
-                    Log.e(TAG, "seekAndCalculateCellData:mCandleMinY "+mCandleMinY +",");
+                    //Log.e(TAG, "seekAndCalculateCellData:mCandleMinY " + mCandleMinY + ",");
                 }
             }
         }
 
-        Log.e(TAG, "seekAndCalculateCellData: ---->>"+mCandleMaxY+","+mCandleMinY+"==>"+(mCandleMaxY-mCandleMinY) );
+        //Log.e(TAG, "seekAndCalculateCellData: ---->>" + mCandleMaxY + "," + mCandleMinY + "==>" + (mCandleMaxY - mCandleMinY));
         mPerX = (mWidth - mPaddingLeft - mPaddingRight - mInnerRightBlankPadding)
                 / (mShownMaxCount);
         //不要忘了减去内部的上下Padding
-        mClosePerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
-                - mInnerBottomBlankPadding) / (mMaxCloseQuotes.c - mMinColseQuotes.c));
-
-        if (mViewType == ViewType.CANDLE) {
+        if (mViewType == ViewType.TIMESHARING) {
+            mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
+                    - mInnerBottomBlankPadding) / (mMaxCloseQuotes.c - mMinColseQuotes.c));
+        } else if (mViewType == ViewType.CANDLE) {
             mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
                     - mInnerBottomBlankPadding) / (mCandleMaxY - mCandleMinY));
         }
