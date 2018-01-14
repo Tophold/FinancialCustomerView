@@ -759,7 +759,8 @@ public class MasterView extends KView {
         boolean isFirstMa20 = true;
         for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes quotes = mQuotesList.get(i);
-            float floatX = quotes.floatX;//在绘制蜡烛图的时候已经计算了
+            //在绘制蜡烛图的时候已经计算了
+            float floatX = quotes.floatX;
 
             float floatY = getMasterDetailFloatY(quotes, MasterDetailType.MA5);
 
@@ -891,6 +892,13 @@ public class MasterView extends KView {
         canvas.drawPath(dnPath, mBollDnPaint);
     }
 
+    /**
+     * 绘制蜡烛图
+     * @param canvas
+     * @param diverWidth 蜡烛图之间的间距
+     * @param i List index
+     * @param quotes 目标Quotes
+     */
     private void drawCandleViewProcess(Canvas canvas, float diverWidth, int i, Quotes quotes) {
         if (mViewType != ViewType.CANDLE) return;
 

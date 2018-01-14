@@ -310,7 +310,6 @@ public class FinancialAlgorithm {
     }
 
     //MA算法
-
     /**
      * MA算法，period（周期）的MA的计算：带上今天，向前取period的收盘价之和除以period,即是今日的MA(period)。
      * 算法很简洁，但是是对的。
@@ -341,7 +340,7 @@ public class FinancialAlgorithm {
             } else if (period == 20) {
                 quotes.ma20 = sum1 / period;
             } else {
-                Log.e(TAG, "calculateMA: TODO:完善算法");
+                Log.e(TAG, "calculateMA: 没有该种period，TODO:完善Quotes");
                 return;
             }
 
