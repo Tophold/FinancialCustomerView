@@ -315,7 +315,7 @@ public abstract class KView extends BaseFinancialView {
     }
 
     /**
-     * 正在加载没有更多数据，在这里添加逻辑
+     * 没有更多数据，在这里添加逻辑
      */
     public void loadMoreNoData() {
         mCanLoadMore = false;
@@ -440,15 +440,12 @@ public abstract class KView extends BaseFinancialView {
         //因为可能在加载的过程中，原来的意图是在最左边，但是加载完毕后，又不在最左边了。
         // 因此，只要保持原来的起始位置和结束位置即可。【原来：指的是视觉上的原来】
         int addSize = quotesList.size();
-        Log.e(TAG, "loadMoreTimeSharingData: 新来的数据大小：" + addSize);
         mBeginIndex = mBeginIndex + addSize;
         if (mBeginIndex + mShownMaxCount > mQuotesList.size()) {
             mBeginIndex = mQuotesList.size() - mShownMaxCount;
         }
         mEndIndex = mBeginIndex + mShownMaxCount;
-        Log.e(TAG, "loadMoreTimeSharingData: 加载更多完毕，mBeginIndex：" + mBeginIndex + ",mEndIndex:" + mEndIndex);
         //重新测量一下,这里不能重新测量。因为重新测量的逻辑是寻找最新的点。
-        //seekBeginAndEndByNewer();
         seekAndCalculateCellData();
     }
 

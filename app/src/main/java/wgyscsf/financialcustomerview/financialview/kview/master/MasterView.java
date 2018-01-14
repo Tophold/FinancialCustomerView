@@ -7,9 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
-import android.text.format.Time;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
@@ -22,7 +20,6 @@ import wgyscsf.financialcustomerview.financialview.FinancialAlgorithm;
 import wgyscsf.financialcustomerview.financialview.kview.KView;
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.utils.FormatUtil;
-import wgyscsf.financialcustomerview.utils.StringUtils;
 import wgyscsf.financialcustomerview.utils.TimeUtils;
 
 /**
@@ -220,7 +217,6 @@ public class MasterView extends KView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        //Log.e("TimeSharingView", "onDraw: ");
         if (mQuotesList == null || mQuotesList.isEmpty()) {
             return;
         }
@@ -243,7 +239,6 @@ public class MasterView extends KView {
         //按下的手指个数
         mFingerPressedCount = event.getPointerCount();
         //手势监听
-        //Log.e(TAG, "onTouchEvent: " + event.getPointerCount());
         mScaleGestureDetector.onTouchEvent(event);
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -252,7 +247,6 @@ public class MasterView extends KView {
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (event.getEventTime() - mPressTime > DEF_LONGPRESS_LENGTH) {
-                    //Log.e(TAG, "onTouchEvent: 长按了。。。");
                     mMovingX = event.getX();
                     showLongPressView();
                 }
@@ -264,7 +258,6 @@ public class MasterView extends KView {
                 if (Math.abs(moveLen) > DEF_PULL_LENGTH &&
                         mFingerPressedCount == 1 &&
                         !mDrawLongPress) {
-                    //Log.e(TAG, "onTouchEvent: 正在移动分时图");
                     //移动k线图
                     moveKView(moveLen);
                 }
@@ -349,7 +342,6 @@ public class MasterView extends KView {
         }
         mEndIndex = mBeginIndex + mShownMaxCount;
         //开始位置和结束位置确认好，就可以重绘啦~
-        //Log.e(TAG, "moveKView: mPullRight：" + mPullRight + ",mBeginIndex:" + mBeginIndex + ",mEndIndex:" + mEndIndex);
         seekAndCalculateCellData();
     }
 
@@ -927,7 +919,6 @@ public class MasterView extends KView {
                 mPerY * (mCandleMaxY - quotes.l));
 
         RectF rectF = new RectF();
-        //Log.e(TAG, "drawCandleView: leftX:"+leftRectX+",topY:"+topRectY+",rightX:"+rightRectX+",bottomY:"+bottomRectY );
         //边界处理
         if (i == mBeginIndex) {
             leftRectX = leftRectX < mPaddingLeft ? mPaddingLeft : leftRectX;
@@ -941,7 +932,6 @@ public class MasterView extends KView {
         mCandlePaint.setColor(quotes.c > quotes.o ? mRedCandleColor : mGreenCandleColor);
         canvas.drawRect(rectF, mCandlePaint);
 
-        //Log.e(TAG, "drawCandleView: leftLineX:"+leftLineX+",topLineY:"+topLineY+",rightLineX:"+rightLineX+",bottomLineY:"+bottomLineY );
         //开始画low、high线
         canvas.drawLine(leftLineX, topLineY, rightLineX, bottomLineY, mCandlePaint);
     }
@@ -949,8 +939,6 @@ public class MasterView extends KView {
     private void drawLongPress(Canvas canvas, int finalIndex, Quotes finalFundMode) {
         if (!mDrawLongPress) return;
 
-        //        Log.e(TAG, "drawLongPress: " + mPaddingLeft + "，"
-        //                + finalFundMode.floatY + "，" + (mWidth - mPaddingRight) + "," + finalFundMode.floatY);
         //x轴线
         canvas.drawLine(mPaddingLeft, finalFundMode.floatY, mWidth - mPaddingRight,
                 finalFundMode.floatY, mLongPressPaint);
@@ -1067,7 +1055,6 @@ public class MasterView extends KView {
             path.moveTo(quotes.floatX, quotes.floatY);
             path2.moveTo(quotes.floatX, quotes.floatY);
         } else {
-            //Log.e(TAG, "drawTimSharingProcess: "+quotes.floatX );
             path.lineTo(quotes.floatX, quotes.floatY);
             //开始绘制path
             path2.lineTo(quotes.floatX, quotes.floatY);
@@ -1108,7 +1095,6 @@ public class MasterView extends KView {
 
         double yDis = (mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding -
                 mInnerBottomBlankPadding);
-        //double yDis = mHeight;
         double perY = dataDis / yDis;
 
         if (mViewType == ViewType.TIMESHARING) {
@@ -1121,7 +1107,6 @@ public class MasterView extends KView {
 
 
         halfTxtHight = getFontHeight(mXYTxtSize, mXYTxtPaint) / 4;//应该/2的，但是不准确，原因不明
-        //halfTxtHight = 0;
 
         //现将最小值、最大值画好
         float rightBorderPadding = mRightTxtPadding;
@@ -1224,17 +1209,14 @@ public class MasterView extends KView {
                 double max = FinancialAlgorithm.getMasterMaxY(quotes, mMasterType);
                 if (max > mCandleMaxY) {
                     mCandleMaxY = max;
-                    //Log.e(TAG, "seekAndCalculateCellData:mCandleMaxY " + mCandleMaxY + ",");
                 }
                 double min = FinancialAlgorithm.getMasterMinY(quotes, mMasterType);
                 if (min < mCandleMinY) {
                     mCandleMinY = min;
-                    //Log.e(TAG, "seekAndCalculateCellData:mCandleMinY " + mCandleMinY + ",");
                 }
             }
         }
 
-        //Log.e(TAG, "seekAndCalculateCellData: ---->>" + mCandleMaxY + "," + mCandleMinY + "==>" + (mCandleMaxY - mCandleMinY));
         mPerX = (mWidth - mPaddingLeft - mPaddingRight - mInnerRightBlankPadding)
                 / (mShownMaxCount);
         //不要忘了减去内部的上下Padding
@@ -1256,9 +1238,6 @@ public class MasterView extends KView {
             new ScaleGestureDetector.SimpleOnScaleGestureListener() {
                 @Override
                 public boolean onScale(ScaleGestureDetector detector) {
-                    //                    Log.e(TAG, "onScale: mFingerPressedCount:" + mFingerPressedCount +
-                    //                            ",mShownMaxCount == mQuotesList.size():" + (mShownMaxCount == mQuotesList.size()) +
-                    //                            ",mShownMaxCount:" + mShownMaxCount);
                     //没有缩放
                     if (detector.getScaleFactor() == 1) return true;
 
@@ -1271,12 +1250,8 @@ public class MasterView extends KView {
                     //一半
                     int helfChangeNum = (int) Math.ceil(changeNum / 2f);
 
-                    //Log.e(TAG, "onScale:changeNum: " + changeNum + ",helfChangeNum:" + helfChangeNum);
-
                     //缩放个数太少，直接return
                     if (changeNum == 0 || helfChangeNum == 0) return true;
-
-                    //Log.e(TAG, "onScale:mShownMaxCount： " + mShownMaxCount);
 
                     //容错处理,获取最大最小值
                     if (DEF_SCALE_MINNUM < 3) {
@@ -1305,9 +1280,6 @@ public class MasterView extends KView {
 
                     mEndIndex = mBeginIndex + mShownMaxCount;
 
-                    //                    Log.e(TAG, "onScaleBegin:mBeginIndex: " + mBeginIndex + ",mEndIndex:"
-                    //                            + mEndIndex + ",changeNum:" + changeNum + ",mShownMaxCount:" + mShownMaxCount);
-
                     //只要找好起始点和结束点就可以交给处理重绘的方法就好啦~
                     seekAndCalculateCellData();
                     return true;
@@ -1315,7 +1287,6 @@ public class MasterView extends KView {
 
                 @Override
                 public boolean onScaleBegin(ScaleGestureDetector detector) {
-                    // Log.e(TAG, "onScaleBegin: " + detector.getFocusX());
                     //指头数量
                     if (mFingerPressedCount != 2) return true;
                     return true;
