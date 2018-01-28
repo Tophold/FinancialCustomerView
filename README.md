@@ -1,4 +1,4 @@
-# 金融类自定义view
+# 金融类自定义view([English?](https://github.com/scsfwgy/FinancialCustomerView/blob/master/README_en.md))
 
 ## 介绍
 > 本项目会对金融交易软件中存在的各种View进行模仿绘制，提供详细的实现思路，收集整理相关算法、文档以及专业资料。
@@ -35,3 +35,5 @@
 * MPAndroidChart：[https://github.com/PhilJay/MPAndroidChart](https://github.com/PhilJay/MPAndroidChart)
 * AndroidCharts：[https://github.com/HackPlan/AndroidCharts](https://github.com/HackPlan/AndroidCharts)
 * Android-Charts：[https://github.com/limccn/Android-Charts](https://github.com/limccn/Android-Charts)
+
+
