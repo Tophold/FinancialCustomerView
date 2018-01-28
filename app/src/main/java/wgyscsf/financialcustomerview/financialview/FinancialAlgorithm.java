@@ -309,36 +309,42 @@ public class FinancialAlgorithm {
 
     }
 
-    //MA算法
+
     /**
-     * MA算法，period（周期）的MA的计算：带上今天，向前取period的收盘价之和除以period,即是今日的MA(period)。
-     * 算法很简洁，但是是对的。
+     * 计算公式：MA =(C1+C2+C3+C4+C5+...+Cn)/n,其中C为收盘价n为移动平均周期数。
+     * 例如现货黄金的5日移动平均价格计算方法为：MA5=(前四天收盘价+前三天收盘价+前天收盘价+昨天收盘价+今天收盘价)/5。
+     * 特殊的，假如数据集合中最开始的n个数据，是没法计算MAn的。这里的处理方式是不计算，绘制时直接不绘制对应MA即可。
      *
-     * @param period 周期，一般是：5、10、20、30、60
+     * @param quotesList 数据集合
+     * @param period MAn中的n,周期，一般是：5、10、20、30、60。
      */
     public static void calculateMA(List<Quotes> quotesList, int period) {
+
         if (quotesList == null || quotesList.isEmpty()) return;
+
         if (period < 0 || period > quotesList.size() - 1) return;
 
-        double sum1 = 0;
+        //包含今日的n日和
+        double sum = 0;
         for (int i = 0; i < quotesList.size(); i++) {
+            //计算和
             Quotes quotes = quotesList.get(i);
-            sum1 += quotes.c;
+            sum += quotes.c;
+            if (i > period - 1) {
+                sum -= quotesList.get(i - period).c;
+            }
+
             //边界
-            if (i < period - 1) {
+            if (i < period-1) {
                 continue;
             }
 
-            if (i > period - 1) {
-                sum1 -= quotesList.get(i - period).c;
-            }
-
             if (period == 5) {
-                quotes.ma5 = sum1 / period;
+                quotes.ma5 = sum / period;
             } else if (period == 10) {
-                quotes.ma10 = sum1 / period;
+                quotes.ma10 = sum / period;
             } else if (period == 20) {
-                quotes.ma20 = sum1 / period;
+                quotes.ma20 = sum / period;
             } else {
                 Log.e(TAG, "calculateMA: 没有该种period，TODO:完善Quotes");
                 return;
@@ -347,23 +353,19 @@ public class FinancialAlgorithm {
         }
     }
 
+
     /**
-     * 计算boll，当List最前面的值（index<period）怎么处理？？？现在的处理，不处理，显示：0
+     * BOLL(n)计算公式：
+     * MA=n日内的收盘价之和÷n。
+     * MD=（n-1）日的平方根（C－MA）的两次方之和除以n
+     * MB=（n－1）日的MA
+     * UP=MB+k×MD
+     * DN=MB－k×MD
+     * K为参数，可根据股票的特性来做相应的调整，一般默认为2
      *
-     * @param quotesList
-     * @param period     周期，一般取26
-     * @param k          K为参数，可根据股票的特性来做相应的调整，一般默认为2
-     *                   <p>
-     *                   boll线
-     *                   日BOLL指标的计算过程
-     *                   （1）计算MA
-     *                   MA=N周期之和÷N
-     *                   （2）计算标准差MD
-     *                   MD=平方根N日的（C－MA）的两次方之和除以N
-     *                   （3）计算MB、UP、DN线
-     *                   MB=（N－1）日的MA
-     *                   UP=MB＋2×MD
-     *                   DN=MB－2×MD
+     * @param quotesList 数据集合
+     * @param period 周期，一般为26
+     * @param k 参数，可根据股票的特性来做相应的调整，一般默认为2
      */
     public static void calculateBOLL(List<Quotes> quotesList, int period, int k) {
         if (quotesList == null || quotesList.isEmpty()) return;
@@ -373,29 +375,37 @@ public class FinancialAlgorithm {
         double up;//中轨线
         double dn;//下轨线
 
-        double ma = 0;//N-1日
-        double md = 0;
+        //n日
         double sum = 0;
-
+        //n-1日
+        double sum2=0;
         for (int i = 0; i < quotesList.size(); i++) {
             Quotes quotes = quotesList.get(i);
             sum += quotes.c;
+            sum2+=quotes.c;
+            if (i > period - 1)
+                sum -= quotesList.get(i - period).c;
+            if(i>period-2)
+                sum2 -= quotesList.get(i - period+1).c;
+
             //这个范围不计算，在View上的反应就是不显示这个范围的boll线
             if (i < period - 1)
                 continue;
 
-            md = 0;
-            if (i > period - 1)
-                sum -= quotesList.get(i - period).c;//特别特别注意，这个算的是（N-1）日的，因为把今天的减去了。
-            ma = sum / period;
+            //n日MA
+            double ma = sum / period;
+            //n-1日MA
+            double ma2=sum2/(period-1);
+            double md = 0;
             for (int j = i + 1 - period; j <= i; j++) {
+                //n-1日
                 md += Math.pow(quotesList.get(j).c - ma, 2);
             }
             md = Math.sqrt(md / period);
-
-            mb = ma;
-            up = mb + 2 * md;
-            dn = mb - 2 * md;
+            //(n－1）日的MA
+            mb = ma2;
+            up = mb + k * md;
+            dn = mb - k * md;
 
             quotes.mb = mb;
             quotes.up = up;
