@@ -2,6 +2,8 @@ package wgyscsf.financialcustomerview.financialview.kview.minor;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -39,6 +41,10 @@ public class MinorView extends KView {
     int mMacdDifColor;
     int mAcdDeaColor;
     int mAcdMacdColor;
+    Paint mMacdPaint;
+    float mMacdLineWidth = 1;
+
+
     //rsi
     int mRsi16Color;
     int mRsi12Color;
@@ -48,8 +54,13 @@ public class MinorView extends KView {
     int mDColor;
     int mJColor;
 
-    //MinorModel聚合的数据`
+    //MinorModel聚合的数据
     MinorModel mMinorModel;
+
+    protected double mMinY;
+    protected double mMaxY;
+    //蜡烛图间隙，大小以单个蜡烛图的宽度的比例算。可修改。
+    protected float mCandleDiverWidthRatio = 0.1f;
 
     public MinorView(Context context) {
         this(context, null);
@@ -90,6 +101,73 @@ public class MinorView extends KView {
     }
 
     private void drawMACD(Canvas canvas) {
+        //macd
+        //首先寻找"0"点，这个点是正负macd的分界点
+        float v = mHeight - mPaddingBottom - mInnerBottomBlankPadding;
+        double zeroY = v - mPerY * (0 - mMinY);
+        float startX, startY, stopX, stopY;
+
+        //dif
+        float difX,difY;
+        Path difPath = new Path();
+
+        //dea
+        float deaX,deaY;
+        Path deaPath = new Path();
+
+        for (int i = mBeginIndex; i < mEndIndex; i++) {
+            Quotes quotes = mQuotesList.get(i);
+
+            //macd
+            //找另外一个y点
+            double y = v - mPerY * (quotes.macd - mMinY);
+            startX = mPaddingLeft + (i-mBeginIndex) * mPerX + mCandleDiverWidthRatio * mPerX / 2;
+            stopX = mPaddingLeft + (i-mBeginIndex + 1) * mPerX - mCandleDiverWidthRatio * mPerX / 2;
+            startY = (float) zeroY;
+            stopY = (float) y;
+            if (quotes.macd > 0) {
+                mMacdPaint.setColor(mMacdBuyColor);
+            } else {
+                mMacdPaint.setColor(mMacdSellColor);
+            }
+//            Log.e(TAG, "drawMACD: "+startY+","+stopY +
+//                    ","+(mPaddingTop+mInnerTopBlankPadding)+","+
+//                    (mHeight-mPaddingBottom-mInnerBottomBlankPadding));
+            mMacdPaint.setStyle(Paint.Style.FILL);
+            canvas.drawRect(startX,startY , stopX, stopY, mMacdPaint);
+
+
+            //dif
+            difX= mPaddingLeft + (i-mBeginIndex) * mPerX + mPerX / 2;
+            difY= (float) (v - mPerY * (quotes.dif - mMinY));
+            if(i==mBeginIndex){
+                difPath.moveTo(difX-mPerX/2,difY);//第一个点特殊处理
+            }else{
+                if(i==mEndIndex-1){
+                    difX+=mPerX/2;//最后一个点特殊处理
+                }
+                difPath.lineTo(difX,difY);
+            }
+            mMacdPaint.setStyle(Paint.Style.STROKE);
+            mMacdPaint.setColor(mMacdDifColor);
+            canvas.drawPath(difPath,mMacdPaint);
+
+
+            //dea
+            deaX= mPaddingLeft + (i-mBeginIndex) * mPerX + mPerX / 2;
+            deaY= (float) (v - mPerY * (quotes.dea - mMinY));
+            if(i==mBeginIndex){
+                deaPath.moveTo(deaX-mPerX/2,deaY);//第一个点特殊处理
+            }else{
+                if(i==mEndIndex-1){
+                    deaX+=mPerX/2;//最后一个点特殊处理
+                }
+                deaPath.lineTo(deaX,deaY);
+            }
+            mMacdPaint.setStyle(Paint.Style.STROKE);
+            mMacdPaint.setColor(mAcdDeaColor);
+            canvas.drawPath(deaPath,mMacdPaint);
+        }
 
     }
 
@@ -105,11 +183,24 @@ public class MinorView extends KView {
         initDefAttrs();
         initColorRes();
 
+        initMacdPaint();
+
+    }
+
+    private void initMacdPaint() {
+        mMacdPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mMacdPaint.setColor(mMacdBuyColor);
+        mMacdPaint.setAntiAlias(true);
+        mMacdPaint.setStrokeWidth(mMacdLineWidth);
     }
 
     private void initDefAttrs() {
         mMinorModel = new MinorModel();
         mMinorModel.setMinorType(MinorModel.MinorType.MACD);
+
+        //重写内边距大小
+        mInnerTopBlankPadding=8;
+        mInnerBottomBlankPadding=8;
 
 
         setShowInnerX(false);
@@ -137,22 +228,19 @@ public class MinorView extends KView {
     }
 
     @Override
-    public void setTimeSharingData(List<Quotes> quotesList) {
-        super.setTimeSharingData(quotesList);
-        if (quotesList == null || quotesList.isEmpty()) {
-            Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "setTimeSharingData: 数据异常");
-            return;
-        }
-        //设置数据
-        mMinorModel.setQuotesList(quotesList);
-
-        //执行寻找最大最小值
-        proformMinMaxData();
-    }
-
-    @Override
     protected void seekAndCalculateCellData() {
+        //设置数据
+        mMinorModel.setQuotesList(mQuotesList);
+
+        if (mMinorModel.getMinorType() == MinorModel.MinorType.MACD) {
+            FinancialAlgorithm.calculateMACD(mMinorModel.getQuotesList());
+        }
+        if (mMinorModel.getMinorType() == MinorModel.MinorType.RSI) {
+
+        }
+        if (mMinorModel.getMinorType() == MinorModel.MinorType.KDJ) {
+
+        }
 
         //找到close最大值和最小值
         double tempMinClosePrice = Integer.MAX_VALUE;
@@ -167,13 +255,16 @@ public class MinorView extends KView {
             if (i == mEndIndex - 1) {
                 mEndQuotes = quotes;
             }
-            if (quotes.c <= tempMinClosePrice) {
-                tempMinClosePrice = quotes.c;
-                mMinColseQuotes = quotes;
+            double min = FinancialAlgorithm.getMasterMinY(quotes, mMinorModel.getMinorType());
+            double max = FinancialAlgorithm.getMasterMaxY(quotes, mMinorModel.getMinorType());
+
+            if (min <= tempMinClosePrice) {
+                tempMinClosePrice = min;
+                mMinY = tempMinClosePrice;
             }
-            if (quotes.c >= tempMaxClosePrice) {
-                tempMaxClosePrice = quotes.c;
-                mMaxCloseQuotes = quotes;
+            if (max >= tempMaxClosePrice) {
+                tempMaxClosePrice = max;
+                mMaxY = tempMaxClosePrice;
             }
 
         }
@@ -182,29 +273,11 @@ public class MinorView extends KView {
         mPerX = (mWidth - mPaddingLeft - mPaddingRight - mInnerRightBlankPadding)
                 / (mShownMaxCount);
         //不要忘了减去内部的上下Padding
-//        mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
-//                - mInnerBottomBlankPadding) / (mMaxCloseQuotes.c - mMinColseQuotes.c));
-
+        mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
+                - mInnerBottomBlankPadding) / (mMaxY - mMinY));
+        Log.e(TAG, "seekAndCalculateCellData: mMinY：" + mMinY + ",mMaxY:" + mMaxY);
         //重绘
         invalidate();
     }
 
-    /**
-     * 寻找指定指标类型的最大最小值
-     */
-    private void proformMinMaxData() {
-        if (mMinorModel.getMinorType() == MinorModel.MinorType.MACD) {
-            MacdModel macdModel = mMinorModel.getMacdModel();
-            //设置并开始寻找最小最大值
-            macdModel.setOriginList(mMinorModel.getQuotesList());
-
-            //以下开始寻找macd的单元宽度与间隔宽度。
-
-
-        } else if (mMinorModel.getMinorType() == MinorModel.MinorType.RSI) {
-            RsiModel rsiModel = mMinorModel.getRsiModel();
-        } else if (mMinorModel.getMinorType() == MinorModel.MinorType.KDJ) {
-            KdjModel kdjModel = mMinorModel.getKdjModel();
-        }
-    }
 }

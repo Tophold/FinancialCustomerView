@@ -7,6 +7,7 @@ import java.util.List;
 
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.financialview.kview.master.MasterView;
+import wgyscsf.financialcustomerview.financialview.kview.minor.MinorModel;
 
 /**
  * ============================================================
@@ -96,14 +97,26 @@ public class FinancialAlgorithm {
         }
     }
 
+    public static void calculateMACD(List<Quotes> quotesList) {
+        calculateMACD(quotesList, 12, 26, 9);
+    }
 
     /**
-     * 计算数据集合的DIF、DEA、MACD。
-     * 新股上市首日，其首日DEA为0。从次日开始，由于首日DEA为0，因此次日的DEA=0.2* DIF+0=0.2*DIF。后续日子的DEA可以套用0.2*DIF + 0.8* DEA’计算。
+     * MACD(x,y,z)，一般取MACD(12,26,9)。
+     * MACD(x,y,z)，x、y为平滑指数。z暂时不知道用处（不影响算法）。
+     * `EMAx=((x-1)/(x+1.0)*前一日EMA)+2.0/(x+1)*今日收盘价`;其中第一日的EMA是当日的收盘价。
+     * `EMA12=(12/13.0)*[前一日EMA12]+2.0/13*[今日quotes.c]`
+     * `EMA26=(25/27.0)*[前一日EMA26]+2.0/27*[今日quotes.c]`
+     * DIF:`DIF=EMA12-EMA26`
+     * DEA:`DEA=8/10.0*(前一日的DEA)+2/10.0*今日DIF`
+     * MACD:`2*(DIF-DEA)`
      *
-     * @param quotesList 对应的数据集合
+     * @param quotesList 数据集合
+     * @param d1 平滑指数，一般为12
+     * @param d2 平滑指数，一般为26
+     * @param z  暂时未知
      */
-    public static void calculateMACD(List<Quotes> quotesList) {
+    public static void calculateMACD(List<Quotes> quotesList, int d1, int d2, int z) {
         //容错
         if (quotesList == null || quotesList.isEmpty()) return;
 
@@ -119,8 +132,8 @@ public class FinancialAlgorithm {
                 ema12 = quotes.c;
                 ema26 = quotes.c;
             } else {
-                ema12 = ema12 * 11 / 13.0 + quotes.c * 2 / 13.0;
-                ema26 = ema12 * 25 / 27.0 + quotes.c * 2 / 27.0;
+                ema12 = (d1 - 1) / (d1 + 1.0) * ema12 + 2.0 / (d1 + 1) * quotes.c;
+                ema26 = (d2 - 1) / (d2 + 1.0) * ema26 + 2.0 / (d2 + 1) * quotes.c;
             }
             //计算dif
             dif = ema12 - ema26;
@@ -141,7 +154,7 @@ public class FinancialAlgorithm {
 
             //计算结束
             //打印日志
-            //Log.e(TAG, "calculateMACD: dif:" + quotes.dif + ",dea:" + quotes.dea + ",macd:" + macd);
+            Log.e(TAG, "calculateMACD: dif:" + quotes.dif + ",dea:" + quotes.dea + ",macd:" + macd);
         }
 
     }
@@ -316,7 +329,7 @@ public class FinancialAlgorithm {
      * 特殊的，假如数据集合中最开始的n个数据，是没法计算MAn的。这里的处理方式是不计算，绘制时直接不绘制对应MA即可。
      *
      * @param quotesList 数据集合
-     * @param period MAn中的n,周期，一般是：5、10、20、30、60。
+     * @param period     MAn中的n,周期，一般是：5、10、20、30、60。
      */
     public static void calculateMA(List<Quotes> quotesList, int period) {
 
@@ -335,7 +348,7 @@ public class FinancialAlgorithm {
             }
 
             //边界
-            if (i < period-1) {
+            if (i < period - 1) {
                 continue;
             }
 
@@ -364,8 +377,8 @@ public class FinancialAlgorithm {
      * K为参数，可根据股票的特性来做相应的调整，一般默认为2
      *
      * @param quotesList 数据集合
-     * @param period 周期，一般为26
-     * @param k 参数，可根据股票的特性来做相应的调整，一般默认为2
+     * @param period     周期，一般为26
+     * @param k          参数，可根据股票的特性来做相应的调整，一般默认为2
      */
     public static void calculateBOLL(List<Quotes> quotesList, int period, int k) {
         if (quotesList == null || quotesList.isEmpty()) return;
@@ -378,15 +391,15 @@ public class FinancialAlgorithm {
         //n日
         double sum = 0;
         //n-1日
-        double sum2=0;
+        double sum2 = 0;
         for (int i = 0; i < quotesList.size(); i++) {
             Quotes quotes = quotesList.get(i);
             sum += quotes.c;
-            sum2+=quotes.c;
+            sum2 += quotes.c;
             if (i > period - 1)
                 sum -= quotesList.get(i - period).c;
-            if(i>period-2)
-                sum2 -= quotesList.get(i - period+1).c;
+            if (i > period - 2)
+                sum2 -= quotesList.get(i - period + 1).c;
 
             //这个范围不计算，在View上的反应就是不显示这个范围的boll线
             if (i < period - 1)
@@ -395,7 +408,7 @@ public class FinancialAlgorithm {
             //n日MA
             double ma = sum / period;
             //n-1日MA
-            double ma2=sum2/(period-1);
+            double ma2 = sum2 / (period - 1);
             double md = 0;
             for (int j = i + 1 - period; j <= i; j++) {
                 //n-1日
@@ -501,6 +514,111 @@ public class FinancialAlgorithm {
         //quotes
         if (quotes.h != 0 && quotes.h > max) {
             max = quotes.h;
+        }
+        //没有找到
+        if (max == Integer.MIN_VALUE) {
+            max = 0;
+        }
+        return max;
+
+    }
+
+    /**
+     * 副图：找到单个报价中的最小值
+     *
+     * @param quotes
+     * @param minorType
+     * @return
+     */
+    public static double getMasterMinY(Quotes quotes, MinorModel.MinorType minorType) {
+        double min = Integer.MAX_VALUE;
+        //macd
+        if (minorType == MinorModel.MinorType.MACD) {
+            if (quotes.dif != 0 && quotes.dif < min) {
+                min = quotes.dif;
+            }
+            if (quotes.dea != 0 && quotes.dea < min) {
+                min = quotes.dea;
+            }
+            if (quotes.macd != 0 && quotes.macd < min) {
+                min = quotes.macd;
+            }
+        }
+        //RSI
+        if (minorType == MinorModel.MinorType.RSI) {
+            if (quotes.rsi6 != 0 && quotes.rsi6 < min) {
+                min = quotes.dif;
+            }
+            if (quotes.rsi12 != 0 && quotes.rsi12 < min) {
+                min = quotes.rsi12;
+            }
+            if (quotes.rsi24 != 0 && quotes.rsi24 < min) {
+                min = quotes.rsi24;
+            }
+        }
+        //KDJ
+        if (minorType == MinorModel.MinorType.KDJ) {
+            if (quotes.k != 0 && quotes.k < min) {
+                min = quotes.k;
+            }
+            if (quotes.d != 0 && quotes.d < min) {
+                min = quotes.d;
+            }
+            if (quotes.j != 0 && quotes.j < min) {
+                min = quotes.j;
+            }
+        }
+        //没有找到
+        if (min == Integer.MAX_VALUE) {
+            min = 0;
+        }
+        return min;
+
+    }
+    /**
+     * 副图：找到单个报价中的最大值
+     *
+     * @param quotes
+     * @param minorType
+     * @return
+     */
+    public static double getMasterMaxY(Quotes quotes, MinorModel.MinorType minorType) {
+        double max = Integer.MIN_VALUE;
+        //macd
+        if (minorType == MinorModel.MinorType.MACD) {
+            if (quotes.dif != 0 && quotes.dif > max) {
+                max = quotes.dif;
+            }
+            if (quotes.dea != 0 && quotes.dea > max) {
+                max = quotes.dea;
+            }
+            if (quotes.macd != 0 && quotes.macd > max) {
+                max = quotes.macd;
+            }
+        }
+        //RSI
+        if (minorType == MinorModel.MinorType.RSI) {
+            if (quotes.rsi6 != 0 && quotes.rsi6 > max) {
+                max = quotes.dif;
+            }
+            if (quotes.rsi12 != 0 && quotes.rsi12 > max) {
+                max = quotes.rsi12;
+            }
+            if (quotes.rsi24 != 0 && quotes.rsi24 > max) {
+                max = quotes.rsi24;
+            }
+        }
+        //KDJ
+        if (minorType == MinorModel.MinorType.KDJ) {
+            if (quotes.k != 0 && quotes.k > max) {
+                max = quotes.k;
+            }
+            if (quotes.d != 0 && quotes.d > max) {
+                max = quotes.d;
+            }
+            if (quotes.j != 0 && quotes.j > max) {
+                max = quotes.j;
+            }
         }
         //没有找到
         if (max == Integer.MIN_VALUE) {
