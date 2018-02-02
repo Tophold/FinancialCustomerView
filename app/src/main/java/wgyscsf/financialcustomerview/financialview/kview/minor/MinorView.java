@@ -66,7 +66,6 @@ public class MinorView extends KView {
     protected float mCandleDiverWidthRatio = 0.1f;
 
 
-
     public MinorView(Context context) {
         this(context, null);
     }
@@ -96,6 +95,11 @@ public class MinorView extends KView {
         if (mQuotesList == null || mQuotesList.isEmpty()) {
             return;
         }
+        //绘制右侧文字
+        drawYRightTxt(canvas);
+        //绘制非按下情况下图例
+        drawNoPressLegend(canvas);
+
         if (mMinorModel.getMinorType() == MinorModel.MinorType.MACD) {
             drawMACD(canvas);
         } else if (mMinorModel.getMinorType() == MinorModel.MinorType.RSI) {
@@ -105,12 +109,27 @@ public class MinorView extends KView {
         }
     }
 
-    private void drawMACD(Canvas canvas) {
+    private void drawNoPressLegend(Canvas canvas) {
+        // FIXME: 2018/2/2 按下情况下则不显示
+
+        String showTxt="";
+        if (mMinorModel.getMinorType() == MinorModel.MinorType.MACD) {
+            showTxt="MACD(12,26,9)";
+        } else if (mMinorModel.getMinorType() == MinorModel.MinorType.RSI) {
+            showTxt="RSI(6,12,24)";
+        } else if (mMinorModel.getMinorType() == MinorModel.MinorType.KDJ) {
+            showTxt="KDJ(9,3,3)";
+        }
+        canvas.drawText(showTxt,
+                (float) (mWidth - mLegendPaddingRight - mPaddingRight - mLegendPaint.measureText(showTxt)),
+                (float) (mLegendPaddingTop + mPaddingTop+getFontHeight(mLegendTxtSize,mLegendPaint)), mLegendPaint);
+    }
+
+    private void drawYRightTxt(Canvas canvas) {
         //绘制右侧的y轴文字
         //现将最小值、最大值画好
         float halfTxtHight = getFontHeight(mXYTxtSize, mXYTxtPaint) / 2;//应该/2的，但是不准确，原因不明
-        float rightBorderPadding = mRightTxtPadding;
-        float x = mWidth - mPaddingRight + rightBorderPadding;
+        float x = mWidth - mPaddingRight + mRightTxtPadding;
         float maxY = mPaddingTop + halfTxtHight + mInnerTopBlankPadding;
         float minY = mHeight - mPaddingBottom - halfTxtHight - mInnerBottomBlankPadding;
         //draw min
@@ -122,11 +141,12 @@ public class MinorView extends KView {
                 x,
                 maxY, mXYTxtPaint);
         //draw middle
-        canvas.drawText(FormatUtil.numFormat((mMaxY+mMinY)/2.0, mDigits),
-                x, (minY +maxY)/2.0f,
+        canvas.drawText(FormatUtil.numFormat((mMaxY + mMinY) / 2.0, mDigits),
+                x, (minY + maxY) / 2.0f,
                 mXYTxtPaint);
+    }
 
-
+    private void drawMACD(Canvas canvas) {
 
         //macd
         //首先寻找"0"点，这个点是正负macd的分界点
@@ -135,11 +155,11 @@ public class MinorView extends KView {
         float startX, startY, stopX, stopY;
 
         //dif
-        float difX,difY;
+        float difX, difY;
         Path difPath = new Path();
 
         //dea
-        float deaX,deaY;
+        float deaX, deaY;
         Path deaPath = new Path();
 
         for (int i = mBeginIndex; i < mEndIndex; i++) {
@@ -148,8 +168,8 @@ public class MinorView extends KView {
             /*macd*/
             //找另外一个y点
             double y = v - mPerY * (quotes.macd - mMinY);
-            startX = mPaddingLeft + (i-mBeginIndex) * mPerX + mCandleDiverWidthRatio * mPerX / 2;
-            stopX = mPaddingLeft + (i-mBeginIndex + 1) * mPerX - mCandleDiverWidthRatio * mPerX / 2;
+            startX = mPaddingLeft + (i - mBeginIndex) * mPerX + mCandleDiverWidthRatio * mPerX / 2;
+            stopX = mPaddingLeft + (i - mBeginIndex + 1) * mPerX - mCandleDiverWidthRatio * mPerX / 2;
             startY = (float) zeroY;
             stopY = (float) y;
             if (quotes.macd > 0) {
@@ -157,43 +177,43 @@ public class MinorView extends KView {
             } else {
                 mMacdPaint.setColor(mMacdSellColor);
             }
-//            Log.e(TAG, "drawMACD: "+startY+","+stopY +
-//                    ","+(mPaddingTop+mInnerTopBlankPadding)+","+
-//                    (mHeight-mPaddingBottom-mInnerBottomBlankPadding));
+            //            Log.e(TAG, "drawMACD: "+startY+","+stopY +
+            //                    ","+(mPaddingTop+mInnerTopBlankPadding)+","+
+            //                    (mHeight-mPaddingBottom-mInnerBottomBlankPadding));
             mMacdPaint.setStyle(Paint.Style.FILL);
-            canvas.drawRect(startX,startY , stopX, stopY, mMacdPaint);
+            canvas.drawRect(startX, startY, stopX, stopY, mMacdPaint);
 
 
             /*dif*/
-            difX= mPaddingLeft + (i-mBeginIndex) * mPerX + mPerX / 2;
-            difY= (float) (v - mPerY * (quotes.dif - mMinY));
-            if(i==mBeginIndex){
-                difPath.moveTo(difX-mPerX/2,difY);//第一个点特殊处理
-            }else{
-                if(i==mEndIndex-1){
-                    difX+=mPerX/2;//最后一个点特殊处理
+            difX = mPaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
+            difY = (float) (v - mPerY * (quotes.dif - mMinY));
+            if (i == mBeginIndex) {
+                difPath.moveTo(difX - mPerX / 2, difY);//第一个点特殊处理
+            } else {
+                if (i == mEndIndex - 1) {
+                    difX += mPerX / 2;//最后一个点特殊处理
                 }
-                difPath.lineTo(difX,difY);
+                difPath.lineTo(difX, difY);
             }
             mMacdPaint.setStyle(Paint.Style.STROKE);
             mMacdPaint.setColor(mMacdDifColor);
-            canvas.drawPath(difPath,mMacdPaint);
+            canvas.drawPath(difPath, mMacdPaint);
 
 
             /*dea*/
-            deaX= mPaddingLeft + (i-mBeginIndex) * mPerX + mPerX / 2;
-            deaY= (float) (v - mPerY * (quotes.dea - mMinY));
-            if(i==mBeginIndex){
-                deaPath.moveTo(deaX-mPerX/2,deaY);//第一个点特殊处理
-            }else{
-                if(i==mEndIndex-1){
-                    deaX+=mPerX/2;//最后一个点特殊处理
+            deaX = mPaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
+            deaY = (float) (v - mPerY * (quotes.dea - mMinY));
+            if (i == mBeginIndex) {
+                deaPath.moveTo(deaX - mPerX / 2, deaY);//第一个点特殊处理
+            } else {
+                if (i == mEndIndex - 1) {
+                    deaX += mPerX / 2;//最后一个点特殊处理
                 }
-                deaPath.lineTo(deaX,deaY);
+                deaPath.lineTo(deaX, deaY);
             }
             mMacdPaint.setStyle(Paint.Style.STROKE);
             mMacdPaint.setColor(mAcdDeaColor);
-            canvas.drawPath(deaPath,mMacdPaint);
+            canvas.drawPath(deaPath, mMacdPaint);
         }
 
     }
@@ -226,8 +246,13 @@ public class MinorView extends KView {
         mMinorModel.setMinorType(MinorModel.MinorType.MACD);
 
         //重写内边距大小
-        mInnerTopBlankPadding=8;
-        mInnerBottomBlankPadding=8;
+        mInnerTopBlankPadding = 8;
+        mInnerBottomBlankPadding = 8;
+
+        //重写Legend padding
+        mLegendPaddingTop=0;
+        mLegendPaddingRight=4;
+        mLegendPaddingLeft=4;
 
 
         setShowInnerX(false);

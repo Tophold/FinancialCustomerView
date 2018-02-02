@@ -126,24 +126,6 @@ public class MasterView extends KView {
     //指标类型
     MasterType mMasterType = MasterType.NONE;
 
-    //画笔:ma5、ma10、ma20
-    int mMaLineWidth = 1;
-
-    //非长按下主图指标图例
-    Paint mLegendPaint;
-    int mLegendColor;
-    //距离上方border的距离(单位：px)
-    double mLegendPaddingTop = 30;
-    //这个是文字框的结束位置距离右侧的距离
-    double mLegendPaddingRight = 10;
-    float mLegendTxtSize = 15;
-
-    //长按下主图指标图例
-    //这个是文字框的结束位置距离右侧的距离
-    double mLegendPaddingLeft = 10;
-    //同时显示ma和boll上下的间距
-    double mLegendTxtTopPadding = 0;
-
     //MA
     Paint mMa5Paint;
     int mMa5Color;
@@ -359,7 +341,6 @@ public class MasterView extends KView {
         initBrokenLinePaint();
         initBrokenLineBgPaint();
         initCandlePaint();
-        initLegendPaint();
         initMaPaint();
         initBollPaint();
 
@@ -386,8 +367,6 @@ public class MasterView extends KView {
         mLongPressTxtBgColor = getColor(R.color.color_timeSharing_longPressTxtBgColor);
         mRedCandleColor = getColor(R.color.color_timeSharing_candleRed);
         mGreenCandleColor = getColor(R.color.color_timeSharing_candleGreen);
-
-        mLegendColor = getColor(R.color.color_masterView_legendColor);
 
         mMa5Color = getColor(R.color.color_masterView_ma5Color);
         mMa10Color = getColor(R.color.color_masterView_ma10Color);
@@ -473,30 +452,23 @@ public class MasterView extends KView {
         mCandlePaint.setStrokeWidth(mCanldeHighLowWidth);
     }
 
-    private void initLegendPaint() {
-        mLegendPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mLegendPaint.setColor(mLegendColor);
-        mLegendPaint.setStrokeWidth(mMaLineWidth);
-        mLegendPaint.setTextSize(mLegendTxtSize);
-    }
-
     private void initMaPaint() {
         mMa5Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mMa5Paint.setColor(mMa5Color);
         mMa5Paint.setStyle(Paint.Style.STROKE);
-        mMa5Paint.setStrokeWidth(mMaLineWidth);
+        mMa5Paint.setStrokeWidth(mLineWidth);
         mMa5Paint.setTextSize(mLegendTxtSize);
 
         mMa10Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mMa10Paint.setColor(mMa10Color);
         mMa10Paint.setStyle(Paint.Style.STROKE);
-        mMa10Paint.setStrokeWidth(mMaLineWidth);
+        mMa10Paint.setStrokeWidth(mLineWidth);
         mMa10Paint.setTextSize(mLegendTxtSize);
 
         mMa20Paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mMa20Paint.setColor(mMa20Color);
         mMa20Paint.setStyle(Paint.Style.STROKE);
-        mMa20Paint.setStrokeWidth(mMaLineWidth);
+        mMa20Paint.setStrokeWidth(mLineWidth);
         mMa20Paint.setTextSize(mLegendTxtSize);
     }
 
@@ -504,21 +476,21 @@ public class MasterView extends KView {
         mBollMbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBollMbPaint.setColor(mBollMbColor);
         mBollMbPaint.setStyle(Paint.Style.STROKE);
-        mBollMbPaint.setStrokeWidth(mMaLineWidth);
+        mBollMbPaint.setStrokeWidth(mLineWidth);
         mBollMbPaint.setTextSize(mLegendTxtSize);
 
 
         mBollUpPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBollUpPaint.setColor(mBollUpColor);
         mBollUpPaint.setStyle(Paint.Style.STROKE);
-        mBollUpPaint.setStrokeWidth(mMaLineWidth);
+        mBollUpPaint.setStrokeWidth(mLineWidth);
         mBollUpPaint.setTextSize(mLegendTxtSize);
 
 
         mBollDnPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mBollDnPaint.setColor(mBollDnColor);
         mBollDnPaint.setStyle(Paint.Style.STROKE);
-        mBollDnPaint.setStrokeWidth(mMaLineWidth);
+        mBollDnPaint.setStrokeWidth(mLineWidth);
         mBollDnPaint.setTextSize(mLegendTxtSize);
 
     }
