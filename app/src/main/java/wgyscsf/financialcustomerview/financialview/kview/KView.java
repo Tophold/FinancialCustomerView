@@ -142,6 +142,17 @@ public abstract class KView extends BaseFinancialView {
     protected float mOuterLineWidth = 1;
     protected int mOuterLineColor;
 
+    //画笔:外围X、Y轴线文字
+    protected Paint mXYTxtPaint;
+    //x、y轴指示文字字体的大小
+    protected final float mXYTxtSize = 14;
+    protected int mXYTxtColor;
+    //右侧文字距离右边线线的距离
+    protected final float mRightTxtPadding = 4;
+    //底部文字距离底部线的距离
+    protected final float mBottomTxtPadding = 20;
+
+
     //画笔:内部xy轴虚线
     protected Paint mInnerXyPaint;
     protected float mInnerXyLineWidth = 1;
@@ -203,12 +214,14 @@ public abstract class KView extends BaseFinancialView {
         mOuterLineColor = getColor(R.color.color_kview_outerStrokeColor);
         mLoadingTextColor = getColor(R.color.color_kview_loadingTxtColor);
         mInnerXyLineColor = getColor(R.color.color_kview_innerXyDashColor);
+        mXYTxtColor = getColor(R.color.color_timeSharing_xYTxtColor);
     }
 
     private void initPaintRes() {
         initLoadingPaint();
         initOuterPaint();
         initInnerXyPaint();
+        initXyTxtPaint();
     }
 
     protected void initLoadingPaint() {
@@ -233,6 +246,12 @@ public abstract class KView extends BaseFinancialView {
             setLayerType(LAYER_TYPE_SOFTWARE, null);
             mInnerXyPaint.setPathEffect(new DashPathEffect(new float[]{5, 5}, 0));
         }
+    }
+    protected void initXyTxtPaint() {
+        mXYTxtPaint = new Paint();
+        mXYTxtPaint.setColor(mXYTxtColor);
+        mXYTxtPaint.setTextSize(mXYTxtSize);
+        mXYTxtPaint.setAntiAlias(true);
     }
 
     protected void showLoadingPaint(Canvas canvas) {

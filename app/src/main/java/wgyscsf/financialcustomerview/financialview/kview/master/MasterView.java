@@ -87,16 +87,6 @@ public class MasterView extends KView {
     int mTimingTxtColor;
     int mTimingTxtBgColor;
 
-    //画笔:外围X、Y轴线文字
-    Paint mXYTxtPaint;
-    //x、y轴指示文字字体的大小
-    final float mXYTxtSize = 14;
-    int mXYTxtColor;
-    //右侧文字距离右边线线的距离
-    final float mRightTxtPadding = 4;
-    //底部文字距离底部线的距离
-    final float mBottomTxtPadding = 20;
-
     //画笔:长按的十字线
     Paint mLongPressPaint;
     int mLongPressColor;
@@ -361,7 +351,6 @@ public class MasterView extends KView {
         loadDefAttrs();
 
         //初始化画笔
-        initXyTxtPaint();
         initDotPaint();
         initTimingTxtPaint();
         initTimingLinePaint();
@@ -392,7 +381,6 @@ public class MasterView extends KView {
         mBrokenLineBgColor = getColor(R.color.color_timeSharing_blowBlueColor);
         mTimingTxtColor = getColor(R.color.color_timeSharing_timingTxtColor);
         mTimingTxtBgColor = getColor(R.color.color_timeSharing_timingTxtBgColor);
-        mXYTxtColor = getColor(R.color.color_timeSharing_xYTxtColor);
         mLongPressColor = getColor(R.color.color_timeSharing_longPressLineColor);
         mLongPressTxtColor = getColor(R.color.color_timeSharing_longPressTxtColor);
         mLongPressTxtBgColor = getColor(R.color.color_timeSharing_longPressTxtBgColor);
@@ -408,13 +396,6 @@ public class MasterView extends KView {
         mBollMbColor = getColor(R.color.color_masterView_bollMbColor);
         mBollUpColor = getColor(R.color.color_masterView_bollUpColor);
         mBollDnColor = getColor(R.color.color_masterView_bollDnColor);
-    }
-
-    protected void initXyTxtPaint() {
-        mXYTxtPaint = new Paint();
-        mXYTxtPaint.setColor(mXYTxtColor);
-        mXYTxtPaint.setTextSize(mXYTxtSize);
-        mXYTxtPaint.setAntiAlias(true);
     }
 
     protected void initDotPaint() {

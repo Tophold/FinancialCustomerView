@@ -154,170 +154,63 @@ public class FinancialAlgorithm {
 
             //计算结束
             //打印日志
-            Log.e(TAG, "calculateMACD: dif:" + quotes.dif + ",dea:" + quotes.dea + ",macd:" + macd);
+            //Log.e(TAG, "calculateMACD: dif:" + quotes.dif + ",dea:" + quotes.dea + ",macd:" + macd);
         }
 
     }
 
     public static void calculateRSI(List<Quotes> quotesList) {
-        calculateRSI(quotesList, 6, 12, 24);
+        calculateRSI(quotesList, 6);
+        calculateRSI(quotesList, 12);
+        calculateRSI(quotesList, 24);
     }
 
     /**
-     * 计算数据集合的RSI。对于异常的数据，比如：分子为0的，返回值全部用0表示。
+     * 计算RSI。RSI(x,y,z)，一般取RSI(6,12,24)。
+     * RSI(x,y,z)，x、y、z均为周期单位，计算算法一直，只是周期不同。
+     * RSIx,在周期x内，upSum="在周期x内的上涨总点数"，downSum="在周期x内的下跌总点数"；`RSIx=upSum/(upSum+downSum)*100`;
+     * 注意：RSIx对于最开始的x+1周期内，不存在对应RSI,在图像上表示就是不显示对应RSIx即可。
      *
-     * @param quotesList 对应的数据集合
-     * @param xPeriod    周期
-     * @param yPeriod
-     * @param zPeriod
+     * @param quotes 对应的数据集合
+     * @param period    周期
      */
-    public static void calculateRSI(List<Quotes> quotesList, int xPeriod, int yPeriod, int zPeriod) {
+    public static void calculateRSI(List<Quotes> quotes, int period) {
         //容错
-        if (quotesList == null || quotesList.isEmpty()) return;
-        if (xPeriod <= 0) xPeriod = 6;
-        if (yPeriod <= 0) yPeriod = 12;
-        if (zPeriod <= 0) zPeriod = 24;
-        //转化为熟悉的索引
-        xPeriod--;
-        yPeriod--;
-        zPeriod--;
-
-        double rs6 = 0;
-        double rsi6 = 0;
-        double rs12 = 0;
-        double rsi12 = 0;
-        double rs24 = 0;
-        double rsi24 = 0;
-
-        for (int i = 0; i < quotesList.size(); i++) {
-            Quotes quotes = quotesList.get(i);
-            double downSum = 0;
-            double upSum = 0;
-            if (i < xPeriod) {
-                for (int i1 = 0; i1 <= i; i1++) {
-                    if (i1 == 0) continue;
-                    Quotes preQuotes = quotesList.get(i1 - 1);
-                    double dis = quotes.c - preQuotes.c;
-                    if (dis < 0) {
-                        downSum -= dis;
-                    } else {
-                        upSum += dis;
-                    }
-                }
-                //异常情况
-                if (i == 0 || downSum / i == 0) {
-                    rs6 = 0;
+        if (quotes == null || quotes.isEmpty()) return;
+        if (period <= 0) period = 6;
+        //period单位的上涨点数
+        double upSum = 0f;
+        //period单位的下跌点数
+        double downSum = 0f;
+        //差值
+        double dis;
+        //最后计算的值
+        double rsi;
+        for (int i = 0; i < quotes.size(); i++) {
+            Quotes q = quotes.get(i);
+            if (i > 0) {
+                dis= q.c - quotes.get(i - 1).c;
+                if (dis>= 0) {
+                    upSum += dis;
                 } else {
-                    rs6 = (upSum / i) / (downSum / i);
+                    downSum -= dis;
                 }
-            } else {
-                for (int i1 = i - xPeriod; i1 <= i; i1++) {
-                    if (i1 == 0) continue;
-                    Quotes preQuotes = quotesList.get(i1 - 1);
-                    double dis = quotes.c - preQuotes.c;
-                    if (dis < 0) {
-                        downSum -= dis;
+
+                //上面加，这里减。要保证累计的和周期为：period
+                if (i + 1 > period) {
+                    dis=quotes.get(i-period+1).c - quotes.get(i - period).c;
+                    if (dis >= 0) {
+                        upSum -= dis;
                     } else {
-                        upSum += dis;
-                    }
-                }
-                //异常情况
-                if (downSum == 0 || upSum == 0) {
-                    rs6 = 0;
-                } else {
-                    rs6 = (upSum / xPeriod) / (downSum / xPeriod);
+                        downSum += dis;
+                     }
+                    rsi = upSum / (upSum + downSum) * 100;
+                    if(period==6) q.rsi6=rsi;
+                    else if(period==12) q.rsi12=rsi;
+                    else if(period==24) q.rsi24=rsi;
+                    else Log.e(TAG, "calculateRSI: 不存在该周期："+period );
                 }
             }
-            //计算
-            rsi6 = 100 * rs6 / (1 + rs6);
-
-
-            if (i < yPeriod) {
-                for (int i1 = 0; i1 <= i; i1++) {
-                    if (i1 == 0) continue;
-                    Quotes preQuotes = quotesList.get(i1 - 1);
-                    double dis = quotes.c - preQuotes.c;
-                    if (dis < 0) {
-                        downSum -= dis;
-                    } else {
-                        upSum += dis;
-                    }
-                }
-                //异常情况
-                if (i == 0 || downSum / i == 0) {
-                    rs12 = 0;
-                } else {
-                    rs12 = (upSum / i) / (downSum / i);
-                }
-            } else {
-                for (int i1 = i - yPeriod; i1 <= i; i1++) {
-                    if (i1 == 0) continue;
-                    Quotes preQuotes = quotesList.get(i1 - 1);
-                    double dis = quotes.c - preQuotes.c;
-                    if (dis < 0) {
-                        downSum -= dis;
-                    } else {
-                        upSum += dis;
-                    }
-                }
-                //异常情况
-                if (downSum == 0 || upSum == 0) {
-                    rs12 = 0;
-                } else {
-                    rs12 = (upSum / yPeriod) / (downSum / yPeriod);
-                }
-            }
-            //计算
-            rsi12 = 100 * rs12 / (1 + rs12);
-
-
-            if (i < zPeriod) {
-                for (int i1 = 0; i1 <= i; i1++) {
-                    if (i1 == 0) continue;
-                    Quotes preQuotes = quotesList.get(i1 - 1);
-                    double dis = quotes.c - preQuotes.c;
-                    if (dis < 0) {
-                        downSum -= dis;
-                    } else {
-                        upSum += dis;
-                    }
-                }
-                //异常情况
-                if (i == 0 || downSum / i == 0) {
-                    rs24 = 0;
-                } else {
-                    rs24 = (upSum / i) / (downSum / i);
-                }
-            } else {
-                for (int i1 = i - zPeriod; i1 <= i; i1++) {
-                    if (i1 == 0) continue;
-                    Quotes preQuotes = quotesList.get(i1 - 1);
-                    double dis = quotes.c - preQuotes.c;
-                    if (dis < 0) {
-                        downSum -= dis;
-                    } else {
-                        upSum += dis;
-                    }
-                }
-
-                //异常情况
-                if (downSum == 0 || upSum == 0) {
-                    rs24 = 0;
-                } else {
-                    rs24 = (upSum / zPeriod) / (downSum / zPeriod);
-                }
-            }
-            //计算
-            rsi24 = 100 * rs24 / (1 + rs24);
-
-            //设置
-            quotes.rsi6 = rsi6;
-            quotes.rsi12 = rsi12;
-            quotes.rsi24 = rsi24;
-
-            //打印日志
-            //            Log.e(TAG, "calculateRSI:rsi6 " + quotes.rsi6
-            //                    + ",rsi12:" + quotes.rsi12 + ",rsi24:" + quotes.rsi24);
         }
 
     }

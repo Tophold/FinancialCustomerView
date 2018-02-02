@@ -15,6 +15,7 @@ import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.financialview.FinancialAlgorithm;
 import wgyscsf.financialcustomerview.financialview.kview.KView;
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
+import wgyscsf.financialcustomerview.utils.FormatUtil;
 
 /**
  * ============================================================
@@ -35,6 +36,7 @@ public class MinorView extends KView {
     int mXyTxtColor;
     int mLegendTxtColor;
     int mLongPressTxtColor;
+
     //macd
     int mMacdBuyColor;
     int mMacdSellColor;
@@ -57,10 +59,13 @@ public class MinorView extends KView {
     //MinorModel聚合的数据
     MinorModel mMinorModel;
 
+    //y轴上最大值和最小值
     protected double mMinY;
     protected double mMaxY;
     //蜡烛图间隙，大小以单个蜡烛图的宽度的比例算。可修改。
     protected float mCandleDiverWidthRatio = 0.1f;
+
+
 
     public MinorView(Context context) {
         this(context, null);
@@ -101,6 +106,28 @@ public class MinorView extends KView {
     }
 
     private void drawMACD(Canvas canvas) {
+        //绘制右侧的y轴文字
+        //现将最小值、最大值画好
+        float halfTxtHight = getFontHeight(mXYTxtSize, mXYTxtPaint) / 2;//应该/2的，但是不准确，原因不明
+        float rightBorderPadding = mRightTxtPadding;
+        float x = mWidth - mPaddingRight + rightBorderPadding;
+        float maxY = mPaddingTop + halfTxtHight + mInnerTopBlankPadding;
+        float minY = mHeight - mPaddingBottom - halfTxtHight - mInnerBottomBlankPadding;
+        //draw min
+        canvas.drawText(FormatUtil.numFormat(mMinY, mDigits),
+                x,
+                minY, mXYTxtPaint);
+        //draw max
+        canvas.drawText(FormatUtil.numFormat(mMaxY, mDigits),
+                x,
+                maxY, mXYTxtPaint);
+        //draw middle
+        canvas.drawText(FormatUtil.numFormat((mMaxY+mMinY)/2.0, mDigits),
+                x, (minY +maxY)/2.0f,
+                mXYTxtPaint);
+
+
+
         //macd
         //首先寻找"0"点，这个点是正负macd的分界点
         float v = mHeight - mPaddingBottom - mInnerBottomBlankPadding;
@@ -118,7 +145,7 @@ public class MinorView extends KView {
         for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes quotes = mQuotesList.get(i);
 
-            //macd
+            /*macd*/
             //找另外一个y点
             double y = v - mPerY * (quotes.macd - mMinY);
             startX = mPaddingLeft + (i-mBeginIndex) * mPerX + mCandleDiverWidthRatio * mPerX / 2;
@@ -137,7 +164,7 @@ public class MinorView extends KView {
             canvas.drawRect(startX,startY , stopX, stopY, mMacdPaint);
 
 
-            //dif
+            /*dif*/
             difX= mPaddingLeft + (i-mBeginIndex) * mPerX + mPerX / 2;
             difY= (float) (v - mPerY * (quotes.dif - mMinY));
             if(i==mBeginIndex){
@@ -153,7 +180,7 @@ public class MinorView extends KView {
             canvas.drawPath(difPath,mMacdPaint);
 
 
-            //dea
+            /*dea*/
             deaX= mPaddingLeft + (i-mBeginIndex) * mPerX + mPerX / 2;
             deaY= (float) (v - mPerY * (quotes.dea - mMinY));
             if(i==mBeginIndex){
