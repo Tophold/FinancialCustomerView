@@ -250,7 +250,7 @@ public class MinorView extends KView {
         mInnerBottomBlankPadding = 8;
 
         //重写Legend padding
-        mLegendPaddingTop=0;
+        mLegendPaddingTop=2;
         mLegendPaddingRight=4;
         mLegendPaddingLeft=4;
 
