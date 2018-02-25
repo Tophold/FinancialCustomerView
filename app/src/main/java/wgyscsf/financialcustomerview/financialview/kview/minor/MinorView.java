@@ -7,9 +7,6 @@ import android.graphics.Path;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.widget.Toast;
-
-import java.util.List;
 
 import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.financialview.FinancialAlgorithm;
@@ -48,13 +45,18 @@ public class MinorView extends KView {
 
 
     //rsi
-    int mRsi16Color;
+    int mRsi6Color;
     int mRsi12Color;
     int mRsi24Color;
+    Paint mRsiPaint;
+    float mRsiLineWidth = 1;
+
     //kdj
     int mKColor;
     int mDColor;
     int mJColor;
+    Paint mKdjPaint;
+    float mKdjLineWidth = 1;
 
     //MinorModel聚合的数据
     MinorModel mMinorModel;
@@ -111,18 +113,17 @@ public class MinorView extends KView {
 
     private void drawNoPressLegend(Canvas canvas) {
         // FIXME: 2018/2/2 按下情况下则不显示
-
-        String showTxt="";
+        String showTxt = "";
         if (mMinorModel.getMinorType() == MinorModel.MinorType.MACD) {
-            showTxt="MACD(12,26,9)";
+            showTxt = "MACD(12,26,9)";
         } else if (mMinorModel.getMinorType() == MinorModel.MinorType.RSI) {
-            showTxt="RSI(6,12,24)";
+            showTxt = "RSI(6,12,24)";
         } else if (mMinorModel.getMinorType() == MinorModel.MinorType.KDJ) {
-            showTxt="KDJ(9,3,3)";
+            showTxt = "KDJ(9,3,3)";
         }
         canvas.drawText(showTxt,
                 (float) (mWidth - mLegendPaddingRight - mPaddingRight - mLegendPaint.measureText(showTxt)),
-                (float) (mLegendPaddingTop + mPaddingTop+getFontHeight(mLegendTxtSize,mLegendPaint)), mLegendPaint);
+                (float) (mLegendPaddingTop + mPaddingTop + getFontHeight(mLegendTxtSize, mLegendPaint)), mLegendPaint);
     }
 
     private void drawYRightTxt(Canvas canvas) {
@@ -220,10 +221,128 @@ public class MinorView extends KView {
 
     private void drawRSI(Canvas canvas) {
 
+        float rsiX;
+
+        //rsi6
+        float rsi6Y;
+        Path rsi6Path = new Path();
+
+        //rsi12
+        float rsi12Y;
+        Path rsi12Path = new Path();
+
+        //rsi24
+        float rsi24Y;
+        Path rsi24Path = new Path();
+
+        float v = mHeight - mPaddingBottom - mInnerBottomBlankPadding;
+        for (int i = mBeginIndex; i < mEndIndex; i++) {
+            Quotes quotes = mQuotesList.get(i);
+            rsiX = mPaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
+
+            /*rsi6*/
+            rsi6Y = (float) (v - mPerY * (quotes.rsi6 - mMinY));
+            if (i == mBeginIndex) {
+                rsi6Path.moveTo(rsiX - mPerX / 2, rsi6Y);//第一个点特殊处理
+            } else {
+                if (i == mEndIndex - 1) {
+                    rsiX += mPerX / 2;//最后一个点特殊处理
+                }
+                rsi6Path.lineTo(rsiX, rsi6Y);
+            }
+            mRsiPaint.setColor(mRsi6Color);
+            canvas.drawPath(rsi6Path, mRsiPaint);
+
+            /*rsi12*/
+            rsi12Y = (float) (v - mPerY * (quotes.rsi12 - mMinY));
+            if (i == mBeginIndex) {
+                rsi12Path.moveTo(rsiX - mPerX / 2, rsi12Y);//第一个点特殊处理
+            } else {
+                if (i == mEndIndex - 1) {
+                    rsiX += mPerX / 2;//最后一个点特殊处理
+                }
+                rsi12Path.lineTo(rsiX, rsi12Y);
+            }
+            mRsiPaint.setColor(mRsi12Color);
+            canvas.drawPath(rsi12Path, mRsiPaint);
+
+             /*rsi24*/
+            rsi24Y = (float) (v - mPerY * (quotes.rsi24 - mMinY));
+            if (i == mBeginIndex) {
+                rsi24Path.moveTo(rsiX - mPerX / 2, rsi24Y);//第一个点特殊处理
+            } else {
+                if (i == mEndIndex - 1) {
+                    rsiX += mPerX / 2;//最后一个点特殊处理
+                }
+                rsi24Path.lineTo(rsiX, rsi24Y);
+            }
+            mRsiPaint.setColor(mRsi24Color);
+            canvas.drawPath(rsi24Path, mRsiPaint);
+
+        }
     }
 
     private void drawKDJ(Canvas canvas) {
 
+        float kdjX;
+
+        //k
+        float kY;
+        Path kPath = new Path();
+
+        //d
+        float dY;
+        Path dPath = new Path();
+
+        //j
+        float jY;
+        Path jPath = new Path();
+
+        float v = mHeight - mPaddingBottom - mInnerBottomBlankPadding;
+        for (int i = mBeginIndex; i < mEndIndex; i++) {
+            Quotes quotes = mQuotesList.get(i);
+            kdjX = mPaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
+
+            /*k*/
+            kY = (float) (v - mPerY * (quotes.k - mMinY));
+            if (i == mBeginIndex) {
+                kPath.moveTo(kdjX - mPerX / 2, kY);//第一个点特殊处理
+            } else {
+                if (i == mEndIndex - 1) {
+                    kdjX += mPerX / 2;//最后一个点特殊处理
+                }
+                kPath.lineTo(kdjX, kY);
+            }
+            mKdjPaint.setColor(mKColor);
+            canvas.drawPath(kPath, mKdjPaint);
+
+            /*d*/
+            dY = (float) (v - mPerY * (quotes.d - mMinY));
+            if (i == mBeginIndex) {
+                dPath.moveTo(kdjX - mPerX / 2, dY);//第一个点特殊处理
+            } else {
+                if (i == mEndIndex - 1) {
+                    kdjX += mPerX / 2;//最后一个点特殊处理
+                }
+                dPath.lineTo(kdjX, dY);
+            }
+            mKdjPaint.setColor(mDColor);
+            canvas.drawPath(dPath, mKdjPaint);
+
+             /*j*/
+            jY = (float) (v - mPerY * (quotes.j - mMinY));
+            if (i == mBeginIndex) {
+                jPath.moveTo(kdjX - mPerX / 2, jY);//第一个点特殊处理
+            } else {
+                if (i == mEndIndex - 1) {
+                    kdjX += mPerX / 2;//最后一个点特殊处理
+                }
+                jPath.lineTo(kdjX, jY);
+            }
+            mKdjPaint.setColor(mJColor);
+            canvas.drawPath(jPath, mKdjPaint);
+
+        }
     }
 
     private void initAttrs() {
@@ -231,7 +350,25 @@ public class MinorView extends KView {
         initColorRes();
 
         initMacdPaint();
+        initRsiPaint();
+        initKdjPaint();
 
+    }
+
+    private void initKdjPaint() {
+        mKdjPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mKdjPaint.setColor(mKColor);
+        mKdjPaint.setAntiAlias(true);
+        mKdjPaint.setStrokeWidth(mKdjLineWidth);
+        mKdjPaint.setStyle(Paint.Style.STROKE);
+    }
+
+    private void initRsiPaint() {
+        mRsiPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mRsiPaint.setColor(mRsi6Color);
+        mRsiPaint.setAntiAlias(true);
+        mRsiPaint.setStrokeWidth(mRsiLineWidth);
+        mRsiPaint.setStyle(Paint.Style.STROKE);
     }
 
     private void initMacdPaint() {
@@ -243,16 +380,16 @@ public class MinorView extends KView {
 
     private void initDefAttrs() {
         mMinorModel = new MinorModel();
-        mMinorModel.setMinorType(MinorModel.MinorType.MACD);
+        mMinorModel.setMinorType(MinorModel.MinorType.KDJ);
 
         //重写内边距大小
         mInnerTopBlankPadding = 8;
         mInnerBottomBlankPadding = 8;
 
         //重写Legend padding
-        mLegendPaddingTop=2;
-        mLegendPaddingRight=4;
-        mLegendPaddingLeft=4;
+        mLegendPaddingTop = 2;
+        mLegendPaddingRight = 4;
+        mLegendPaddingLeft = 4;
 
 
         setShowInnerX(false);
@@ -271,7 +408,7 @@ public class MinorView extends KView {
         mMacdDifColor = getColor(R.color.color_minorView_macdDifColor);
         mAcdDeaColor = getColor(R.color.color_minorView_macdDeaColor);
         mAcdMacdColor = getColor(R.color.color_minorView_macdMacdColor);
-        mRsi16Color = getColor(R.color.color_minorView_rsi16Color);
+        mRsi6Color = getColor(R.color.color_minorView_rsi6Color);
         mRsi12Color = getColor(R.color.color_minorView_rsi12Color);
         mRsi24Color = getColor(R.color.color_minorView_rsi24Color);
         mKColor = getColor(R.color.color_minorView_kColor);
@@ -288,10 +425,10 @@ public class MinorView extends KView {
             FinancialAlgorithm.calculateMACD(mMinorModel.getQuotesList());
         }
         if (mMinorModel.getMinorType() == MinorModel.MinorType.RSI) {
-
+            FinancialAlgorithm.calculateRSI(mMinorModel.getQuotesList());
         }
         if (mMinorModel.getMinorType() == MinorModel.MinorType.KDJ) {
-
+            FinancialAlgorithm.calculateKDJ(mMinorModel.getQuotesList());
         }
 
         //找到close最大值和最小值
@@ -332,4 +469,9 @@ public class MinorView extends KView {
         invalidate();
     }
 
+    public void setMinorType(MinorModel.MinorType minorType) {
+        mMinorModel.setMinorType(minorType);
+
+        seekAndCalculateCellData();
+    }
 }

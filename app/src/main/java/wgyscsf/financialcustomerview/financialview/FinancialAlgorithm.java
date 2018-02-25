@@ -440,7 +440,7 @@ public class FinancialAlgorithm {
         //RSI
         if (minorType == MinorModel.MinorType.RSI) {
             if (quotes.rsi6 != 0 && quotes.rsi6 < min) {
-                min = quotes.dif;
+                min = quotes.rsi6;
             }
             if (quotes.rsi12 != 0 && quotes.rsi12 < min) {
                 min = quotes.rsi12;
@@ -492,7 +492,7 @@ public class FinancialAlgorithm {
         //RSI
         if (minorType == MinorModel.MinorType.RSI) {
             if (quotes.rsi6 != 0 && quotes.rsi6 > max) {
-                max = quotes.dif;
+                max = quotes.rsi6;
             }
             if (quotes.rsi12 != 0 && quotes.rsi12 > max) {
                 max = quotes.rsi12;
