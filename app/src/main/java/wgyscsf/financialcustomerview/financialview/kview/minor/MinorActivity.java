@@ -245,18 +245,4 @@ public class MinorActivity extends BaseActivity {
         //及时回收，防止泄露
         addGcManagerSubscription(subscribe);
     }
-
-    public void showMacd(View view) {
-        mMinorView.setMinorType(MinorModel.MinorType.MACD);
-    }
-
-    public void showRsi(View view) {
-        mMinorView.setMinorType(MinorModel.MinorType.RSI);
-    }
-
-    public void showKdj(View view) {
-        mMinorView.
-                setMinorType(MinorModel.MinorType.KDJ);
-
-    }
 }
