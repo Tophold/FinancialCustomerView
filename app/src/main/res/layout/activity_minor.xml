@@ -38,7 +38,7 @@
             android:text="kdj"/>
     </LinearLayout>
 
-    <wgyscsf.financialcustomerview.financialview.kview.minor.MinorView
+    <wgyscsf.financialcustomerview.financialview.kview.MinorView
         android:id="@+id/am_mv_minorView"
         android:layout_width="match_parent"
         android:layout_height="100dp"

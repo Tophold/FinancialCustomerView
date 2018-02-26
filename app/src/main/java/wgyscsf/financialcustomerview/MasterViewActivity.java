@@ -19,13 +19,11 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
-import wgyscsf.financialcustomerview.KViewBaseActivity;
-import wgyscsf.financialcustomerview.R;
-import wgyscsf.financialcustomerview.financialview.kview.KView;
+import wgyscsf.financialcustomerview.financialview.kview.KBaseView;
 import wgyscsf.financialcustomerview.financialview.kview.OriginQuotes;
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.financialview.kview.SimulateNetAPI;
-import wgyscsf.financialcustomerview.financialview.kview.master.MasterView;
+import wgyscsf.financialcustomerview.financialview.kview.MasterView;
 import wgyscsf.financialcustomerview.utils.FormatUtil;
 import wgyscsf.financialcustomerview.utils.GsonUtil;
 import wgyscsf.financialcustomerview.utils.StringUtils;
@@ -105,9 +103,9 @@ public class MasterViewActivity extends KViewBaseActivity {
         ats_tv_time = (TextView) findViewById(R.id.ats_tv_time);
 
         if (isTimeShring) {
-            mMasterView.setViewType(KView.ViewType.TIMESHARING);
+            mMasterView.setViewType(KBaseView.ViewType.TIMESHARING);
         } else {
-            mMasterView.setViewType(KView.ViewType.CANDLE);
+            mMasterView.setViewType(KBaseView.ViewType.CANDLE);
         }
     }
 
@@ -146,7 +144,7 @@ public class MasterViewActivity extends KViewBaseActivity {
                     @Override
                     public void call(List<Quotes> o) {
                         if (o != null) {
-                            mMasterView.setTimeSharingData(o, new KView.TimeSharingListener() {
+                            mMasterView.setTimeSharingData(o, new KBaseView.TimeSharingListener() {
 
                                 @Override
                                 public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {

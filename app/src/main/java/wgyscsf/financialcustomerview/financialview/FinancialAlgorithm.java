@@ -1,13 +1,12 @@
 package wgyscsf.financialcustomerview.financialview;
 
-import android.support.annotation.IntDef;
 import android.util.Log;
 
 import java.util.List;
 
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
-import wgyscsf.financialcustomerview.financialview.kview.master.MasterView;
-import wgyscsf.financialcustomerview.financialview.kview.minor.MinorModel;
+import wgyscsf.financialcustomerview.financialview.kview.MasterView;
+import wgyscsf.financialcustomerview.financialview.kview.MinorView;
 
 /**
  * ============================================================
@@ -423,10 +422,10 @@ public class FinancialAlgorithm {
      * @param minorType
      * @return
      */
-    public static double getMasterMinY(Quotes quotes, MinorModel.MinorType minorType) {
+    public static double getMasterMinY(Quotes quotes, MinorView.MinorType minorType) {
         double min = Integer.MAX_VALUE;
         //macd
-        if (minorType == MinorModel.MinorType.MACD) {
+        if (minorType == MinorView.MinorType.MACD) {
             if (quotes.dif != 0 && quotes.dif < min) {
                 min = quotes.dif;
             }
@@ -438,7 +437,7 @@ public class FinancialAlgorithm {
             }
         }
         //RSI
-        if (minorType == MinorModel.MinorType.RSI) {
+        if (minorType == MinorView.MinorType.RSI) {
             if (quotes.rsi6 != 0 && quotes.rsi6 < min) {
                 min = quotes.rsi6;
             }
@@ -450,7 +449,7 @@ public class FinancialAlgorithm {
             }
         }
         //KDJ
-        if (minorType == MinorModel.MinorType.KDJ) {
+        if (minorType == MinorView.MinorType.KDJ) {
             if (quotes.k != 0 && quotes.k < min) {
                 min = quotes.k;
             }
@@ -475,10 +474,10 @@ public class FinancialAlgorithm {
      * @param minorType
      * @return
      */
-    public static double getMasterMaxY(Quotes quotes, MinorModel.MinorType minorType) {
+    public static double getMasterMaxY(Quotes quotes, MinorView.MinorType minorType) {
         double max = Integer.MIN_VALUE;
         //macd
-        if (minorType == MinorModel.MinorType.MACD) {
+        if (minorType == MinorView.MinorType.MACD) {
             if (quotes.dif != 0 && quotes.dif > max) {
                 max = quotes.dif;
             }
@@ -490,7 +489,7 @@ public class FinancialAlgorithm {
             }
         }
         //RSI
-        if (minorType == MinorModel.MinorType.RSI) {
+        if (minorType == MinorView.MinorType.RSI) {
             if (quotes.rsi6 != 0 && quotes.rsi6 > max) {
                 max = quotes.rsi6;
             }
@@ -502,7 +501,7 @@ public class FinancialAlgorithm {
             }
         }
         //KDJ
-        if (minorType == MinorModel.MinorType.KDJ) {
+        if (minorType == MinorView.MinorType.KDJ) {
             if (quotes.k != 0 && quotes.k > max) {
                 max = quotes.k;
             }

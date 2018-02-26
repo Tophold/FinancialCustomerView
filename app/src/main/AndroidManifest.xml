@@ -20,7 +20,7 @@
         </activity>
         <activity android:name=".MasterViewActivity">
         </activity>
-        <activity android:name=".financialview.kview.minor.MinorActivity"
+        <activity android:name=".MinorViewActivity"
             android:screenOrientation="landscape">
         </activity>
     </application>
