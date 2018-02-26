@@ -92,7 +92,7 @@
     <color name="color_minorView_macdMacdColor">#3785d9</color>
 
     <!--rsi相关-->
-    <color name="color_minorView_rsi6Color">#dcb1ad</color>
+    <color name="color_minorView_rsi16Color">#dcb1ad</color>
     <color name="color_minorView_rsi12Color">#9941e1</color>
     <color name="color_minorView_rsi24Color">#3785d9</color>
 
