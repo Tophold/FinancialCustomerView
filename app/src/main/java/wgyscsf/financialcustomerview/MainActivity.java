@@ -25,7 +25,8 @@ public class MainActivity extends BaseActivity {
 
 
     public void goMinor(View view) {
-        go(MinorActivity.class);
+         go(MinorActivity.class);
+        //Test.test();
     }
 
     public void goTimeShringView(View view) {
