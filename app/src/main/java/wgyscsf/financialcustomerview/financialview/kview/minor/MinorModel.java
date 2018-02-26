@@ -12,8 +12,8 @@ import wgyscsf.financialcustomerview.financialview.kview.Quotes;
  * ============================================================
  **/
 public class MinorModel {
-
-    private MinorType mMinorType;
+    //当前的类型
+    private MinorType mMinorType=MinorType.MACD;
 
     private MacdModel mMacdModel;
     private RsiModel mRsiModel;
