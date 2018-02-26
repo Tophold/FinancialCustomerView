@@ -238,9 +238,9 @@ public class MinorView extends KView {
         float v = mHeight - mPaddingBottom - mInnerBottomBlankPadding;
         for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes quotes = mQuotesList.get(i);
-            rsiX = mPaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
 
             /*rsi6*/
+            rsiX = mPaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
             rsi6Y = (float) (v - mPerY * (quotes.rsi6 - mMinY));
             if (i == mBeginIndex) {
                 rsi6Path.moveTo(rsiX - mPerX / 2, rsi6Y);//第一个点特殊处理
@@ -254,6 +254,8 @@ public class MinorView extends KView {
             canvas.drawPath(rsi6Path, mRsiPaint);
 
             /*rsi12*/
+            //为什么这里重复再赋一遍值？因为下面有一个"rsiX +="操作
+            rsiX = mPaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
             rsi12Y = (float) (v - mPerY * (quotes.rsi12 - mMinY));
             if (i == mBeginIndex) {
                 rsi12Path.moveTo(rsiX - mPerX / 2, rsi12Y);//第一个点特殊处理
@@ -267,6 +269,8 @@ public class MinorView extends KView {
             canvas.drawPath(rsi12Path, mRsiPaint);
 
              /*rsi24*/
+            //为什么这里重复再赋一遍值？因为下面有一个"rsiX +="操作
+            rsiX = mPaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
             rsi24Y = (float) (v - mPerY * (quotes.rsi24 - mMinY));
             if (i == mBeginIndex) {
                 rsi24Path.moveTo(rsiX - mPerX / 2, rsi24Y);//第一个点特殊处理
@@ -301,9 +305,9 @@ public class MinorView extends KView {
         float v = mHeight - mPaddingBottom - mInnerBottomBlankPadding;
         for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes quotes = mQuotesList.get(i);
-            kdjX = mPaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
 
             /*k*/
+            kdjX = mPaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
             kY = (float) (v - mPerY * (quotes.k - mMinY));
             if (i == mBeginIndex) {
                 kPath.moveTo(kdjX - mPerX / 2, kY);//第一个点特殊处理
@@ -317,6 +321,7 @@ public class MinorView extends KView {
             canvas.drawPath(kPath, mKdjPaint);
 
             /*d*/
+            kdjX = mPaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
             dY = (float) (v - mPerY * (quotes.d - mMinY));
             if (i == mBeginIndex) {
                 dPath.moveTo(kdjX - mPerX / 2, dY);//第一个点特殊处理
@@ -330,6 +335,7 @@ public class MinorView extends KView {
             canvas.drawPath(dPath, mKdjPaint);
 
              /*j*/
+            kdjX = mPaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
             jY = (float) (v - mPerY * (quotes.j - mMinY));
             if (i == mBeginIndex) {
                 jPath.moveTo(kdjX - mPerX / 2, jY);//第一个点特殊处理
