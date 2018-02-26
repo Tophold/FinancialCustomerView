@@ -9,7 +9,7 @@ import wgyscsf.financialcustomerview.utils.TimeUtils;
  * ============================================================
  * 作 者 :    wgyscsf@163.com
  * 创建日期 ：2017/11/21 11:12
- * 描 述 ：实际使用的Quotes
+ * 描 述 ：包装后的Quotes，实际使用的Quotes
  * ============================================================
  **/
 public class Quotes extends BaseModel {

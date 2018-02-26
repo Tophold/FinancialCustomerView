@@ -5,7 +5,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import wgyscsf.financialcustomerview.financialview.fund.FundActivity;
-import wgyscsf.financialcustomerview.financialview.kview.minor.MinorActivity;
 
 public class MainActivity extends BaseActivity {
     TextView mTextView;
@@ -25,7 +24,7 @@ public class MainActivity extends BaseActivity {
 
 
     public void goMinor(View view) {
-         go(MinorActivity.class);
+         go(MinorViewActivity.class);
         //Test.test();
     }
 

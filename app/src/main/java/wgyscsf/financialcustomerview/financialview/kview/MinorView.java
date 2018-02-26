@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.financialview.kview.minor;
+package wgyscsf.financialcustomerview.financialview.kview;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -10,7 +10,7 @@ import android.util.Log;
 
 import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.financialview.FinancialAlgorithm;
-import wgyscsf.financialcustomerview.financialview.kview.KView;
+import wgyscsf.financialcustomerview.financialview.kview.KBaseView;
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.utils.FormatUtil;
 
@@ -18,10 +18,10 @@ import wgyscsf.financialcustomerview.utils.FormatUtil;
  * ============================================================
  * 作 者 :    wgyscsf@163.com
  * 创建日期 ：2017/12/14 17:56
- * 描 述 ：
+ * 描 述 ：副图。该view提供各种副图指标。
  * ============================================================
  **/
-public class MinorView extends KView {
+public class MinorView extends KBaseView {
 
 
     /**
@@ -58,8 +58,8 @@ public class MinorView extends KView {
     Paint mKdjPaint;
     float mKdjLineWidth = 1;
 
-    //MinorModel聚合的数据
-    MinorModel mMinorModel;
+    //当前显示的指标
+    MinorType mMinorType=MinorType.MACD;
 
     //y轴上最大值和最小值
     protected double mMinY;
@@ -102,11 +102,11 @@ public class MinorView extends KView {
         //绘制非按下情况下图例
         drawNoPressLegend(canvas);
 
-        if (mMinorModel.getMinorType() == MinorModel.MinorType.MACD) {
+        if (mMinorType == MinorType.MACD) {
             drawMACD(canvas);
-        } else if (mMinorModel.getMinorType() == MinorModel.MinorType.RSI) {
+        } else if (mMinorType == MinorType.RSI) {
             drawRSI(canvas);
-        } else if (mMinorModel.getMinorType() == MinorModel.MinorType.KDJ) {
+        } else if (mMinorType == MinorType.KDJ) {
             drawKDJ(canvas);
         }
     }
@@ -114,11 +114,11 @@ public class MinorView extends KView {
     private void drawNoPressLegend(Canvas canvas) {
         // FIXME: 2018/2/2 按下情况下则不显示
         String showTxt = "";
-        if (mMinorModel.getMinorType() == MinorModel.MinorType.MACD) {
+        if (mMinorType == MinorType.MACD) {
             showTxt = "MACD(12,26,9)";
-        } else if (mMinorModel.getMinorType() == MinorModel.MinorType.RSI) {
+        } else if (mMinorType == MinorType.RSI) {
             showTxt = "RSI(6,12,24)";
-        } else if (mMinorModel.getMinorType() == MinorModel.MinorType.KDJ) {
+        } else if (mMinorType == MinorType.KDJ) {
             showTxt = "KDJ(9,3,3)";
         }
         canvas.drawText(showTxt,
@@ -385,9 +385,6 @@ public class MinorView extends KView {
     }
 
     private void initDefAttrs() {
-        mMinorModel = new MinorModel();
-        mMinorModel.setMinorType(MinorModel.MinorType.KDJ);
-
         //重写内边距大小
         mInnerTopBlankPadding = 8;
         mInnerBottomBlankPadding = 8;
@@ -424,17 +421,14 @@ public class MinorView extends KView {
 
     @Override
     protected void seekAndCalculateCellData() {
-        //设置数据
-        mMinorModel.setQuotesList(mQuotesList);
-
-        if (mMinorModel.getMinorType() == MinorModel.MinorType.MACD) {
-            FinancialAlgorithm.calculateMACD(mMinorModel.getQuotesList());
+        if (mMinorType == MinorType.MACD) {
+            FinancialAlgorithm.calculateMACD(mQuotesList);
         }
-        if (mMinorModel.getMinorType() == MinorModel.MinorType.RSI) {
-            FinancialAlgorithm.calculateRSI(mMinorModel.getQuotesList());
+        if (mMinorType == MinorType.RSI) {
+            FinancialAlgorithm.calculateRSI(mQuotesList);
         }
-        if (mMinorModel.getMinorType() == MinorModel.MinorType.KDJ) {
-            FinancialAlgorithm.calculateKDJ(mMinorModel.getQuotesList());
+        if (mMinorType == MinorType.KDJ) {
+            FinancialAlgorithm.calculateKDJ(mQuotesList);
         }
 
         //找到close最大值和最小值
@@ -450,8 +444,8 @@ public class MinorView extends KView {
             if (i == mEndIndex - 1) {
                 mEndQuotes = quotes;
             }
-            double min = FinancialAlgorithm.getMasterMinY(quotes, mMinorModel.getMinorType());
-            double max = FinancialAlgorithm.getMasterMaxY(quotes, mMinorModel.getMinorType());
+            double min = FinancialAlgorithm.getMasterMinY(quotes, mMinorType);
+            double max = FinancialAlgorithm.getMasterMaxY(quotes, mMinorType);
 
             if (min <= tempMinClosePrice) {
                 tempMinClosePrice = min;
@@ -475,9 +469,16 @@ public class MinorView extends KView {
         invalidate();
     }
 
-    public void setMinorType(MinorModel.MinorType minorType) {
-        mMinorModel.setMinorType(minorType);
+    public void setMinorType(MinorType minorType) {
+        mMinorType=minorType;
 
         seekAndCalculateCellData();
+    }
+
+    //副图正在展示的类型
+    public enum MinorType {
+        MACD,
+        RSI,
+        KDJ
     }
 }

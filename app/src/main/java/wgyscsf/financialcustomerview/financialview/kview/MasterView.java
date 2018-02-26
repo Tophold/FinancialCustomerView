@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.financialview.kview.master;
+package wgyscsf.financialcustomerview.financialview.kview;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -17,7 +17,7 @@ import java.util.Locale;
 
 import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.financialview.FinancialAlgorithm;
-import wgyscsf.financialcustomerview.financialview.kview.KView;
+import wgyscsf.financialcustomerview.financialview.kview.KBaseView;
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.utils.FormatUtil;
 import wgyscsf.financialcustomerview.utils.TimeUtils;
@@ -26,7 +26,7 @@ import wgyscsf.financialcustomerview.utils.TimeUtils;
  * ============================================================
  * 作 者 :    wgyscsf@163.com
  * 更细日期 ：2018/01/14 12:03
- * 描 述 ：该View可以实现绘制分时图和蜡烛图。通过void setViewType(ViewType viewType)方法控制，该方法暴漏给使用者。
+ * 描 述 ：主图。该View可以实现绘制分时图和蜡烛图。通过void setViewType(ViewType viewType)方法控制，该方法暴漏给使用者。
  * 为了模拟真实环境，拿到的数据没有直接使用，而是做了适配转换处理。没有使用任何第三方框架，
  * rx的使用仅仅在模拟网络环境获取数据的时候进行了线程的切换处理，控件中并没有使用。
  * <p>
@@ -48,7 +48,7 @@ import wgyscsf.financialcustomerview.utils.TimeUtils;
  * <p>
  * ============================================================
  **/
-public class MasterView extends KView {
+public class MasterView extends KBaseView {
 
     /**
      * 各种画笔及其参数

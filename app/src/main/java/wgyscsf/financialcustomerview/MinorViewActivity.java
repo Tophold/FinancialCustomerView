@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.financialview.kview.minor;
+package wgyscsf.financialcustomerview;
 
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
@@ -16,16 +16,15 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
-import wgyscsf.financialcustomerview.BaseActivity;
-import wgyscsf.financialcustomerview.R;
-import wgyscsf.financialcustomerview.financialview.kview.KView;
+import wgyscsf.financialcustomerview.financialview.kview.KBaseView;
 import wgyscsf.financialcustomerview.financialview.kview.OriginQuotes;
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.financialview.kview.SimulateNetAPI;
+import wgyscsf.financialcustomerview.financialview.kview.MinorView;
 import wgyscsf.financialcustomerview.utils.GsonUtil;
 import wgyscsf.financialcustomerview.utils.StringUtils;
 
-public class MinorActivity extends BaseActivity {
+public class MinorViewActivity extends BaseActivity {
     MinorView mMinorView;
 
     List<Quotes> mLoadMoreList;
@@ -104,7 +103,7 @@ public class MinorActivity extends BaseActivity {
                     @Override
                     public void call(List<Quotes> o) {
                         if (o != null) {
-                            mMinorView.setTimeSharingData(o, new KView.TimeSharingListener() {
+                            mMinorView.setTimeSharingData(o, new KBaseView.TimeSharingListener() {
 
                                 @Override
                                 public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
@@ -247,16 +246,15 @@ public class MinorActivity extends BaseActivity {
     }
 
     public void showMacd(View view) {
-        mMinorView.setMinorType(MinorModel.MinorType.MACD);
+        mMinorView.setMinorType(MinorView.MinorType.MACD);
     }
 
     public void showRsi(View view) {
-        mMinorView.setMinorType(MinorModel.MinorType.RSI);
+        mMinorView.setMinorType(MinorView.MinorType.RSI);
     }
 
     public void showKdj(View view) {
-        mMinorView.
-                setMinorType(MinorModel.MinorType.KDJ);
+        mMinorView.setMinorType(MinorView.MinorType.KDJ);
 
     }
 }

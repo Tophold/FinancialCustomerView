@@ -157,7 +157,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <wgyscsf.financialcustomerview.financialview.kview.master.MasterView
+    <wgyscsf.financialcustomerview.financialview.kview.MasterView
         android:id="@+id/tsv"
         android:layout_width="match_parent"
         android:layout_height="400dp"
