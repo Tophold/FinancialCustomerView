@@ -111,5 +111,11 @@ public class BaseFinancialView extends View {
         boolean onMove();
     }
 
+    public void setWidth(int width) {
+        mWidth = width;
+    }
 
+    public void setHeight(int height) {
+        mHeight = height;
+    }
 }
