@@ -15,7 +15,8 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
-import wgyscsf.financialcustomerview.financialview.kview.KTestView;
+import wgyscsf.financialcustomerview.financialview.kview.KLayoutView;
+import wgyscsf.financialcustomerview.financialview.kview.KView;
 import wgyscsf.financialcustomerview.financialview.kview.OriginQuotes;
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.financialview.kview.SimulateNetAPI;
@@ -23,7 +24,7 @@ import wgyscsf.financialcustomerview.utils.GsonUtil;
 import wgyscsf.financialcustomerview.utils.StringUtils;
 
 public class CustomerViewGroupActivity extends BaseActivity {
-    KTestView cvg;
+    KView cvg;
     List<Quotes> mLoadMoreList;
     int index = 0;//加载更多，加载到哪儿了。因为真实应用中，也存在加载完毕的情况。这里对应加载到list的最后
 
@@ -32,7 +33,7 @@ public class CustomerViewGroupActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customer_view_group);
-        cvg = (KTestView) findViewById(R.id.cvg);
+        cvg = (KView) findViewById(R.id.cvg);
 
         loadData();
         pushData();

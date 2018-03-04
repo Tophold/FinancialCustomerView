@@ -19,7 +19,8 @@
             android:name=".MinorViewActivity"
             android:screenOrientation="landscape">
         </activity>
-        <activity android:name=".CustomerViewGroupActivity">
+        <activity android:name=".CustomerViewGroupActivity"
+                  android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

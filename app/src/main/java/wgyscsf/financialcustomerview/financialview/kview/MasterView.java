@@ -17,8 +17,6 @@ import java.util.Locale;
 
 import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.financialview.FinancialAlgorithm;
-import wgyscsf.financialcustomerview.financialview.kview.KBaseView;
-import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.utils.FormatUtil;
 import wgyscsf.financialcustomerview.utils.TimeUtils;
 
@@ -243,7 +241,7 @@ public class MasterView extends KBaseView {
                         hiddenLongPressView();
                     } else {
                         //响应单击事件
-                        onMClickListener();
+                        onKViewInnerClickListener();
                     }
                 }
                 break;
@@ -256,7 +254,7 @@ public class MasterView extends KBaseView {
     /**
      * 单击事件
      */
-    private void onMClickListener() {
+    protected void onKViewInnerClickListener() {
         if (mViewType == ViewType.CANDLE) {
             if (mMasterType == MasterType.NONE) {
                 mMasterType = MasterType.MA;
@@ -349,6 +347,8 @@ public class MasterView extends KBaseView {
 
         //是分时图还是蜡烛图,def
         setViewType(ViewType.CANDLE);
+        //底部距离
+        mPaddingBottom=35;
     }
 
 

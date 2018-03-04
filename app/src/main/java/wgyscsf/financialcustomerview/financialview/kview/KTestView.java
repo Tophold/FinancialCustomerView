@@ -124,8 +124,8 @@ public class KTestView extends ViewGroup {
                 }
             } else if (i < 7) {
                 //主图,主图的高度取可用高度的3/4,副图去1/4
-                mMasterView.setWidth(childRight-childLeft);
-                mMasterView.setHeight(childBottom-childTop);
+                mMasterView.setFWidth(childRight-childLeft);
+                mMasterView.setFHeight(childBottom-childTop);
                 child.layout(childLeft, childTop, childRight, childBottom);
 
                 if(i==6){
@@ -138,8 +138,8 @@ public class KTestView extends ViewGroup {
                 }
             } else if (i < 8) {
                 //副图
-                mMinorView.setWidth(childRight-childLeft);
-                mMinorView.setHeight(childBottom-childTop);
+                mMinorView.setFWidth(childRight-childLeft);
+                mMinorView.setFHeight(childBottom-childTop);
                 child.layout(childLeft, childTop, childRight, childBottom);
             }
         }

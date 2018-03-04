@@ -94,6 +94,7 @@ public class MinorView extends KBaseView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        Log.d(TAG, "onDraw: "+mHeight+","+mWidth);
         if (mQuotesList == null || mQuotesList.isEmpty()) {
             return;
         }
@@ -473,6 +474,10 @@ public class MinorView extends KBaseView {
         mMinorType=minorType;
 
         seekAndCalculateCellData();
+    }
+
+    public void setInnrListener(KViewInnerListener kViewInnerListener) {
+
     }
 
     //副图正在展示的类型

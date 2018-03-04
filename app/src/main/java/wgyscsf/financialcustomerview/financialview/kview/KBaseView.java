@@ -46,7 +46,7 @@ public abstract class KBaseView extends BaseFinancialView {
 
     //上下左右padding，这里不再采用系统属性padding，因为用户容易忘记设置padding,直接在这里更改即可。
     protected float mPaddingTop = 20;
-    protected float mPaddingBottom = 50;
+    protected float mPaddingBottom = 10;
     protected float mPaddingLeft = 8;
     protected float mPaddingRight = 90;
 
