@@ -533,4 +533,12 @@ public abstract class KBaseView extends BaseFinancialView {
         //重绘
         invalidate();
     }
+
+    public ScaleGestureDetector getScaleGestureDetector() {
+        return mScaleGestureDetector;
+    }
+
+    public void setScaleGestureDetector(ScaleGestureDetector scaleGestureDetector) {
+        mScaleGestureDetector = scaleGestureDetector;
+    }
 }

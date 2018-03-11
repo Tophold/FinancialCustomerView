@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 
 /**
  * ============================================================
@@ -28,31 +27,31 @@ public class KView extends KLayoutView {
     protected float mPressedX;
     //按下的时刻
     protected long mPressTime;
-    //滑动点的x轴坐标，滑动使用，记录当前滑动点的x坐标
-    float mMovingX;
     //是否绘制长按十字，逻辑判断使用，不可更改
     boolean mDrawLongPress = false;
-
 
 
     KViewInnerListener mKViewInnerListener;
 
     public KView(Context context) {
-        this(context,null);
+        this(context, null);
     }
 
     public KView(Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs,0);
+        this(context, attrs, 0);
     }
 
     public KView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initListener();
     }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         //按下的手指个数
         mFingerPressedCount = event.getPointerCount();
+        //添加手势
+        mMasterView.getScaleGestureDetector().onTouchEvent(event);
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mPressedX = event.getX();
@@ -60,8 +59,7 @@ public class KView extends KLayoutView {
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (event.getEventTime() - mPressTime > DEF_LONGPRESS_LENGTH) {
-                    mMovingX = event.getX();
-                    mKViewInnerListener.showLongPressView();
+                    mKViewInnerListener.showLongPressView(event.getX());
                 }
                 //判断是否是手指移动
                 float currentPressedX = event.getX();
@@ -81,27 +79,32 @@ public class KView extends KLayoutView {
                     //单击并且是在绘制十字
                     if (mDrawLongPress) {
                         //取消掉长按十字
-                       mKViewInnerListener.hiddenLongPressView();
+                        mKViewInnerListener.hiddenLongPressView();
                     } else {
                         //响应单击事件
-                        mKViewInnerListener.onKViewInnerClickListener();
+                        return super.onTouchEvent(event);//这个事件传递下去
                     }
                 }
                 break;
             default:
                 break;
         }
-        return super.onTouchEvent(event);
+        return true;
     }
+
     private void initListener() {
-        mKViewInnerListener=new KViewInnerListener() {
+        mKViewInnerListener = new KViewInnerListener() {
             @Override
-            public void showLongPressView() {
-                mMasterView.showLongPressView();
+            public void showLongPressView(float movingX) {
+                mDrawLongPress = true;
+                mMasterView.setDrawLongPress(mDrawLongPress);
+                mMasterView.showLongPressView(movingX);
             }
 
             @Override
             public void hiddenLongPressView() {
+                mDrawLongPress = false;
+                mMasterView.setDrawLongPress(mDrawLongPress);
                 mMasterView.hiddenLongPressView();
             }
 
@@ -109,11 +112,8 @@ public class KView extends KLayoutView {
             public void moveKView(float moveLen) {
                 mMasterView.moveKView(moveLen);
             }
-
-            @Override
-            public void onKViewInnerClickListener() {
-                mMasterView.onKViewInnerClickListener();
-            }
         };
+        mMasterView.setOnClickListener(x -> mMasterView.onKViewInnerClickListener());
+        mMinorView.setOnClickListener(x -> mMinorView.onKViewInnerClickListener());
     }
 }

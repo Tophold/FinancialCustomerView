@@ -10,8 +10,6 @@ import android.util.Log;
 
 import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.financialview.FinancialAlgorithm;
-import wgyscsf.financialcustomerview.financialview.kview.KBaseView;
-import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.utils.FormatUtil;
 
 /**
@@ -59,7 +57,7 @@ public class MinorView extends KBaseView {
     float mKdjLineWidth = 1;
 
     //当前显示的指标
-    MinorType mMinorType=MinorType.MACD;
+    MinorType mMinorType = MinorType.MACD;
 
     //y轴上最大值和最小值
     protected double mMinY;
@@ -94,7 +92,7 @@ public class MinorView extends KBaseView {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        Log.d(TAG, "onDraw: "+mHeight+","+mWidth);
+        Log.d(TAG, "onDraw: " + mHeight + "," + mWidth);
         if (mQuotesList == null || mQuotesList.isEmpty()) {
             return;
         }
@@ -471,13 +469,23 @@ public class MinorView extends KBaseView {
     }
 
     public void setMinorType(MinorType minorType) {
-        mMinorType=minorType;
+        mMinorType = minorType;
 
         seekAndCalculateCellData();
     }
 
-    public void setInnrListener(KViewInnerListener kViewInnerListener) {
-
+    /**
+     * 单击事件
+     */
+    protected void onKViewInnerClickListener() {
+        if (mMinorType == MinorType.MACD) {
+            mMinorType = MinorType.RSI;
+        } else if (mMinorType == MinorType.RSI) {
+            mMinorType = MinorType.KDJ;
+        } else if (mMinorType == MinorType.KDJ) {
+            mMinorType = MinorType.MACD;
+        }
+        setMinorType(mMinorType);
     }
 
     //副图正在展示的类型

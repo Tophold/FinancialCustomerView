@@ -70,6 +70,7 @@ android {
             signingConfig signingConfigs.debug
             //动态修改应用的名字和图标
             manifestPlaceholders = [app_names: "金融View_debug"]
+            debuggable true
         }
 
         //内侧使用
@@ -87,6 +88,7 @@ android {
             //签名选择
             signingConfig signingConfigs.beta
             manifestPlaceholders = [app_names: "金融View_beta"]
+            debuggable true
         }
 
         //正式版本
@@ -104,6 +106,7 @@ android {
             signingConfig signingConfigs.release
 
             manifestPlaceholders = [app_names: "金融View"]
+            debuggable true
         }
     }
     compileOptions {

@@ -8,8 +8,7 @@ package wgyscsf.financialcustomerview.financialview.kview;
  * ============================================================
  **/
 public interface KViewInnerListener {
-    void showLongPressView();
+    void showLongPressView(float movingX);
     void hiddenLongPressView();
     void moveKView(float moveLen);
-    void onKViewInnerClickListener();
 }

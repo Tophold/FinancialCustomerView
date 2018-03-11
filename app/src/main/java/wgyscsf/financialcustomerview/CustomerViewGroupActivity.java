@@ -15,7 +15,7 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
-import wgyscsf.financialcustomerview.financialview.kview.KLayoutView;
+import wgyscsf.financialcustomerview.financialview.kview.KBaseView;
 import wgyscsf.financialcustomerview.financialview.kview.KView;
 import wgyscsf.financialcustomerview.financialview.kview.OriginQuotes;
 import wgyscsf.financialcustomerview.financialview.kview.Quotes;
@@ -26,7 +26,8 @@ import wgyscsf.financialcustomerview.utils.StringUtils;
 public class CustomerViewGroupActivity extends BaseActivity {
     KView cvg;
     List<Quotes> mLoadMoreList;
-    int index = 0;//加载更多，加载到哪儿了。因为真实应用中，也存在加载完毕的情况。这里对应加载到list的最后
+    //加载更多，加载到哪儿了。因为真实应用中，也存在加载完毕的情况。这里对应加载到list的最后
+    int index = 0;
 
 
     @Override
@@ -93,30 +94,27 @@ public class CustomerViewGroupActivity extends BaseActivity {
                     @Override
                     public void call(List<Quotes> o) {
                         if (o != null) {
-                            cvg.setTimeSharingData(o);
-//                            mMinorView.setTimeSharingData(o, new KBaseView.TimeSharingListener() {
-//
-//                                @Override
-//                                public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
-//                                    //showContanier(preQuotes, currentQuotes);
-//                                }
-//
-//                                @Override
-//                                public void onUnLongTouch() {
-//                                }
-//
-//                                @Override
-//                                public void needLoadMore() {
-//                                    Log.e(TAG, "needLoadMore: 需要加载更多了..");
-//                                    loadMoreData();
-//                                }
-//                            });
-                        } else {
-                            Log.e(TAG, "run: 数据适配失败、、、、");
+                            cvg.setTimeSharingData(o,new KBaseView.TimeSharingListener() {
+                                @Override
+                                public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
+
+                                }
+
+                                @Override
+                                public void onUnLongTouch() {
+
+                                }
+
+                                @Override
+                                public void needLoadMore() {
+                                    loadMoreData();
+                                }
+                            });
+                        }else{
+                            Log.e(TAG, "call: 数据适配失败" );
                         }
                     }
                 });
-        //及时回收，防止泄露
         addGcManagerSubscription(subscribeApi);
     }
 
@@ -223,7 +221,7 @@ public class CustomerViewGroupActivity extends BaseActivity {
                 .subscribe(new Action1<List<Quotes>>() {
                     @Override
                     public void call(List<Quotes> integer) {
-                       // mMinorView.loadMoreTimeSharingData(integer);
+                         cvg.loadMoreTimeSharingData(integer);
                     }
                 }, new Action1<Throwable>() {
                     @Override

@@ -9,8 +9,6 @@ import android.widget.Toast;
 
 import java.util.List;
 
-import wgyscsf.financialcustomerview.R;
-
 /**
  * ============================================================
  * 作 者 :    wgyscsf@163.com
@@ -64,7 +62,7 @@ public class KLayoutView extends LinearLayout {
         setOrientation(VERTICAL);
 
         mMasterView = new MasterView(getContext());
-        mMasterView.setBackgroundColor(getResources().getColor(R.color.color_fundView_brokenLineColor));
+       // mMasterView.setBackgroundColor(getResources().getColor(R.color.color_fundView_brokenLineColor));
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LayoutParams.MATCH_PARENT, 0);
         params.weight = 1 - mMinorHRatio;
@@ -72,7 +70,7 @@ public class KLayoutView extends LinearLayout {
         addView(mMasterView);
 
         mMinorView = new MinorView(getContext());
-        mMinorView.setBackgroundColor(getResources().getColor(R.color.color_fundView_xLineColor));
+       // mMinorView.setBackgroundColor(getResources().getColor(R.color.color_fundView_xLineColor));
         LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(
                 LayoutParams.MATCH_PARENT, 0);
         params2.weight = mMinorHRatio;
@@ -107,14 +105,14 @@ public class KLayoutView extends LinearLayout {
      *
      * @param quotesList
      */
-    public void setTimeSharingData(List<Quotes> quotesList) {
+    public void setTimeSharingData(List<Quotes> quotesList, KBaseView.TimeSharingListener timeSharingListener) {
         if (quotesList == null || quotesList.isEmpty()) {
             Toast.makeText(getContext(), "数据异常", Toast.LENGTH_SHORT).show();
             Log.e(TAG, "setTimeSharingData: 数据异常");
             return;
         }
-        mMasterView.setTimeSharingData(quotesList);
-        mMinorView.setTimeSharingData(quotesList);
+        mMasterView.setTimeSharingData(quotesList,timeSharingListener);
+        mMinorView.setTimeSharingData(quotesList,timeSharingListener);
     }
 
     /**

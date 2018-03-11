@@ -204,53 +204,6 @@ public class MasterView extends KBaseView {
         drawMasterndIcatrix(canvas);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        //按下的手指个数
-        mFingerPressedCount = event.getPointerCount();
-        //手势监听
-        mScaleGestureDetector.onTouchEvent(event);
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                mPressedX = event.getX();
-                mPressTime = event.getDownTime();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                if (event.getEventTime() - mPressTime > DEF_LONGPRESS_LENGTH) {
-                    mMovingX = event.getX();
-                    showLongPressView();
-                }
-                //判断是否是手指移动
-                float currentPressedX = event.getX();
-                float moveLen = currentPressedX - mPressedX;
-                //重置当前按下的位置
-                mPressedX = currentPressedX;
-                if (Math.abs(moveLen) > DEF_PULL_LENGTH &&
-                        mFingerPressedCount == 1 &&
-                        !mDrawLongPress) {
-                    //移动k线图
-                    moveKView(moveLen);
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                //单击事件
-                if (event.getEventTime() - mPressTime < DEF_CLICKPRESS_LENGTH) {
-                    //单击并且是在绘制十字
-                    if (mDrawLongPress) {
-                        //取消掉长按十字
-                        hiddenLongPressView();
-                    } else {
-                        //响应单击事件
-                        onKViewInnerClickListener();
-                    }
-                }
-                break;
-            default:
-                break;
-        }
-        return super.onTouchEvent(event);
-    }
-
     /**
      * 单击事件
      */
@@ -315,15 +268,14 @@ public class MasterView extends KBaseView {
         seekAndCalculateCellData();
     }
 
-    protected void showLongPressView() {
-        mDrawLongPress = true;
+    protected void showLongPressView(float movingX) {
+        mMovingX = movingX;
         invalidate();
     }
 
     protected void hiddenLongPressView() {
-        mDrawLongPress = false;
         invalidate();
-        mTimeSharingListener.onUnLongTouch();
+        if (mTimeSharingListener != null) mTimeSharingListener.onUnLongTouch();
     }
 
     protected void initAttrs() {
@@ -348,7 +300,7 @@ public class MasterView extends KBaseView {
         //是分时图还是蜡烛图,def
         setViewType(ViewType.CANDLE);
         //底部距离
-        mPaddingBottom=35;
+        mPaddingBottom = 35;
     }
 
 
@@ -601,7 +553,6 @@ public class MasterView extends KBaseView {
             mBollDnPaint.setStyle(Paint.Style.FILL);
             mBollUpPaint.setStyle(Paint.Style.FILL);
             mBollMbPaint.setStyle(Paint.Style.FILL);
-            //非长按
             String showTxt = "";
             if (mMasterType == MasterType.MA) {
                 showTxt = "• MA5 " + FormatUtil.formatBySubString(mCurrentQuotes.ma5, mDigits) + " ";
@@ -847,10 +798,11 @@ public class MasterView extends KBaseView {
 
     /**
      * 绘制蜡烛图
+     *
      * @param canvas
      * @param diverWidth 蜡烛图之间的间距
-     * @param i List index
-     * @param quotes 目标Quotes
+     * @param i          List index
+     * @param quotes     目标Quotes
      */
     private void drawCandleViewProcess(Canvas canvas, float diverWidth, int i, Quotes quotes) {
         if (mViewType != ViewType.CANDLE) return;
@@ -943,13 +895,12 @@ public class MasterView extends KBaseView {
                 , mLongPressTxtPaint);
 
         //在这里回调数据信息
+        int size = mQuotesList.size();
+        if ((0 <= finalIndex && finalIndex < size) &&
+                (0 <= finalIndex - 1 && finalIndex - 1 < size))
+            //记录当前Quotes
+            mCurrentQuotes = mQuotesList.get(finalIndex);
         if (mTimeSharingListener != null) {
-            int size = mQuotesList.size();
-            if ((0 <= finalIndex && finalIndex < size) &&
-                    (0 <= finalIndex - 1 && finalIndex - 1 < size))
-                //记录当前Quotes
-                mCurrentQuotes = mQuotesList.get(finalIndex);
-
             //回调,需要两个数据，便于计算涨跌百分比
             mTimeSharingListener.onLongTouch(mQuotesList.get(finalIndex - 1),
                     mQuotesList.get(finalIndex));
@@ -1087,6 +1038,14 @@ public class MasterView extends KBaseView {
                     mWidth - mPaddingRight + rightBorderPadding,
                     mHeight - mPaddingBottom - perYWidth * i + halfTxtHight, mXYTxtPaint);
         }
+    }
+
+    public boolean isDrawLongPress() {
+        return mDrawLongPress;
+    }
+
+    public void setDrawLongPress(boolean drawLongPress) {
+        mDrawLongPress = drawLongPress;
     }
 
     /**
