@@ -6,6 +6,7 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import static android.view.View.MeasureSpec.AT_MOST;
@@ -26,7 +27,8 @@ public class BaseFinancialView extends View {
     protected static final long DEF_LONGPRESS_LENGTH = 700;
     //单击阀值
     protected static final long DEF_CLICKPRESS_LENGTH = 100;
-
+    //移动阀值。手指移动多远算移动的阀值（单位：sp）
+    protected static final long DEF_PULL_LENGTH = 5;
 
     //控件默认宽高。当控件的宽高设置为wrap_content时会采用该参数进行默认的设置（单位：sp）。子类可以修改。
     protected float DEF_WIDTH = 650;
@@ -35,6 +37,7 @@ public class BaseFinancialView extends View {
     //测量的控件宽高，会在onMeasure中进行测量。
     protected int mWidth;
     protected int mHeight;
+
 
     public BaseFinancialView(Context context) {
         this(context, null);
@@ -93,22 +96,6 @@ public class BaseFinancialView extends View {
         paint.setTextSize(fontSize);
         Paint.FontMetrics fm = paint.getFontMetrics();
         return (float) (Math.ceil(fm.descent - fm.top) + 2f);
-    }
-
-
-    //自定义单击
-    interface OnFClickListener {
-        void onClick(View var1);
-    }
-
-    //长按
-    interface OnFLongClickListener {
-        boolean onLongClick(View var1);
-    }
-
-    //移动
-    interface onFMoveListener {
-        boolean onMove();
     }
 
     public void setFWidth(int width) {

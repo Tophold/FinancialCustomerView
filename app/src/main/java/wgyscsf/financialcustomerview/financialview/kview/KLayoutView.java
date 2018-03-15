@@ -76,6 +76,8 @@ public class KLayoutView extends LinearLayout {
         params2.weight = mMinorHRatio;
         mMinorView.setLayoutParams(params2);
         addView(mMinorView);
+
+        mMasterView.setMasterListener(mMinorView.getMasterListener());
     }
 
     public float getMinorHRatio() {

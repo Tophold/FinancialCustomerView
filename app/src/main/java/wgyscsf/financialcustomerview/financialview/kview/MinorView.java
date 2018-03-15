@@ -36,8 +36,8 @@ public class MinorView extends KBaseView {
     int mMacdBuyColor;
     int mMacdSellColor;
     int mMacdDifColor;
-    int mAcdDeaColor;
-    int mAcdMacdColor;
+    int mMacdDeaColor;
+    int mMacdMacdColor;
     Paint mMacdPaint;
     float mMacdLineWidth = 1;
 
@@ -65,6 +65,12 @@ public class MinorView extends KBaseView {
     //蜡烛图间隙，大小以单个蜡烛图的宽度的比例算。可修改。
     protected float mCandleDiverWidthRatio = 0.1f;
 
+    //监听主图的长按事件
+    private MinorView.MasterListener mMasterListener;
+
+    public MasterListener getMasterListener() {
+        return mMasterListener;
+    }
 
     public MinorView(Context context) {
         this(context, null);
@@ -77,6 +83,24 @@ public class MinorView extends KBaseView {
     public MinorView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initAttrs();
+        initListener();
+    }
+
+    private void initListener() {
+        mMasterListener = new MasterListener() {
+            @Override
+            public void masterLongPressListener(float currX, Quotes currQuotes) {
+                mDrawLongPress = true;
+                mCurrLongPressQuotes = currQuotes;
+                invalidate();
+            }
+
+            @Override
+            public void masterNoLongPressListener() {
+                mDrawLongPress = false;
+                invalidate();
+            }
+        };
     }
 
     @Override
@@ -100,7 +124,17 @@ public class MinorView extends KBaseView {
         drawYRightTxt(canvas);
         //绘制非按下情况下图例
         drawNoPressLegend(canvas);
+        drawPressLegend(canvas);
 
+        drawMinorIndicatrix(canvas);
+
+        drawLongPress(canvas);
+    }
+
+    private void drawMinorIndicatrix(Canvas canvas) {
+        mMacdPaint.setStyle(Paint.Style.STROKE);
+        mRsiPaint.setStyle(Paint.Style.STROKE);
+        mKdjPaint.setStyle(Paint.Style.STROKE);
         if (mMinorType == MinorType.MACD) {
             drawMACD(canvas);
         } else if (mMinorType == MinorType.RSI) {
@@ -110,8 +144,88 @@ public class MinorView extends KBaseView {
         }
     }
 
+    private void drawLongPress(Canvas canvas) {
+        if (!mDrawLongPress) return;
+        if (mCurrLongPressQuotes == null) return;
+
+        //y轴线
+        canvas.drawLine(mCurrLongPressQuotes.floatX, mPaddingTop, mCurrLongPressQuotes.floatX,
+                mHeight - mPaddingBottom, mLongPressPaint);
+    }
+
+    private void drawPressLegend(Canvas canvas) {
+        if (!mDrawLongPress) return;
+
+        mMacdPaint.setStyle(Paint.Style.FILL);
+        mRsiPaint.setStyle(Paint.Style.FILL);
+        mKdjPaint.setStyle(Paint.Style.FILL);
+
+        float x= (float) (mLegendPaddingLeft + mPaddingLeft);
+        float y= (float) (mLegendPaddingTop + mPaddingTop)+ getFontHeight(mLegendTxtSize, mMacdPaint);
+
+        String showTxt;
+        switch (mMinorType) {
+            case MACD:
+                showTxt = "DIFF:" + FormatUtil.formatBySubString(mCurrLongPressQuotes.dif, mDigits) + " ";
+                mMacdPaint.setColor(mMacdDifColor);
+                canvas.drawText(showTxt, x,
+                        y, mMacdPaint);
+
+                float leftWidth11 = mMacdPaint.measureText(showTxt);
+                showTxt = "DEA:" + FormatUtil.formatBySubString(mCurrLongPressQuotes.dea, mDigits) + " ";
+                mMacdPaint.setColor(mMacdDeaColor);
+                canvas.drawText(showTxt, x + leftWidth11, y, mMacdPaint);
+
+                float leftWidth12 = mMacdPaint.measureText(showTxt);
+                showTxt = "MACD:" + FormatUtil.formatBySubString(mCurrLongPressQuotes.macd, mDigits) + " ";
+                mMacdPaint.setColor(mMacdMacdColor);
+                canvas.drawText(showTxt,  (x + leftWidth11 + leftWidth12),
+                        y, mMacdPaint);
+                break;
+            case RSI:
+                showTxt = "RSI6:" + FormatUtil.formatBySubString(mCurrLongPressQuotes.rsi6, mDigits) + " ";
+                mRsiPaint.setColor(mRsi6Color);
+                canvas.drawText(showTxt,  (x),
+                        y, mRsiPaint);
+
+                float leftWidth21 = mRsiPaint.measureText(showTxt);
+                showTxt = "RSI12:" + FormatUtil.formatBySubString(mCurrLongPressQuotes.rsi12, mDigits) + " ";
+                mRsiPaint.setColor(mRsi12Color);
+                canvas.drawText(showTxt,  (x + leftWidth21),
+                        y, mRsiPaint);
+
+                float leftWidth22 = mRsiPaint.measureText(showTxt);
+                showTxt = "RSI24:" + FormatUtil.formatBySubString(mCurrLongPressQuotes.rsi24, mDigits) + " ";
+                mRsiPaint.setColor(mRsi24Color);
+                canvas.drawText(showTxt,  (x + leftWidth21 + leftWidth22),
+                        y, mRsiPaint);
+                break;
+            case KDJ:
+                showTxt = "K:" + FormatUtil.formatBySubString(mCurrLongPressQuotes.k, mDigits) + " ";
+                mKdjPaint.setColor(mKColor);
+                canvas.drawText(showTxt,  (x),
+                        y, mKdjPaint);
+
+                float leftWidth = mKdjPaint.measureText(showTxt);
+                showTxt = "D:" + FormatUtil.formatBySubString(mCurrLongPressQuotes.d, mDigits) + " ";
+                mKdjPaint.setColor(mDColor);
+                canvas.drawText(showTxt,  (x + leftWidth),
+                        y, mKdjPaint);
+
+                float leftWidth2 = mKdjPaint.measureText(showTxt);
+                showTxt = "J:" + FormatUtil.formatBySubString(mCurrLongPressQuotes.j, mDigits) + " ";
+                mKdjPaint.setColor(mJColor);
+                canvas.drawText(showTxt,  (x + leftWidth + leftWidth2),
+                        y, mKdjPaint);
+                break;
+            default:
+                break;
+        }
+
+    }
+
     private void drawNoPressLegend(Canvas canvas) {
-        // FIXME: 2018/2/2 按下情况下则不显示
+        if (mDrawLongPress) return;
         String showTxt = "";
         if (mMinorType == MinorType.MACD) {
             showTxt = "MACD(12,26,9)";
@@ -212,7 +326,7 @@ public class MinorView extends KBaseView {
                 deaPath.lineTo(deaX, deaY);
             }
             mMacdPaint.setStyle(Paint.Style.STROKE);
-            mMacdPaint.setColor(mAcdDeaColor);
+            mMacdPaint.setColor(mMacdDeaColor);
             canvas.drawPath(deaPath, mMacdPaint);
         }
 
@@ -366,6 +480,7 @@ public class MinorView extends KBaseView {
         mKdjPaint.setAntiAlias(true);
         mKdjPaint.setStrokeWidth(mKdjLineWidth);
         mKdjPaint.setStyle(Paint.Style.STROKE);
+        mKdjPaint.setTextSize(mLegendTxtSize);
     }
 
     private void initRsiPaint() {
@@ -374,6 +489,7 @@ public class MinorView extends KBaseView {
         mRsiPaint.setAntiAlias(true);
         mRsiPaint.setStrokeWidth(mRsiLineWidth);
         mRsiPaint.setStyle(Paint.Style.STROKE);
+        mRsiPaint.setTextSize(mLegendTxtSize);
     }
 
     private void initMacdPaint() {
@@ -381,6 +497,7 @@ public class MinorView extends KBaseView {
         mMacdPaint.setColor(mMacdBuyColor);
         mMacdPaint.setAntiAlias(true);
         mMacdPaint.setStrokeWidth(mMacdLineWidth);
+        mMacdPaint.setTextSize(mLegendTxtSize);
     }
 
     private void initDefAttrs() {
@@ -389,7 +506,7 @@ public class MinorView extends KBaseView {
         mInnerBottomBlankPadding = 8;
 
         //重写Legend padding
-        mLegendPaddingTop = 2;
+        mLegendPaddingTop = 0;
         mLegendPaddingRight = 4;
         mLegendPaddingLeft = 4;
 
@@ -408,14 +525,17 @@ public class MinorView extends KBaseView {
         mMacdBuyColor = getColor(R.color.color_minorView_macdBuyColor);
         mMacdSellColor = getColor(R.color.color_minorView_macdSellColor);
         mMacdDifColor = getColor(R.color.color_minorView_macdDifColor);
-        mAcdDeaColor = getColor(R.color.color_minorView_macdDeaColor);
-        mAcdMacdColor = getColor(R.color.color_minorView_macdMacdColor);
+        mMacdDeaColor = getColor(R.color.color_minorView_macdDeaColor);
+        mMacdMacdColor = getColor(R.color.color_minorView_macdMacdColor);
         mRsi6Color = getColor(R.color.color_minorView_rsi6Color);
         mRsi12Color = getColor(R.color.color_minorView_rsi12Color);
         mRsi24Color = getColor(R.color.color_minorView_rsi24Color);
         mKColor = getColor(R.color.color_minorView_kColor);
         mDColor = getColor(R.color.color_minorView_dColor);
         mJColor = getColor(R.color.color_minorView_jColor);
+
+
+        setBackgroundColor(mLongPressTxtColor);
     }
 
     @Override
@@ -474,10 +594,16 @@ public class MinorView extends KBaseView {
         seekAndCalculateCellData();
     }
 
-    /**
-     * 单击事件
-     */
-    protected void onKViewInnerClickListener() {
+    //副图正在展示的类型
+    public enum MinorType {
+        MACD,
+        RSI,
+        KDJ
+    }
+
+    @Override
+    protected void innerClickListener() {
+        super.innerClickListener();
         if (mMinorType == MinorType.MACD) {
             mMinorType = MinorType.RSI;
         } else if (mMinorType == MinorType.RSI) {
@@ -488,10 +614,26 @@ public class MinorView extends KBaseView {
         setMinorType(mMinorType);
     }
 
-    //副图正在展示的类型
-    public enum MinorType {
-        MACD,
-        RSI,
-        KDJ
+    @Override
+    protected void innerLongClickListener(float x, float y) {
+        super.innerLongClickListener(x, y);
+
+    }
+
+    @Override
+    protected void innerHiddenLongClick() {
+        super.innerHiddenLongClick();
+    }
+
+    @Override
+    protected void innerMoveViewListener(float moveXLen) {
+        super.innerMoveViewListener(moveXLen);
+
+    }
+
+    public interface MasterListener {
+        void masterLongPressListener(float x, Quotes currQuotes);
+
+        void masterNoLongPressListener();
     }
 }

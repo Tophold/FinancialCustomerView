@@ -13,8 +13,8 @@ import android.widget.Toast;
 
 import java.util.List;
 
-import wgyscsf.financialcustomerview.financialview.BaseFinancialView;
 import wgyscsf.financialcustomerview.R;
+import wgyscsf.financialcustomerview.financialview.BaseFinancialView;
 
 /**
  * ============================================================
@@ -29,15 +29,11 @@ public abstract class KBaseView extends BaseFinancialView {
     /**
      * 默认参数及常量
      */
-
     //右侧内边距，默认情况下结束点距离右边边距（单位：sp）
     protected static final float DEF_INNER_RIGHT_BLANK_PADDING = 60;
 
     //加载更多阀值。当在左侧不可见范围内还剩多少数据时开始加载更多。（单位：数据个数）
     protected static final int DEF_MINLEN_LOADMORE = 10;
-
-    //移动阀值。手指移动多远算移动的阀值（单位：sp）
-    protected static final long DEF_PULL_LENGTH = 5;
 
     //缩放最小值，该值理论上可以最小为3。为了美观，这个值不能太小，不然就成一条线了。不能定义为final,程序可能会对该值进行修改（容错）
     protected static int DEF_SCALE_MINNUM = 10;
@@ -108,8 +104,9 @@ public abstract class KBaseView extends BaseFinancialView {
     protected int mFingerPressedCount;
     //是否是向右拉，不可修改
     protected boolean mPullRight = false;
-    //按下的x轴坐标
+    //按下的x、y轴坐标
     protected float mPressedX;
+    protected float mPressedY;
     //按下的时刻
     protected long mPressTime;
     //手指移动的类型，默认在最后边
@@ -181,7 +178,18 @@ public abstract class KBaseView extends BaseFinancialView {
     protected double mLegendTxtTopPadding = 0;
 
 
+    //是否绘制长按十字，逻辑判断使用，不可更改
+    protected boolean mDrawLongPress = false;
 
+    //滑动点的x轴坐标，滑动使用，记录当前滑动点的x坐标
+    protected float mMovingX;
+
+    //画笔:长按的十字线
+    protected Paint mLongPressPaint;
+    protected int mLongPressColor;
+    protected float mLongPressLineWidth = 1.5f;
+    //长按对应的对象
+    protected Quotes mCurrLongPressQuotes;
 
 
     public KBaseView(Context context) {
@@ -221,7 +229,46 @@ public abstract class KBaseView extends BaseFinancialView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return super.onTouchEvent(event);
+        //按下的手指个数
+        mFingerPressedCount = event.getPointerCount();
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mPressedX = event.getX();
+                mPressTime = event.getDownTime();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (event.getEventTime() - mPressTime > DEF_LONGPRESS_LENGTH) {
+                    innerLongClickListener(event.getX(), event.getY());
+                }
+                //判断是否是手指移动
+                float currentPressedX = event.getX();
+                float moveLen = currentPressedX - mPressedX;
+                //重置当前按下的位置
+                mPressedX = currentPressedX;
+                if (Math.abs(moveLen) > DEF_PULL_LENGTH &&
+                        mFingerPressedCount == 1 &&
+                        !mDrawLongPress) {
+                    //移动k线图
+                    innerMoveViewListener(moveLen);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                //单击事件
+                if (event.getEventTime() - mPressTime < DEF_CLICKPRESS_LENGTH) {
+                    //单击并且是在绘制十字
+                    if (mDrawLongPress) {
+                        //取消掉长按十字
+                        innerHiddenLongClick();
+                    } else {
+                        //响应单击事件
+                        innerClickListener();//这个事件传递下去
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 
     private void initAttrs() {
@@ -235,6 +282,7 @@ public abstract class KBaseView extends BaseFinancialView {
         mInnerXyLineColor = getColor(R.color.color_kview_innerXyDashColor);
         mXYTxtColor = getColor(R.color.color_timeSharing_xYTxtColor);
         mLegendColor = getColor(R.color.color_masterView_legendColor);
+        mLongPressColor = getColor(R.color.color_timeSharing_longPressLineColor);
     }
 
     private void initPaintRes() {
@@ -243,6 +291,7 @@ public abstract class KBaseView extends BaseFinancialView {
         initInnerXyPaint();
         initXyTxtPaint();
         initLegendPaint();
+        initLongPressPaint();
     }
 
     protected void initLoadingPaint() {
@@ -268,17 +317,25 @@ public abstract class KBaseView extends BaseFinancialView {
             mInnerXyPaint.setPathEffect(new DashPathEffect(new float[]{5, 5}, 0));
         }
     }
+
     protected void initXyTxtPaint() {
         mXYTxtPaint = new Paint();
         mXYTxtPaint.setColor(mXYTxtColor);
         mXYTxtPaint.setTextSize(mXYTxtSize);
         mXYTxtPaint.setAntiAlias(true);
     }
+
     private void initLegendPaint() {
         mLegendPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLegendPaint.setColor(mLegendColor);
         mLegendPaint.setStrokeWidth(mLineWidth);
         mLegendPaint.setTextSize(mLegendTxtSize);
+    }
+    protected void initLongPressPaint() {
+        mLongPressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mLongPressPaint.setColor(mLongPressColor);
+        mLongPressPaint.setStrokeWidth(mLongPressLineWidth);
+        mLongPressPaint.setStyle(Paint.Style.STROKE);
     }
     protected void showLoadingPaint(Canvas canvas) {
         if (!mDrawLoadingPaint) return;
@@ -303,6 +360,7 @@ public abstract class KBaseView extends BaseFinancialView {
 
     /**
      * 绘制内部x/y轴虚线
+     *
      * @param canvas
      */
     protected void drawInnerXy(Canvas canvas) {
@@ -534,11 +592,16 @@ public abstract class KBaseView extends BaseFinancialView {
         invalidate();
     }
 
-    public ScaleGestureDetector getScaleGestureDetector() {
-        return mScaleGestureDetector;
+    protected void innerClickListener() {
     }
 
-    public void setScaleGestureDetector(ScaleGestureDetector scaleGestureDetector) {
-        mScaleGestureDetector = scaleGestureDetector;
+    protected void innerHiddenLongClick() {
+
+    }
+
+    protected void innerMoveViewListener(float moveXLen) {
+    }
+
+    protected void innerLongClickListener(float x, float y) {
     }
 }
