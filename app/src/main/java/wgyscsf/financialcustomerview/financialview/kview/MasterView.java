@@ -1121,6 +1121,9 @@ public class MasterView extends KBaseView {
 
                     mEndIndex = mBeginIndex + mShownMaxCount;
 
+                    //将新的索引回调给副图
+                    if(mMasterListener!=null) mMasterListener.masteZoomlNewIndex(mBeginIndex,mEndIndex,mShownMaxCount);
+
                     //只要找好起始点和结束点就可以交给处理重绘的方法就好啦~
                     seekAndCalculateCellData();
                     return true;
@@ -1197,6 +1200,10 @@ public class MasterView extends KBaseView {
             }
         }
         mEndIndex = mBeginIndex + mShownMaxCount;
+
+        //回调给副图
+        if(mMasterListener!=null) mMasterListener.mastelPullmNewIndex(mBeginIndex,mEndIndex,mPullType,mShownMaxCount);
+
         //开始位置和结束位置确认好，就可以重绘啦~
         seekAndCalculateCellData();
     }

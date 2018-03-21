@@ -7,6 +7,8 @@ import android.graphics.Path;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 
 import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.financialview.FinancialAlgorithm;
@@ -100,6 +102,32 @@ public class MinorView extends KBaseView {
                 mDrawLongPress = false;
                 invalidate();
             }
+
+            @Override
+            public void masteZoomlNewIndex(int beginIndex, int endIndex,int shownMaxCount) {
+                mBeginIndex=beginIndex;
+                mEndIndex=endIndex;
+                mShownMaxCount=shownMaxCount;
+                seekAndCalculateCellData();
+            }
+
+            @Override
+            public void mastelPullmNewIndex(int beginIndex, int endIndex, PullType currPullType, int shownMaxCount) {
+                mBeginIndex=beginIndex;
+                mEndIndex=endIndex;
+                mShownMaxCount=shownMaxCount;
+                mPullType=currPullType;
+
+                //处理右侧内边距
+                if(currPullType==PullType.PULL_RIGHT_STOP){
+                    //重置到之前的状态
+                    mInnerRightBlankPadding = DEF_INNER_RIGHT_BLANK_PADDING;
+                }else{
+                    mInnerRightBlankPadding=0;
+                }
+
+                seekAndCalculateCellData();
+            }
         };
     }
 
@@ -122,15 +150,26 @@ public class MinorView extends KBaseView {
         }
         //绘制右侧文字
         drawYRightTxt(canvas);
-        //绘制非按下情况下图例
-        drawNoPressLegend(canvas);
-        drawPressLegend(canvas);
-
+        //绘制图例
+        drawLegend(canvas);
+        //绘制核心指标线
         drawMinorIndicatrix(canvas);
-
+        //绘制长按线
         drawLongPress(canvas);
     }
 
+    private void drawLegend(Canvas canvas) {
+        //绘制非按下情况下图例
+        drawNoPressLegend(canvas);
+        //绘制按下的图例
+        drawPressLegend(canvas);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        mScaleGestureDetector.onTouchEvent(event);
+        return super.onTouchEvent(event);
+    }
     private void drawMinorIndicatrix(Canvas canvas) {
         mMacdPaint.setStyle(Paint.Style.STROKE);
         mRsiPaint.setStyle(Paint.Style.STROKE);
@@ -468,6 +507,10 @@ public class MinorView extends KBaseView {
         initDefAttrs();
         initColorRes();
 
+        //手势
+        mScaleGestureDetector = new ScaleGestureDetector(mContext, mOnScaleGestureListener);
+
+
         initMacdPaint();
         initRsiPaint();
         initKdjPaint();
@@ -614,6 +657,67 @@ public class MinorView extends KBaseView {
         setMinorType(mMinorType);
     }
 
+
+    //缩放手势监听
+    ScaleGestureDetector.OnScaleGestureListener mOnScaleGestureListener =
+            new ScaleGestureDetector.SimpleOnScaleGestureListener() {
+                @Override
+                public boolean onScale(ScaleGestureDetector detector) {
+                    //没有缩放
+                    if (detector.getScaleFactor() == 1) return true;
+
+                    //是放大还是缩小
+                    boolean isBigger = detector.getScaleFactor() > 1;
+
+                    //变化的个数（缩小或者放大），必须向上取整，不然当mShownMaxCount过小时容易取到0。
+                    int changeNum = (int) Math.ceil(mShownMaxCount * Math.abs(detector.getScaleFactor() - 1));
+
+                    //一半
+                    int helfChangeNum = (int) Math.ceil(changeNum / 2f);
+
+                    //缩放个数太少，直接return
+                    if (changeNum == 0 || helfChangeNum == 0) return true;
+
+                    //容错处理,获取最大最小值
+                    if (DEF_SCALE_MINNUM < 3) {
+                        DEF_SCALE_MINNUM = 3;
+                    }
+                    if (DEF_SCALE_MAXNUM > mQuotesList.size()) {
+                        DEF_SCALE_MAXNUM = mQuotesList.size();
+                    }
+
+                    //变大了(拉伸了)，数量变少了
+                    int tempCount = isBigger ? mShownMaxCount - changeNum : mShownMaxCount + changeNum;
+
+                    //缩小大到最小了或者放大到很大了
+                    if (tempCount > DEF_SCALE_MAXNUM || tempCount < DEF_SCALE_MINNUM) return true;
+
+                    mShownMaxCount = tempCount;
+
+                    //计算新的开始位置。这个地方比较难以理解:拉伸了起始点变大，并且是拉伸数量的一半，结束点变小，也是原来的一半。
+                    // 收缩，相反。可以自己画一个图看看
+                    mBeginIndex = isBigger ? mBeginIndex + helfChangeNum : mBeginIndex - helfChangeNum;
+                    if (mBeginIndex < 0) {
+                        mBeginIndex = 0;
+                    } else if ((mBeginIndex + mShownMaxCount) > mQuotesList.size()) {
+                        mBeginIndex = mQuotesList.size() - mShownMaxCount;
+                    }
+
+                    mEndIndex = mBeginIndex + mShownMaxCount;
+
+                    //只要找好起始点和结束点就可以交给处理重绘的方法就好啦~
+                    seekAndCalculateCellData();
+                    return true;
+                }
+
+                @Override
+                public boolean onScaleBegin(ScaleGestureDetector detector) {
+                    //指头数量
+                    if (mFingerPressedCount != 2) return true;
+                    return true;
+                }
+            };
+
     @Override
     protected void innerLongClickListener(float x, float y) {
         super.innerLongClickListener(x, y);
@@ -632,8 +736,34 @@ public class MinorView extends KBaseView {
     }
 
     public interface MasterListener {
+        /**
+         * 长按操作
+         * @param x  按下所对应的x坐标
+         * @param currQuotes 按下所对应的点
+         */
         void masterLongPressListener(float x, Quotes currQuotes);
 
+        /**
+         * 不再长按回调
+         */
         void masterNoLongPressListener();
+
+        /**
+         * 缩放
+         * @param beginIndex 缩放后的起始位置索引
+         * @param endIndex 缩放后的结束索引
+         * @param shownMaxCount 可见数据总条数
+         */
+        void masteZoomlNewIndex(int beginIndex, int endIndex,int shownMaxCount);
+
+        /**
+         * 左右滑动
+         * @param endIndex 滑动后的结束索引
+         * @param currPullType 当前PullType类型
+         * @param shownMaxCount
+         * @param shownMaxCount 可见数据总条数
+         */
+        void mastelPullmNewIndex(int beginIndex, int endIndex, PullType currPullType, int shownMaxCount);
+
     }
 }
