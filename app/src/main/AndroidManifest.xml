@@ -22,7 +22,8 @@
         </activity>
         <activity
             android:name=".KViewHorizontalActivityActivity"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape"
+            android:theme="@style/AppTheme_Fullscreen">
         </activity>
     </application>
 

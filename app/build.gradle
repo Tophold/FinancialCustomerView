@@ -16,7 +16,7 @@ android {
         minSdkVersion 17
         targetSdkVersion 25
         versionCode getMyVersionCode() as int//查询versioncode即可找到对应git历史
-        versionName "1.4"
+        versionName "1.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
 

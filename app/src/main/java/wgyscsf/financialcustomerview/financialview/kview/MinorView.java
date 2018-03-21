@@ -576,9 +576,6 @@ public class MinorView extends KBaseView {
         mKColor = getColor(R.color.color_minorView_kColor);
         mDColor = getColor(R.color.color_minorView_dColor);
         mJColor = getColor(R.color.color_minorView_jColor);
-
-
-        setBackgroundColor(mLongPressTxtColor);
     }
 
     @Override
