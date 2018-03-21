@@ -3,8 +3,9 @@ package wgyscsf.financialcustomerview;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import wgyscsf.financialcustomerview.financialview.fund.FundActivity;
+import wgyscsf.financialcustomerview.financialview.FundActivity;
 
 public class MainActivity extends BaseActivity {
     TextView mTextView;
@@ -17,27 +18,20 @@ public class MainActivity extends BaseActivity {
         mTextView.setText(getVersionStr());
     }
 
-    public void goFundView(View view) {
+    public void fundView(View view) {
         go(FundActivity.class);
-
     }
 
-
-    public void goMinor(View view) {
-         go(MinorViewActivity.class);
-        //Test.test();
+    public void kViewVertical(View view) {
+        go(KViewVerticalActivity.class);
     }
 
-    public void goTimeShringView(View view) {
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(MasterViewActivity.KEY_INTENT, true);
-        go(MasterViewActivity.class, bundle);
+    public void kViewHorizontal(View view) {
+        go(KViewHorizontalActivityActivity.class);
     }
 
-    public void goCandleView(View view) {
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(MasterViewActivity.KEY_INTENT, false);
-        go(MasterViewActivity.class, bundle);
+    public void kViewEvaluation(View view) {
+        Toast.makeText(mContext, "TODO:待完善", Toast.LENGTH_SHORT).show();
     }
 
     public String getVersionStr() {

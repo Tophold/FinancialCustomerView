@@ -10,41 +10,42 @@
         android:id="@+id/version"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
         android:layout_gravity="top"
         android:gravity="center"
+        android:padding="16dp"
         android:text="verisonName:1.4,versionCode(git head):"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="goFundView"
+        android:layout_marginTop="100dp"
+        android:onClick="fundView"
         android:text="去自定义基金页面"
-        android:layout_marginTop="160dp"
         />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:onClick="goTimeShringView"
-        android:text="去主图页面_分时图"
+        android:onClick="kViewVertical"
+        android:text="去K线图（竖屏）"
         />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:onClick="goCandleView"
-        android:text="去主图页面_蜡烛图"
+        android:onClick="kViewHorizontal"
+        android:text="去K线图（横屏）"
         />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:onClick="goMinor"
-        android:text="去副图页面"
+        android:onClick="kViewEvaluation"
+        android:text="KView测评"
+        android:textAllCaps="false"
         />
 
 

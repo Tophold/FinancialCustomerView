@@ -218,7 +218,7 @@ public class MasterView extends KBaseView {
         mScaleGestureDetector = new ScaleGestureDetector(mContext, mOnScaleGestureListener);
 
         //是分时图还是蜡烛图,def
-        setViewType(ViewType.CANDLE);
+        setViewType(ViewType.TIMESHARING);
         //底部距离
         mPaddingBottom = 35;
     }

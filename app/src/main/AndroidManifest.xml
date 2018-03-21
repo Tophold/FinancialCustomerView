@@ -10,22 +10,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
-        </activity>
-        <activity android:name=".financialview.fund.FundActivity">
-        </activity>
-        <activity android:name=".MasterViewActivity">
-        </activity>
-        <activity
-            android:name=".MinorViewActivity"
-            android:screenOrientation="landscape">
-        </activity>
-        <activity android:name=".CustomerViewGroupActivity"
-                  android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity android:name=".financialview.FundActivity">
+        </activity>
+        <activity android:name=".KViewVerticalActivity">
+        </activity>
+        <activity
+            android:name=".KViewHorizontalActivityActivity"
+            android:screenOrientation="landscape">
         </activity>
     </application>
 

@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.financialview.fund;
+package wgyscsf.financialcustomerview.financialview;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,6 +10,10 @@ import java.util.List;
 
 import wgyscsf.financialcustomerview.BaseActivity;
 import wgyscsf.financialcustomerview.R;
+import wgyscsf.financialcustomerview.financialview.fund.FundMode;
+import wgyscsf.financialcustomerview.financialview.fund.FundView;
+import wgyscsf.financialcustomerview.financialview.fund.OriginFundMode;
+import wgyscsf.financialcustomerview.financialview.fund.SimulateNetAPI;
 import wgyscsf.financialcustomerview.utils.GsonUtil;
 
 public class FundActivity extends BaseActivity {

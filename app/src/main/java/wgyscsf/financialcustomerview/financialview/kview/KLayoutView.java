@@ -26,6 +26,9 @@ public class KLayoutView extends LinearLayout {
     //是否展示副图
     boolean isShowMinor = true;
 
+    //主图展示的是蜡烛图还是分时图
+    boolean isShowTimSharing=true;
+
     public KLayoutView(Context context) {
         this(context, null);
     }
@@ -146,5 +149,40 @@ public class KLayoutView extends LinearLayout {
         mMasterView.loadMoreTimeSharingData(quotesList);
         mMinorView.loadMoreTimeSharingData(quotesList);
     }
+    /**
+     * 加载更多失败，在这里添加逻辑
+     */
+    public void loadMoreError() {
+      mMasterView.loadMoreError();
+    }
 
+    /**
+     * 加载更多成功，在这里添加逻辑
+     */
+    public void loadMoreSuccess() {
+        mMasterView.loadMoreSuccess();
+    }
+
+    /**
+     * 正在加载更多，在这里添加逻辑
+     */
+    public void loadMoreIng() {
+        mMasterView.loadMoreIng();
+    }
+
+    /**
+     * 没有更多数据，在这里添加逻辑
+     */
+    public void loadMoreNoData() {
+        mMasterView.loadMoreNoData();
+    }
+
+    public boolean isShowTimSharing() {
+        return isShowTimSharing;
+    }
+
+    public void setShowTimSharing(boolean showTimSharing) {
+        isShowTimSharing = showTimSharing;
+        mMasterView.setViewType(showTimSharing? KBaseView.ViewType.TIMESHARING: KBaseView.ViewType.CANDLE);
+    }
 }

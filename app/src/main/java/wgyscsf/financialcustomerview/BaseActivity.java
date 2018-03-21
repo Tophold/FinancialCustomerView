@@ -9,12 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
-import rx.Subscription;
-import rx.subscriptions.CompositeSubscription;
-
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
 /**
  * ============================================================
- * 版 权 ：   天厚投资 版权所有 (c)
  * 作 者 :    wgyscsf
  * 创建日期 ：2017/10/16 16:27
  * 描 述 ：
@@ -38,8 +36,7 @@ public class BaseActivity extends AppCompatActivity {
      */
     private Toast toast = null;
 
-    //retrofit请求集合
-    private CompositeSubscription mCompositeSubscription;
+    private CompositeDisposable compositeDisposable;
 
     @Override
     public void setContentView(int view) {
@@ -66,32 +63,30 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     /**
-     * 添加Subscription
+     * 添加disposable
      *
-     * @param subscription
+     * @param disposable
      */
-    public void addGcManagerSubscription(Subscription subscription) {
-        Log.d(TAG, "add subscription");
+    public void unSubscription(Disposable disposable) {
         initSingletonCompositeSubscription();
-        mCompositeSubscription.add(subscription);
+        compositeDisposable.add(disposable);
     }
 
     private void initSingletonCompositeSubscription() {
-        if (mCompositeSubscription == null) {
-            synchronized (CompositeSubscription.class) {
-                if (mCompositeSubscription == null) {
-                    mCompositeSubscription = new CompositeSubscription();
+        if (compositeDisposable == null) {
+            synchronized (CompositeDisposable.class) {
+                if (compositeDisposable == null) {
+                    compositeDisposable = new CompositeDisposable();
                 }
             }
         }
     }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mCompositeSubscription != null) {
-            Log.d(TAG, "base activity unscbscribe");
-            mCompositeSubscription.unsubscribe();
+        if (compositeDisposable != null) {
+            Log.d(TAG, "base activity dispose");
+            compositeDisposable.clear();
         }
     }
 

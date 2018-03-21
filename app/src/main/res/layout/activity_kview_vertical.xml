@@ -3,13 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical">
 
+    <!--按下的指标显示-->
     <LinearLayout
-        android:id="@+id/ats_ll_container"
+        android:id="@+id/akv_ll_container"
         android:layout_width="match_parent"
         android:layout_height="50dp"
+        android:layout_marginTop="20dp"
         android:background="#e7e3e3"
         android:orientation="vertical"
         android:paddingTop="4dp"
@@ -34,7 +35,7 @@
                     android:textSize="12dp"/>
 
                 <TextView
-                    android:id="@+id/ats_tv_h"
+                    android:id="@+id/akv_tv_h"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/string_placeHold"
@@ -56,7 +57,7 @@
                     android:textSize="12dp"/>
 
                 <TextView
-                    android:id="@+id/ats_tv_o"
+                    android:id="@+id/akv_tv_o"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/string_placeHold"
@@ -71,7 +72,7 @@
                 android:gravity="center">
 
                 <TextView
-                    android:id="@+id/ats_tv_time"
+                    android:id="@+id/akv_tv_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/string_placeHold"
@@ -101,7 +102,7 @@
                     android:textSize="12dp"/>
 
                 <TextView
-                    android:id="@+id/ats_tv_l"
+                    android:id="@+id/akv_tv_l"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/string_placeHold"
@@ -123,7 +124,7 @@
                     android:textSize="12dp"/>
 
                 <TextView
-                    android:id="@+id/ats_tv_c"
+                    android:id="@+id/akv_tv_c"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/string_placeHold"
@@ -145,7 +146,7 @@
                     android:textSize="12dp"/>
 
                 <TextView
-                    android:id="@+id/ats_tv_p"
+                    android:id="@+id/akv_tv_p"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/string_placeHold"
@@ -157,9 +158,35 @@
         </LinearLayout>
     </LinearLayout>
 
-    <wgyscsf.financialcustomerview.financialview.kview.MasterView
-        android:id="@+id/tsv"
+    <wgyscsf.financialcustomerview.financialview.kview.KView
+        android:id="@+id/akv_kv_kview"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:background="#fff0ae"/>
+        android:layout_height="300dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="45dp"
+        android:layout_marginTop="100dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/akv_btn_showCandle"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_weight="1"
+            android:onClick="showCandle"
+            android:text="点击展示蜡烛图"/>
+
+        <View
+            android:layout_width="10dp"
+            android:layout_height="match_parent"/>
+
+        <Button
+            android:id="@+id/akv_btn_showMinnor"
+            android:layout_width="0dp"
+            android:layout_height="45dp"
+            android:layout_weight="1"
+            android:onClick="showMinor"
+            android:text="点击不显示副图"/>
+    </LinearLayout>
 </LinearLayout>
