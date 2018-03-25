@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview;
+package wgyscsf.financialcustomerview.ui.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,8 +9,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.greenrobot.eventbus.EventBus;
+
+import io.reactivex.Observable;
+import io.reactivex.Observer;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+
+import wgyscsf.financialcustomerview.api.RetrofitManager;
+
 /**
  * ============================================================
  * 作 者 :    wgyscsf
@@ -55,7 +62,13 @@ public class BaseActivity extends AppCompatActivity {
         if (null != extras) {
             getBundleExtras(extras);
         }
+        if (isBindEventBusHere()) {
+            EventBus.getDefault().register(mActivity);
+        }
+    }
 
+    public boolean isBindEventBusHere() {
+        return false;
     }
 
     protected void getBundleExtras(Bundle extras) {
@@ -68,11 +81,6 @@ public class BaseActivity extends AppCompatActivity {
      * @param disposable
      */
     public void unSubscription(Disposable disposable) {
-        initSingletonCompositeSubscription();
-        compositeDisposable.add(disposable);
-    }
-
-    private void initSingletonCompositeSubscription() {
         if (compositeDisposable == null) {
             synchronized (CompositeDisposable.class) {
                 if (compositeDisposable == null) {
@@ -80,16 +88,27 @@ public class BaseActivity extends AppCompatActivity {
                 }
             }
         }
+        compositeDisposable.add(disposable);
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (isBindEventBusHere()) {
+            EventBus.getDefault().unregister(mActivity);
+        }
         if (compositeDisposable != null) {
             Log.d(TAG, "base activity dispose");
             compositeDisposable.clear();
         }
     }
-
+    /**
+     * @param observable
+     * @param observer
+     */
+    public void call(Observable observable, Observer observer) {
+       RetrofitManager.call(observable, observer);
+    }
     /**
      * startActivity
      *

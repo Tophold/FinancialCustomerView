@@ -66,8 +66,8 @@
     <color name="color_masterView_ma20Color">#3785d9</color>
 
     <!--boll-->
-    <color name="color_masterView_bollMbColor">#ed978f</color>
-    <color name="color_masterView_bollUpColor">#136ad6</color>
+    <color name="color_masterView_bollUpColor">#ed978f</color>
+    <color name="color_masterView_bollMbColor">#136ad6</color>
     <color name="color_masterView_bollDnColor">#7897b9</color>
 
     <!--++++++++++++++++++副图自定义View++++++++++++++++++++-->
@@ -104,5 +104,10 @@
     <!--++++++++++++++++++++KView相关，包括：分时图、副图  结束+++++++++++++++++++++++++++++++++++++++++++++++-->
 
 
+
+    <!--具体业务-->
+    <color name="color_tb_indicator">#ef1e13</color>
+    <color name="color_tb_selectedTxt">#ef1e13</color>
+    <color name="color_tb_Txt">#8a8a8b</color>
 
 </resources>

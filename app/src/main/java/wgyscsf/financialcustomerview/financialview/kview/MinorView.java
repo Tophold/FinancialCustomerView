@@ -580,6 +580,8 @@ public class MinorView extends KBaseView {
 
     @Override
     protected void seekAndCalculateCellData() {
+        if (mQuotesList==null||mQuotesList.isEmpty()) return;
+
         if (mMinorType == MinorType.MACD) {
             FinancialAlgorithm.calculateMACD(mQuotesList);
         }

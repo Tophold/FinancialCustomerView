@@ -104,7 +104,7 @@ public class FinancialAlgorithm {
      * MACD(x,y,z)，一般取MACD(12,26,9)。
      * MACD(x,y,z)，x、y为平滑指数。z暂时不知道用处（不影响算法）。
      * `EMAx=((x-1)/(x+1.0)*前一日EMA)+2.0/(x+1)*今日收盘价`;其中第一日的EMA是当日的收盘价。
-     * `EMA12=(12/13.0)*[前一日EMA12]+2.0/13*[今日quotes.c]`
+     * `EMA12=(11/13.0)*[前一日EMA12]+2.0/13*[今日quotes.c]`
      * `EMA26=(25/27.0)*[前一日EMA26]+2.0/27*[今日quotes.c]`
      * DIF:`DIF=EMA12-EMA26`
      * DEA:`DEA=8/10.0*(前一日的DEA)+2/10.0*今日DIF`
@@ -216,7 +216,7 @@ public class FinancialAlgorithm {
 
 
     /**
-     * 计算公式：MA =(C1+C2+C3+C4+C5+...+Cn)/n,其中C为收盘价n为移动平均周期数。
+     * 【该算法已核实】计算公式：MA =(C1+C2+C3+C4+C5+...+Cn)/n,其中C为收盘价n为移动平均周期数。
      * 例如现货黄金的5日移动平均价格计算方法为：MA5=(前四天收盘价+前三天收盘价+前天收盘价+昨天收盘价+今天收盘价)/5。
      * 特殊的，假如数据集合中最开始的n个数据，是没法计算MAn的。这里的处理方式是不计算，绘制时直接不绘制对应MA即可。
      *
@@ -260,9 +260,9 @@ public class FinancialAlgorithm {
 
 
     /**
-     * BOLL(n)计算公式：
+     * 【该算法已核实】BOLL(n)计算公式：
      * MA=n日内的收盘价之和÷n。
-     * MD=（n-1）日的平方根（C－MA）的两次方之和除以n
+     * MD=n日的平方根（C－MA）的两次方之和除以n
      * MB=（n－1）日的MA
      * UP=MB+k×MD
      * DN=MB－k×MD
@@ -276,8 +276,8 @@ public class FinancialAlgorithm {
         if (quotesList == null || quotesList.isEmpty()) return;
         if (period < 0 || period > quotesList.size() - 1) return;
 
-        double mb;//上轨线
-        double up;//中轨线
+        double up;//上轨线
+        double mb;//中轨线
         double dn;//下轨线
 
         //n日
@@ -303,7 +303,7 @@ public class FinancialAlgorithm {
             double ma2 = sum2 / (period - 1);
             double md = 0;
             for (int j = i + 1 - period; j <= i; j++) {
-                //n-1日
+                //n日
                 md += Math.pow(quotesList.get(j).c - ma, 2);
             }
             md = Math.sqrt(md / period);
@@ -312,8 +312,8 @@ public class FinancialAlgorithm {
             up = mb + k * md;
             dn = mb - k * md;
 
-            quotes.mb = mb;
             quotes.up = up;
+            quotes.mb = mb;
             quotes.dn = dn;
         }
     }

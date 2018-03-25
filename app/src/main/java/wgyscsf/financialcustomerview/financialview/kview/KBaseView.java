@@ -15,6 +15,7 @@ import java.util.List;
 
 import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.financialview.BaseFinancialView;
+import wgyscsf.financialcustomerview.utils.StringUtils;
 
 /**
  * ============================================================
@@ -331,12 +332,14 @@ public abstract class KBaseView extends BaseFinancialView {
         mLegendPaint.setStrokeWidth(mLineWidth);
         mLegendPaint.setTextSize(mLegendTxtSize);
     }
+
     protected void initLongPressPaint() {
         mLongPressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLongPressPaint.setColor(mLongPressColor);
         mLongPressPaint.setStrokeWidth(mLongPressLineWidth);
         mLongPressPaint.setStyle(Paint.Style.STROKE);
     }
+
     protected void showLoadingPaint(Canvas canvas) {
         if (!mDrawLoadingPaint) return;
         //这里特别注意，x轴的起始点要减去文字宽度的一半
@@ -429,11 +432,6 @@ public abstract class KBaseView extends BaseFinancialView {
         Toast.makeText(mContext, "加载更多，没有数据了...", Toast.LENGTH_SHORT).show();
     }
 
-    //产品的小数位数
-    public void setDigits(int digits) {
-        mDigits = digits;
-    }
-
     protected enum PullType {
         PULL_RIGHT,//向右滑动
         PULL_LEFT,//向左滑动
@@ -482,8 +480,6 @@ public abstract class KBaseView extends BaseFinancialView {
         mQuotesList = quotesList;
         //数据过来，隐藏加载更多
         hiddenLoadingPaint();
-        //开始处理数据
-        mDigits = 4;
 
         //寻找开始位置和结束位置
         seekBeginAndEndByNewer();
@@ -511,14 +507,41 @@ public abstract class KBaseView extends BaseFinancialView {
      * 实时推送过来的数据，实时更新
      *
      * @param quotes
+     * @param forexTab
      */
-    public void pushingTimeSharingData(Quotes quotes) {
+    public void pushingTimeSharingData(Quotes quotes, ForexTab forexTab) {
         if (quotes == null) {
             Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
             Log.e(TAG, "setTimeSharingData: 数据异常");
             return;
         }
-        mQuotesList.add(quotes);
+        if (StringUtils.isEmpty(mQuotesList)) return;
+
+
+        /**
+         * 对于新推送过来的数据，需要判断和列表中最新的数据的时间差进行对比。对比和View的类型有关，比如1min的
+         * 时间差是60s，如果小于60s,就更新最新一条的最大值和最小值；否则添加进去。
+         */
+        Quotes q = mQuotesList.get(mQuotesList.size() - 1);
+        if (quotes.t < q.t) return;
+        if (forexTab!=null&&((quotes.t-q.t)/1000.0)<=forexTab.getTypeLength()) {
+            //这个时候替换最后一个原有数据
+            q.c = quotes.c;//绘制分时图是根据闭市价格算的
+
+            //判断最大值和最小值，及时更新
+            if(quotes.c>q.h) q.h=quotes.c;
+            if(quotes.c<q.l) q.l=quotes.c;
+
+
+            mQuotesList.set(mQuotesList.size() - 1, q);
+        } else {
+            //new ?Add it!
+            mQuotesList.add(quotes);
+        }
+
+
+
+
         //如果是在左右移动，则不去实时更新K线图，但是要把数据加进去
         if (mPullType == PullType.PULL_RIGHT_STOP) {
             //Log.e(TAG, "pushingTimeSharingData: 处理实时更新操作...");
@@ -603,5 +626,13 @@ public abstract class KBaseView extends BaseFinancialView {
     }
 
     protected void innerLongClickListener(float x, float y) {
+    }
+
+    public int getDigits() {
+        return mDigits;
+    }
+    //产品的小数位数
+    public void setDigits(int digits) {
+        mDigits = digits;
     }
 }

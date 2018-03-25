@@ -1,5 +1,6 @@
 package wgyscsf.financialcustomerview.utils;
 
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -21,6 +22,11 @@ public class StringUtils {
         for (String str : strs) {
             if (str == null || str.trim().equals("")) return true;
         }
+        return false;
+    }
+
+    public static boolean isEmpty(List list) {
+        if (list == null || list.size() == 0) return true;
         return false;
     }
 

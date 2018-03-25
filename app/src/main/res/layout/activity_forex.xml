@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="vertical">
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/af_tl_tablayout"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            app:tabIndicatorColor="@color/color_tb_indicator"
+            app:tabSelectedTextColor="@color/color_tb_selectedTxt"
+            app:tabTextColor="@color/color_tb_Txt"
+            />
+
+        <!--按下的指标显示-->
+        <LinearLayout
+            android:id="@+id/akv_ll_container"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="#e7e3e3"
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="高:"
+                        android:textColor="#000"
+                        android:textSize="12dp"/>
+
+                    <TextView
+                        android:id="@+id/akv_tv_h"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/string_placeHold"
+                        android:textColor="#f00"
+                        android:textSize="12dp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="开:"
+                        android:textColor="#000"
+                        android:textSize="12dp"/>
+
+                    <TextView
+                        android:id="@+id/akv_tv_o"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/string_placeHold"
+                        android:textColor="#f00"
+                        android:textSize="12dp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/akv_tv_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/string_placeHold"
+                        android:textColor="#000"
+                        android:textSize="12dp"/>
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="低:"
+                        android:textColor="#000"
+                        android:textSize="12dp"/>
+
+                    <TextView
+                        android:id="@+id/akv_tv_l"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/string_placeHold"
+                        android:textColor="#f00"
+                        android:textSize="12dp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="收:"
+                        android:textColor="#000"
+                        android:textSize="12dp"/>
+
+                    <TextView
+                        android:id="@+id/akv_tv_c"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/string_placeHold"
+                        android:textColor="#f00"
+                        android:textSize="12dp"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="幅:"
+                        android:textColor="#000"
+                        android:textSize="12dp"/>
+
+                    <TextView
+                        android:id="@+id/akv_tv_p"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/string_placeHold"
+                        android:textColor="#f00"
+                        android:textSize="12dp"/>
+                </LinearLayout>
+
+
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#8f8d8d"/>
+
+    <wgyscsf.financialcustomerview.ui.view.NoScrollViewPager
+        android:id="@+id/af_vp_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"/>
+
+    <TextView
+        android:id="@+id/af_tv_symbol"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="欧元/美元(USDCAD)"
+        android:gravity="center"
+        android:background="#a7a4a4"/>
+    <TextView
+        android:id="@+id/af_tv_blank"
+        android:onClick="showHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="4dp"
+        android:background="#cccccc"
+        android:gravity="center"
+        android:text="业务模块(单击这里进入横屏)"/>
+
+</LinearLayout>

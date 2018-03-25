@@ -2,13 +2,17 @@
 <manifest package="wgyscsf.financialcustomerview"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="${app_names}"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:name=".MyApplication">
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -18,12 +22,16 @@
         </activity>
         <activity android:name=".financialview.FundActivity">
         </activity>
-        <activity android:name=".KViewVerticalActivity">
+        <activity android:name=".ui.activity.KViewVerticalActivity">
         </activity>
         <activity
-            android:name=".KViewHorizontalActivityActivity"
+            android:name=".ui.activity.KViewHorizontalActivityActivity"
             android:screenOrientation="landscape"
             android:theme="@style/AppTheme_Fullscreen">
+        </activity>
+        <activity android:name=".ui.activity.ForexListActivity">
+        </activity>
+        <activity android:name=".ui.activity.ForexActivity">
         </activity>
     </application>
 

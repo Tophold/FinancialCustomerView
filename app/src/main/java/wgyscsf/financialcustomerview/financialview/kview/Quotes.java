@@ -26,11 +26,14 @@ public class Quotes extends BaseModel {
     /**
      * 原始数据
      */
-    public long t;
+    public long t;//开始时间
     public double o;
     public double h;
     public double l;
     public double c;
+
+    //扩展一个结束时间
+    public long e;
 
 
     /**
@@ -48,14 +51,25 @@ public class Quotes extends BaseModel {
     public double ma20;
 
     //BOLL
-    public double mb;//上轨线
-    public double up;//中轨线
+    public double up;//上轨线
+    public double mb;//中轨线
     public double dn;//下轨线
 
     //KDJ
     public double k;
     public double d;
     public double j;
+
+    public Quotes(String o, String h, String l, String c, long s,long e) {
+        this.o = Double.parseDouble(o);
+        this.h = Double.parseDouble(h);
+        this.l = Double.parseDouble(l);
+        this.c = Double.parseDouble(c);
+        this.t = s;
+        this.e=e;
+        this.showTime = TimeUtils.millis2String(this.t);
+    }
+
     //调试使用，找到k、d、j中的最小值
     public double getMinKDJ(){
        double min;

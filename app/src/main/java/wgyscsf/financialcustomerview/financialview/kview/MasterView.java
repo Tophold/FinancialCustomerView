@@ -121,11 +121,12 @@ public class MasterView extends KBaseView {
     Paint mMa20Paint;
     int mMa20Color;
 
+
     //BOLL
-    Paint mBollMbPaint;
-    int mBollMbColor;
     Paint mBollUpPaint;
     int mBollUpColor;
+    Paint mBollMbPaint;
+    int mBollMbColor;
     Paint mBollDnPaint;
     int mBollDnColor;
 
@@ -248,8 +249,8 @@ public class MasterView extends KBaseView {
         mMa10Color = getColor(R.color.color_masterView_ma10Color);
         mMa20Color = getColor(R.color.color_masterView_ma20Color);
 
-        mBollMbColor = getColor(R.color.color_masterView_bollMbColor);
         mBollUpColor = getColor(R.color.color_masterView_bollUpColor);
+        mBollMbColor = getColor(R.color.color_masterView_bollMbColor);
         mBollDnColor = getColor(R.color.color_masterView_bollDnColor);
     }
 
@@ -486,12 +487,12 @@ public class MasterView extends KBaseView {
                 canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft + leftWidth + leftWidth2),
                         (float) (mLegendPaddingTop + mPaddingTop), mMa20Paint);
             } else if (mMasterType == MasterType.BOLL) {
-                showTxt = "• UPPER " + FormatUtil.formatBySubString(mCurrLongPressQuotes.mb, mDigits) + " ";
+                showTxt = "• UPPER " + FormatUtil.formatBySubString(mCurrLongPressQuotes.up, mDigits) + " ";
                 canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft),
                         (float) (mLegendPaddingTop + mPaddingTop), mBollMbPaint);
 
                 float leftWidth = mBollMbPaint.measureText(showTxt);
-                showTxt = "• MID " + FormatUtil.formatBySubString(mCurrLongPressQuotes.up, mDigits) + " ";
+                showTxt = "• MID " + FormatUtil.formatBySubString(mCurrLongPressQuotes.mb, mDigits) + " ";
                 canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft + leftWidth),
                         (float) (mLegendPaddingTop + mPaddingTop), mBollUpPaint);
 
@@ -636,10 +637,10 @@ public class MasterView extends KBaseView {
             v = quotes.ma20 - mCandleMinY;
         }
         //boll
-        else if (maType == MasterDetailType.BOLLMB) {
-            v = quotes.mb - mCandleMinY;
-        } else if (maType == MasterDetailType.BOLLUP) {
+        else if (maType == MasterDetailType.BOLLUP) {
             v = quotes.up - mCandleMinY;
+        } else if (maType == MasterDetailType.BOLLMB) {
+            v = quotes.mb - mCandleMinY;
         } else if (maType == MasterDetailType.BOLLDN) {
             v = quotes.dn - mCandleMinY;
         }
@@ -671,20 +672,8 @@ public class MasterView extends KBaseView {
             Quotes quotes = mQuotesList.get(i);
             float floatX = quotes.floatX;//在绘制蜡烛图的时候已经计算了
 
-            float floatY = getMasterDetailFloatY(quotes, MasterDetailType.BOLLMB);
-
-            //异常,在View的行为就是不显示而已，影响不大。一般都是数据的开头部分。
-            if (floatY == -1) continue;
-
-            if (isFirstMB) {
-                isFirstMB = false;
-                mbPath.moveTo(floatX, floatY);
-            } else {
-                mbPath.lineTo(floatX, floatY);
-            }
-
-            floatY = getMasterDetailFloatY(quotes, MasterDetailType.BOLLUP);
-
+            //上轨线
+            float floatY = getMasterDetailFloatY(quotes, MasterDetailType.BOLLUP);
             //异常
             if (floatY == -1) continue;
 
@@ -695,8 +684,21 @@ public class MasterView extends KBaseView {
                 upPath.lineTo(floatX, floatY);
             }
 
-            floatY = getMasterDetailFloatY(quotes, MasterDetailType.BOLLDN);
+             //中轨线
+             floatY = getMasterDetailFloatY(quotes, MasterDetailType.BOLLMB);
+            //异常,在View的行为就是不显示而已，影响不大。一般都是数据的开头部分。
+            if (floatY == -1) continue;
 
+            if (isFirstMB) {
+                isFirstMB = false;
+                mbPath.moveTo(floatX, floatY);
+            } else {
+                mbPath.lineTo(floatX, floatY);
+            }
+
+
+            //下轨线
+            floatY = getMasterDetailFloatY(quotes, MasterDetailType.BOLLDN);
             //异常
             if (floatY == -1) continue;
 
@@ -708,8 +710,8 @@ public class MasterView extends KBaseView {
             }
         }
 
-        canvas.drawPath(mbPath, mBollMbPaint);
         canvas.drawPath(upPath, mBollUpPaint);
+        canvas.drawPath(mbPath, mBollMbPaint);
         canvas.drawPath(dnPath, mBollDnPaint);
     }
 
@@ -757,6 +759,10 @@ public class MasterView extends KBaseView {
             rightRectX = rightRectX > mWidth - mPaddingRight ? mWidth - mPaddingRight : rightRectX;
             rightLineX = rightLineX > mWidth - mPaddingRight ? mWidth - mPaddingRight : rightLineX;
         }
+
+        //上下边界一样，设置一个偏移值
+        if (topRectY == bottomRectY) bottomRectY += 1;
+
         rectF.set(leftRectX, topRectY, rightRectX, bottomRectY);
         //设置颜色
         mCandlePaint.setColor(quotes.c > quotes.o ? mRedCandleColor : mGreenCandleColor);
@@ -1006,7 +1012,7 @@ public class MasterView extends KBaseView {
 
     @Override
     protected void seekAndCalculateCellData() {
-        if (mQuotesList.isEmpty()) return;
+        if (mQuotesList==null||mQuotesList.isEmpty()) return;
 
         //对于蜡烛图，需要计算以下指标。
         if (mViewType == ViewType.CANDLE) {
@@ -1122,7 +1128,8 @@ public class MasterView extends KBaseView {
                     mEndIndex = mBeginIndex + mShownMaxCount;
 
                     //将新的索引回调给副图
-                    if(mMasterListener!=null) mMasterListener.masteZoomlNewIndex(mBeginIndex,mEndIndex,mShownMaxCount);
+                    if (mMasterListener != null)
+                        mMasterListener.masteZoomlNewIndex(mBeginIndex, mEndIndex, mShownMaxCount);
 
                     //只要找好起始点和结束点就可以交给处理重绘的方法就好啦~
                     seekAndCalculateCellData();
@@ -1154,8 +1161,8 @@ public class MasterView extends KBaseView {
         MA5,
         MA10,
         MA20,
-        BOLLMB,
         BOLLUP,
+        BOLLMB,
         BOLLDN
     }
 
@@ -1202,7 +1209,8 @@ public class MasterView extends KBaseView {
         mEndIndex = mBeginIndex + mShownMaxCount;
 
         //回调给副图
-        if(mMasterListener!=null) mMasterListener.mastelPullmNewIndex(mBeginIndex,mEndIndex,mPullType,mShownMaxCount);
+        if (mMasterListener != null)
+            mMasterListener.mastelPullmNewIndex(mBeginIndex, mEndIndex, mPullType, mShownMaxCount);
 
         //开始位置和结束位置确认好，就可以重绘啦~
         seekAndCalculateCellData();

@@ -3,9 +3,12 @@ package wgyscsf.financialcustomerview;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import wgyscsf.financialcustomerview.financialview.FundActivity;
+import wgyscsf.financialcustomerview.ui.activity.BaseActivity;
+import wgyscsf.financialcustomerview.ui.activity.ForexListActivity;
+import wgyscsf.financialcustomerview.ui.activity.KViewHorizontalActivityActivity;
+import wgyscsf.financialcustomerview.ui.activity.KViewVerticalActivity;
 
 public class MainActivity extends BaseActivity {
     TextView mTextView;
@@ -31,7 +34,7 @@ public class MainActivity extends BaseActivity {
     }
 
     public void kViewEvaluation(View view) {
-        Toast.makeText(mContext, "TODO:待完善", Toast.LENGTH_SHORT).show();
+        go(ForexListActivity.class);
     }
 
     public String getVersionStr() {

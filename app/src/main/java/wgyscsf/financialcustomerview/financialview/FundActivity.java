@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import wgyscsf.financialcustomerview.BaseActivity;
+import wgyscsf.financialcustomerview.ui.activity.BaseActivity;
 import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.financialview.fund.FundMode;
 import wgyscsf.financialcustomerview.financialview.fund.FundView;

@@ -28,6 +28,8 @@ public class KLayoutView extends LinearLayout {
 
     //主图展示的是蜡烛图还是分时图
     boolean isShowTimSharing=true;
+    //设置数据精度
+    int mDigit=4;
 
     public KLayoutView(Context context) {
         this(context, null);
@@ -125,14 +127,24 @@ public class KLayoutView extends LinearLayout {
      *
      * @param quotes
      */
-    public void pushingTimeSharingData(Quotes quotes) {
+    public void pushingTimeSharingData(Quotes quotes, ForexTab forexTab) {
         if (quotes == null) {
             Toast.makeText(getContext(), "数据异常", Toast.LENGTH_SHORT).show();
             Log.e(TAG, "setTimeSharingData: 数据异常");
             return;
         }
-        mMasterView.pushingTimeSharingData(quotes);
-        mMinorView.pushingTimeSharingData(quotes);
+        mMasterView.pushingTimeSharingData(quotes,forexTab);
+        mMinorView.pushingTimeSharingData(quotes,forexTab);
+    }
+
+    public int getDigit() {
+        return mDigit;
+    }
+
+    public void setDigit(int digit) {
+        mDigit = digit;
+        mMasterView.setDigits(mDigit);
+        mMinorView.setDigits(mDigit);
     }
 
     /**

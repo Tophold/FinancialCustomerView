@@ -203,8 +203,8 @@ public class KTestView extends ViewGroup {
             Log.e(TAG, "setTimeSharingData: 数据异常");
             return;
         }
-        mMasterView.pushingTimeSharingData(quotes);
-        mMinorView.pushingTimeSharingData(quotes);
+        mMasterView.pushingTimeSharingData(quotes, null);
+        mMinorView.pushingTimeSharingData(quotes, null);
 
     }
     /**

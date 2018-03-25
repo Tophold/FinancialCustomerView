@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview;
+package wgyscsf.financialcustomerview.ui.activity;
 
 import android.os.Bundle;
 import android.support.annotation.ColorRes;
@@ -19,6 +19,7 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.financialview.kview.KBaseView;
 import wgyscsf.financialcustomerview.financialview.kview.KView;
 import wgyscsf.financialcustomerview.financialview.kview.OriginQuotes;
@@ -34,7 +35,7 @@ import wgyscsf.financialcustomerview.utils.TimeUtils;
  * timesharing1：模拟的是api请求的数据集合，注意：一次加载完毕，模拟的是第一次加载的数据
  * timesharing2：模拟的是实时**推送**的数据，注意：会分段取，一次取一个。
  */
-public class KViewHorizontalActivityActivity extends BaseActivity {
+public class KViewVerticalActivity extends BaseActivity {
     //bind view
     private LinearLayout mAkvLlContainer;
     private TextView mAkvTvH;
@@ -44,6 +45,8 @@ public class KViewHorizontalActivityActivity extends BaseActivity {
     private TextView mAkvTvC;
     private TextView mAkvTvP;
     private KView mAkvKvKview;
+    private Button mAkvBtnShowCandle;
+    private Button mAkvBtnShowMinnor;
 
     //模拟网络过来的列表数据
     List<Quotes> mQuotesList;
@@ -58,7 +61,7 @@ public class KViewHorizontalActivityActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_kview_horizontal);
+        setContentView(R.layout.activity_kview_vertical);
         initView();
         initData();
         loadData();
@@ -73,7 +76,7 @@ public class KViewHorizontalActivityActivity extends BaseActivity {
                         data -> {
                             int size = mPushData.size();
                             if (data < size) {
-                                mAkvKvKview.pushingTimeSharingData(mPushData.get(data.intValue()));
+                                mAkvKvKview.pushingTimeSharingData(mPushData.get(data.intValue()),null);
                             } else {
 
                             }
@@ -94,6 +97,8 @@ public class KViewHorizontalActivityActivity extends BaseActivity {
         mAkvTvC = (TextView) findViewById(R.id.akv_tv_c);
         mAkvTvP = (TextView) findViewById(R.id.akv_tv_p);
         mAkvKvKview = (KView) findViewById(R.id.akv_kv_kview);
+        mAkvBtnShowCandle = (Button) findViewById(R.id.akv_btn_showCandle);
+        mAkvBtnShowMinnor = (Button) findViewById(R.id.akv_btn_showMinnor);
     }
 
     private void initData() {
@@ -219,6 +224,26 @@ public class KViewHorizontalActivityActivity extends BaseActivity {
 
     }
 
+    public void showCandle(View view) {
+        boolean showTimSharing = mAkvKvKview.isShowTimSharing();
+        mAkvKvKview.setShowTimSharing(!showTimSharing);
+        if(!showTimSharing){
+            mAkvBtnShowCandle.setText("点击展示蜡烛图");
+        }else{
+            mAkvBtnShowCandle.setText("点击展示分时图");
+        }
+    }
+
+    public void showMinor(View view) {
+        boolean showMinor = mAkvKvKview.isShowMinor();
+        mAkvKvKview.setShowMinor(!showMinor);
+        if(!showMinor){
+            mAkvBtnShowMinnor.setText("点击不显示副图");
+        }else{
+            mAkvBtnShowMinnor.setText("点击显示副图");
+        }
+    }
+
     private List<Quotes> adapterData(List<OriginQuotes> originFundModeList) {
         List<Quotes> fundModeList = new ArrayList<>();//适配后的数据
         for (OriginQuotes OriginQuotes : originFundModeList) {
@@ -264,15 +289,5 @@ public class KViewHorizontalActivityActivity extends BaseActivity {
 
     private int getMyColor(@ColorRes int colorId) {
         return getResources().getColor(colorId);
-    }
-
-    public void showCandle(View view) {
-        boolean showTimSharing = mAkvKvKview.isShowTimSharing();
-        mAkvKvKview.setShowTimSharing(!showTimSharing);
-        if (!showTimSharing) {
-            ((Button) view).setText("点击展示蜡烛图");
-        } else {
-            ((Button) view).setText("点击展示分时图");
-        }
     }
 }
