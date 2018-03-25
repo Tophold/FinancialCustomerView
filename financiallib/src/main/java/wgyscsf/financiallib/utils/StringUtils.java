@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.utils;
+package wgyscsf.financiallib.utils;
 
 import java.util.List;
 import java.util.Random;

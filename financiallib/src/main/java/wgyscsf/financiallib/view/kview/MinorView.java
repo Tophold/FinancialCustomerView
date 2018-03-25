@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.financialview.kview;
+package wgyscsf.financiallib.view.kview;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -10,9 +10,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
-import wgyscsf.financialcustomerview.R;
-import wgyscsf.financialcustomerview.financialview.FinancialAlgorithm;
-import wgyscsf.financialcustomerview.utils.FormatUtil;
+import wgyscsf.financiallib.R;
+import wgyscsf.financiallib.utils.FormatUtil;
+
 
 /**
  * ============================================================
@@ -753,7 +753,7 @@ public class MinorView extends KBaseView {
          * @param endIndex 缩放后的结束索引
          * @param shownMaxCount 可见数据总条数
          */
-        void masteZoomlNewIndex(int beginIndex, int endIndex,int shownMaxCount);
+        void masteZoomlNewIndex(int beginIndex, int endIndex, int shownMaxCount);
 
         /**
          * 左右滑动

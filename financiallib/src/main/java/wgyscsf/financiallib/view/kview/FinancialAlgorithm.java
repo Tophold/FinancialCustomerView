@@ -1,12 +1,9 @@
-package wgyscsf.financialcustomerview.financialview;
+package wgyscsf.financiallib.view.kview;
 
 import android.util.Log;
 
 import java.util.List;
 
-import wgyscsf.financialcustomerview.financialview.kview.Quotes;
-import wgyscsf.financialcustomerview.financialview.kview.MasterView;
-import wgyscsf.financialcustomerview.financialview.kview.MinorView;
 
 /**
  * ============================================================

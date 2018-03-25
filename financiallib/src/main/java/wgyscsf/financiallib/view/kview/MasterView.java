@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.financialview.kview;
+package wgyscsf.financiallib.view.kview;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -15,10 +15,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import wgyscsf.financialcustomerview.R;
-import wgyscsf.financialcustomerview.financialview.FinancialAlgorithm;
-import wgyscsf.financialcustomerview.utils.FormatUtil;
-import wgyscsf.financialcustomerview.utils.TimeUtils;
+import wgyscsf.financiallib.R;
+import wgyscsf.financiallib.utils.FormatUtil;
+import wgyscsf.financiallib.utils.TimeUtils;
 
 /**
  * ============================================================

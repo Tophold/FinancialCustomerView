@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.financialview;
+package wgyscsf.financiallib.view;
 
 import android.content.Context;
 import android.graphics.Paint;
@@ -6,7 +6,6 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 
 import static android.view.View.MeasureSpec.AT_MOST;
@@ -18,7 +17,7 @@ import static android.view.View.MeasureSpec.AT_MOST;
  * 描 述 ：整个自定义View共有的数据特征全部在这里处理。
  * ============================================================
  **/
-public class BaseFinancialView extends View {
+public class BaseView extends View {
 
     protected String TAG;
     protected Context mContext;
@@ -39,15 +38,15 @@ public class BaseFinancialView extends View {
     protected int mHeight;
 
 
-    public BaseFinancialView(Context context) {
+    public BaseView(Context context) {
         this(context, null);
     }
 
-    public BaseFinancialView(Context context, @Nullable AttributeSet attrs) {
+    public BaseView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public BaseFinancialView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public BaseView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         TAG = this.getClass().getSimpleName();
         mContext = context;

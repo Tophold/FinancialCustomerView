@@ -20,15 +20,15 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import wgyscsf.financialcustomerview.R;
-import wgyscsf.financialcustomerview.financialview.kview.KBaseView;
-import wgyscsf.financialcustomerview.financialview.kview.KView;
 import wgyscsf.financialcustomerview.financialview.kview.OriginQuotes;
-import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.financialview.kview.SimulateNetAPI;
-import wgyscsf.financialcustomerview.utils.FormatUtil;
-import wgyscsf.financialcustomerview.utils.GsonUtil;
-import wgyscsf.financialcustomerview.utils.StringUtils;
-import wgyscsf.financialcustomerview.utils.TimeUtils;
+import wgyscsf.financiallib.utils.FormatUtil;
+import wgyscsf.financiallib.utils.GsonUtil;
+import wgyscsf.financiallib.utils.StringUtils;
+import wgyscsf.financiallib.utils.TimeUtils;
+import wgyscsf.financiallib.view.kview.KBaseView;
+import wgyscsf.financiallib.view.kview.KView;
+import wgyscsf.financiallib.view.kview.Quotes;
 
 /**
  * timesharing0:模拟的是加载更多的数据，注意，会分段取，模拟的是多次加载更多

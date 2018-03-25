@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview;
+package wgyscsf.financialcustomerview.model;
 
 import java.io.Serializable;
 

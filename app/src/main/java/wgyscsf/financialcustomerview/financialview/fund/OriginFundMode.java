@@ -1,6 +1,6 @@
 package wgyscsf.financialcustomerview.financialview.fund;
 
-import wgyscsf.financialcustomerview.BaseModel;
+import wgyscsf.financialcustomerview.model.BaseModel;
 
 /**
  * ============================================================

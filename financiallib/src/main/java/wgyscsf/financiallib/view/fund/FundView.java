@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.financialview.fund;
+package wgyscsf.financiallib.view.fund;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -14,8 +14,8 @@ import android.view.MotionEvent;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import wgyscsf.financialcustomerview.financialview.BaseFinancialView;
-import wgyscsf.financialcustomerview.R;
+import wgyscsf.financiallib.R;
+import wgyscsf.financiallib.view.BaseView;
 
 /**
  * ============================================================
@@ -24,7 +24,7 @@ import wgyscsf.financialcustomerview.R;
  * 描 述 ：蚂蚁财富基金收益折线图
  * ============================================================
  **/
-public class FundView extends BaseFinancialView {
+public class FundView extends BaseView {
 
     //数据源
     List<FundMode> mFundModeList;

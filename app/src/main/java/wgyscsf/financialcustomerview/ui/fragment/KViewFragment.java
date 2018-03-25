@@ -19,15 +19,15 @@ import io.reactivex.disposables.Disposable;
 import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.api.RetrofitManager;
 import wgyscsf.financialcustomerview.api.XcfdService;
-import wgyscsf.financialcustomerview.financialview.kview.KBaseView;
-import wgyscsf.financialcustomerview.financialview.kview.KView;
-import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.model.Forex;
-import wgyscsf.financialcustomerview.financialview.kview.ForexTab;
 import wgyscsf.financialcustomerview.model.WsPrice;
 import wgyscsf.financialcustomerview.model.XcfdQuotes;
 import wgyscsf.financialcustomerview.ui.activity.ForexActivity;
-import wgyscsf.financialcustomerview.utils.StringUtils;
+import wgyscsf.financiallib.utils.StringUtils;
+import wgyscsf.financiallib.view.kview.ForexTab;
+import wgyscsf.financiallib.view.kview.KBaseView;
+import wgyscsf.financiallib.view.kview.KView;
+import wgyscsf.financiallib.view.kview.Quotes;
 
 public class KViewFragment extends BaseFragment {
     private static final String ARG_PARAM1 = "param1";

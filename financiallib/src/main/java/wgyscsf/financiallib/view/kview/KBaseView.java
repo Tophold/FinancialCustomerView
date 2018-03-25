@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.financialview.kview;
+package wgyscsf.financiallib.view.kview;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -13,9 +13,10 @@ import android.widget.Toast;
 
 import java.util.List;
 
-import wgyscsf.financialcustomerview.R;
-import wgyscsf.financialcustomerview.financialview.BaseFinancialView;
-import wgyscsf.financialcustomerview.utils.StringUtils;
+import wgyscsf.financiallib.R;
+import wgyscsf.financiallib.utils.StringUtils;
+import wgyscsf.financiallib.view.BaseView;
+
 
 /**
  * ============================================================
@@ -25,7 +26,7 @@ import wgyscsf.financialcustomerview.utils.StringUtils;
  * 提供各种基础能力，包括边框、边距、内虚线以及其它公共参数的初始化操作。
  * ============================================================
  **/
-public abstract class KBaseView extends BaseFinancialView {
+public abstract class KBaseView extends BaseView {
 
     /**
      * 默认参数及常量

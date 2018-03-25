@@ -1,10 +1,9 @@
-package wgyscsf.financialcustomerview.financialview.kview;
+package wgyscsf.financiallib.view.kview;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import java.util.List;
@@ -12,99 +11,27 @@ import java.util.List;
 /**
  * ============================================================
  * 作 者 :    wgyscsf@163.com
- * 创建日期 ：2018/03/03 15:38
- * 描 述 ：KView,包含主图和副图，包括手势、加载数据等
+ * 创建日期 ：2018/03/04 11:06
+ * 描 述 ：KView入口
  * ============================================================
  **/
-public class KLayoutView extends LinearLayout {
-    protected static  String TAG ;
-    protected MasterView mMasterView;
-    protected MinorView mMinorView;
-    //副图高度占全部高度比
-    float mMinorHRatio = 0.25f;
-
-    //是否展示副图
-    boolean isShowMinor = true;
+public class KView extends KLayoutView {
 
     //主图展示的是蜡烛图还是分时图
-    boolean isShowTimSharing=true;
+    protected boolean isShowTimSharing=true;
     //设置数据精度
-    int mDigit=4;
+    protected int mDigit=4;
 
-    public KLayoutView(Context context) {
+    public KView(Context context) {
         this(context, null);
     }
 
-    public KLayoutView(Context context, @Nullable AttributeSet attrs) {
+    public KView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public KLayoutView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public KView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        TAG=this.getClass().getSimpleName();
-        layoutViews();
-        initDefAttrs();
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-
-    }
-
-
-
-    private void initDefAttrs() {
-        setShowMinor(true);
-    }
-
-    private void layoutViews() {
-        setOrientation(VERTICAL);
-
-        mMasterView = new MasterView(getContext());
-       // mMasterView.setBackgroundColor(getResources().getColor(R.color.color_fundView_brokenLineColor));
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT, 0);
-        params.weight = 1 - mMinorHRatio;
-        mMasterView.setLayoutParams(params);
-        addView(mMasterView);
-
-        mMinorView = new MinorView(getContext());
-       // mMinorView.setBackgroundColor(getResources().getColor(R.color.color_fundView_xLineColor));
-        LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT, 0);
-        params2.weight = mMinorHRatio;
-        mMinorView.setLayoutParams(params2);
-        addView(mMinorView);
-
-        mMasterView.setMasterListener(mMinorView.getMasterListener());
-    }
-
-    public float getMinorHRatio() {
-        return mMinorHRatio;
-    }
-
-    public void setMinorHRatio(float minorHRatio) {
-        mMinorHRatio = minorHRatio;
-    }
-
-    public boolean isShowMinor() {
-        return isShowMinor;
-    }
-
-    public void setShowMinor(boolean showMinor) {
-        isShowMinor = showMinor;
-        if (!isShowMinor) {
-            mMinorHRatio = 0;
-            mMinorView.setVisibility(GONE);
-        } else {
-            mMinorView.setVisibility(VISIBLE);
-        }
     }
 
     /**
@@ -137,16 +64,6 @@ public class KLayoutView extends LinearLayout {
         mMinorView.pushingTimeSharingData(quotes,forexTab);
     }
 
-    public int getDigit() {
-        return mDigit;
-    }
-
-    public void setDigit(int digit) {
-        mDigit = digit;
-        mMasterView.setDigits(mDigit);
-        mMinorView.setDigits(mDigit);
-    }
-
     /**
      * 加载更多数据
      *
@@ -160,6 +77,15 @@ public class KLayoutView extends LinearLayout {
         }
         mMasterView.loadMoreTimeSharingData(quotesList);
         mMinorView.loadMoreTimeSharingData(quotesList);
+    }
+    public int getDigit() {
+        return mDigit;
+    }
+
+    public void setDigit(int digit) {
+        mDigit = digit;
+        mMasterView.setDigits(mDigit);
+        mMinorView.setDigits(mDigit);
     }
     /**
      * 加载更多失败，在这里添加逻辑

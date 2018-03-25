@@ -1,9 +1,9 @@
-package wgyscsf.financialcustomerview.financialview.kview;
+package wgyscsf.financiallib.view.kview;
 
+import java.io.Serializable;
 import java.util.Date;
 
-import wgyscsf.financialcustomerview.BaseModel;
-import wgyscsf.financialcustomerview.utils.TimeUtils;
+import wgyscsf.financiallib.utils.TimeUtils;
 
 /**
  * ============================================================
@@ -12,7 +12,7 @@ import wgyscsf.financialcustomerview.utils.TimeUtils;
  * 描 述 ：包装后的Quotes，实际使用的Quotes
  * ============================================================
  **/
-public class Quotes extends BaseModel {
+public class Quotes implements Serializable {
 
     public Quotes(String o, String h, String l, String c, String t) {
         this.o = Double.parseDouble(o);

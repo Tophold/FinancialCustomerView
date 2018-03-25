@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import wgyscsf.financialcustomerview.financialview.FundActivity;
+import wgyscsf.financialcustomerview.ui.activity.FundActivity;
 import wgyscsf.financialcustomerview.ui.activity.BaseActivity;
 import wgyscsf.financialcustomerview.ui.activity.ForexListActivity;
 import wgyscsf.financialcustomerview.ui.activity.KViewHorizontalActivityActivity;

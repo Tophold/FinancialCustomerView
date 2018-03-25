@@ -1,7 +1,7 @@
-package wgyscsf.financialcustomerview.financialview.fund;
+package wgyscsf.financiallib.view.fund;
 
-import wgyscsf.financialcustomerview.BaseModel;
-import wgyscsf.financialcustomerview.utils.RegxUtils;
+
+import wgyscsf.financiallib.utils.RegxUtils;
 
 /**
  * ============================================================
@@ -10,11 +10,14 @@ import wgyscsf.financialcustomerview.utils.RegxUtils;
  * 描 述 ：
  * ============================================================
  **/
-public class FundMode extends BaseModel{
+public class FundMode {
     //x轴原始时间数据，ms
     public long datetime;
-    public float dataY;
+    //y轴的原始数据
     public String originDataY;
+    //y轴的转换后的数据
+    public float dataY;
+
     //在自定义view:FundView中的位置坐标
     public float floatX;
     public float floatY;
@@ -23,16 +26,5 @@ public class FundMode extends BaseModel{
         this.datetime = timestamp;
         this.originDataY = actual;
         this.dataY = RegxUtils.getPureDouble(originDataY);//提取后的Y周的值
-    }
-
-    @Override
-    public String toString() {
-        return "FundMode{" +
-                "datetime=" + datetime +
-                ", dataY=" + dataY +
-                ", originDataY='" + originDataY + '\'' +
-                ", floatX=" + floatX +
-                ", floatY=" + floatY +
-                '}';
     }
 }

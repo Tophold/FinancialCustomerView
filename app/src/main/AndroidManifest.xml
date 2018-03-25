@@ -20,7 +20,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".financialview.FundActivity">
+        <activity android:name=".ui.activity.FundActivity">
         </activity>
         <activity android:name=".ui.activity.KViewVerticalActivity">
         </activity>

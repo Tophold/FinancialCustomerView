@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview.financialview.kview;
+package wgyscsf.financiallib.view.kview;
 
 import java.io.Serializable;
 

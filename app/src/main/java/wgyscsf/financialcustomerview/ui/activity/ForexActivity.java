@@ -17,14 +17,14 @@ import java.util.List;
 
 import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.api.WebSocketApi;
-import wgyscsf.financialcustomerview.financialview.kview.Quotes;
 import wgyscsf.financialcustomerview.model.Forex;
-import wgyscsf.financialcustomerview.financialview.kview.ForexTab;
 import wgyscsf.financialcustomerview.ui.adapter.KViewAdapter;
 import wgyscsf.financialcustomerview.ui.fragment.KViewFragment;
 import wgyscsf.financialcustomerview.ui.view.NoScrollViewPager;
-import wgyscsf.financialcustomerview.utils.FormatUtil;
-import wgyscsf.financialcustomerview.utils.TimeUtils;
+import wgyscsf.financiallib.utils.FormatUtil;
+import wgyscsf.financiallib.utils.TimeUtils;
+import wgyscsf.financiallib.view.kview.ForexTab;
+import wgyscsf.financiallib.view.kview.Quotes;
 
 public class ForexActivity extends BaseActivity {
     public static final String KEY_FOREX = "KEY_FOREX";
