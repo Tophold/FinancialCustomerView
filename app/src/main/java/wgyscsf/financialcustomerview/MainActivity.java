@@ -4,11 +4,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import wgyscsf.financialcustomerview.ui.activity.FundActivity;
-import wgyscsf.financialcustomerview.ui.activity.BaseActivity;
-import wgyscsf.financialcustomerview.ui.activity.ForexListActivity;
-import wgyscsf.financialcustomerview.ui.activity.KViewHorizontalActivityActivity;
-import wgyscsf.financialcustomerview.ui.activity.KViewVerticalActivity;
+import wgyscsf.financialcustomerview.demo.beginner.ui.FundActivity;
+import wgyscsf.financialcustomerview.demo.beginner.ui.KViewHorizontalActivityActivity;
+import wgyscsf.financialcustomerview.demo.beginner.ui.KViewVerticalActivity;
+import wgyscsf.financialcustomerview.demo.btc.ui.HuobiActivity;
+import wgyscsf.financialcustomerview.demo.btc.ui.HuobiListActivity;
+import wgyscsf.financialcustomerview.demo.forex.ui.ForexListActivity;
 
 public class MainActivity extends BaseActivity {
     TextView mTextView;
@@ -43,5 +44,9 @@ public class MainActivity extends BaseActivity {
         version += ",versionCode(git head):" + BuildConfig.VERSION_CODE;
 
         return version;
+    }
+
+    public void btnDemo(View view) {
+        go(HuobiListActivity.class);
     }
 }

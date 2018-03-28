@@ -3,7 +3,8 @@ package wgyscsf.financialcustomerview;
 import android.app.Application;
 import android.content.Context;
 
-import wgyscsf.financialcustomerview.api.WebSocket;
+import wgyscsf.financialcustomerview.demo.btc.api.HuobiWebSocket;
+import wgyscsf.financialcustomerview.demo.forex.api.ForexWebSocket;
 
 /**
  * ============================================================
@@ -19,6 +20,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         mAppContext = this;
-        WebSocket.getInstance().init();
+        //ForexWebSocket.getInstance().init();
+        HuobiWebSocket.getInstance().init();
     }
 }

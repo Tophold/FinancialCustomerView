@@ -14,15 +14,6 @@ import wgyscsf.financiallib.utils.TimeUtils;
  **/
 public class Quotes implements Serializable {
 
-    public Quotes(String o, String h, String l, String c, String t) {
-        this.o = Double.parseDouble(o);
-        this.h = Double.parseDouble(h);
-        this.l = Double.parseDouble(l);
-        this.c = Double.parseDouble(c);
-        this.t = TimeUtils.date2Millis(new Date(t));
-        this.showTime = TimeUtils.millis2String(this.t);
-    }
-
     /**
      * 原始数据
      */
@@ -35,6 +26,33 @@ public class Quotes implements Serializable {
     //扩展一个结束时间
     public long e;
 
+    public Quotes(String o, String h, String l, String c, String t) {
+        this.o = Double.parseDouble(o);
+        this.h = Double.parseDouble(h);
+        this.l = Double.parseDouble(l);
+        this.c = Double.parseDouble(c);
+        this.t = TimeUtils.date2Millis(new Date(t));
+        this.showTime = TimeUtils.millis2String(this.t);
+    }
+
+    public Quotes(double o, double h, double l, double c, long t) {
+        this.o = o;
+        this.h = h;
+        this.l = l;
+        this.c = c;
+        this.t = t;
+        this.showTime = TimeUtils.millis2String(this.t);
+    }
+
+    public Quotes(String o, String h, String l, String c, long s, long e) {
+        this.o = Double.parseDouble(o);
+        this.h = Double.parseDouble(h);
+        this.l = Double.parseDouble(l);
+        this.c = Double.parseDouble(c);
+        this.t = s;
+        this.e = e;
+        this.showTime = TimeUtils.millis2String(this.t);
+    }
 
     /**
      * 扩展的数据
@@ -60,37 +78,29 @@ public class Quotes implements Serializable {
     public double d;
     public double j;
 
-    public Quotes(String o, String h, String l, String c, long s,long e) {
-        this.o = Double.parseDouble(o);
-        this.h = Double.parseDouble(h);
-        this.l = Double.parseDouble(l);
-        this.c = Double.parseDouble(c);
-        this.t = s;
-        this.e=e;
-        this.showTime = TimeUtils.millis2String(this.t);
-    }
 
     //调试使用，找到k、d、j中的最小值
-    public double getMinKDJ(){
-       double min;
-       if(k<=d&&k<=j){
-           min=k;
-       }else if(d<=k&&d<=j){
-           min=d;
-       }else{
-           min=j;
+    public double getMinKDJ() {
+        double min;
+        if (k <= d && k <= j) {
+            min = k;
+        } else if (d <= k && d <= j) {
+            min = d;
+        } else {
+            min = j;
         }
         return min;
     }
+
     //调试使用，找到k、d、j中的最大值
-    public double getMaxKDJ(){
+    public double getMaxKDJ() {
         double max;
-        if(k>=d&&k>=j){
-            max=k;
-        }else if(d>=k&&d>=j){
-            max=d;
-        }else{
-            max=j;
+        if (k >= d && k >= j) {
+            max = k;
+        } else if (d >= k && d >= j) {
+            max = d;
+        } else {
+            max = j;
         }
         return max;
     }
@@ -101,26 +111,27 @@ public class Quotes implements Serializable {
     public double macd;
 
     //调试使用，找到dif、dea、macd中的最小值
-    public double getMinMacd(){
+    public double getMinMacd() {
         double min;
-        if(dif<=dea&&dif<=macd){
-            min=dif;
-        }else if(dea<=dif&&dea<=macd){
-            min=dea;
-        }else{
-            min=macd;
+        if (dif <= dea && dif <= macd) {
+            min = dif;
+        } else if (dea <= dif && dea <= macd) {
+            min = dea;
+        } else {
+            min = macd;
         }
         return min;
     }
+
     //调试使用，找到dif、dea、macd中的最大值
-    public double getMaxMacd(){
+    public double getMaxMacd() {
         double max;
-        if(dif>=dea&&dif>=macd){
-            max=dif;
-        }else if(dea>=dif&&dea>=macd){
-            max=dea;
-        }else{
-            max=macd;
+        if (dif >= dea && dif >= macd) {
+            max = dif;
+        } else if (dea >= dif && dea >= macd) {
+            max = dea;
+        } else {
+            max = macd;
         }
         return max;
     }
@@ -131,32 +142,30 @@ public class Quotes implements Serializable {
     public double rsi24;
 
     //调试使用，找到rsi6、rsi12、rsi24中的最小值
-    public double getMinRsi(){
+    public double getMinRsi() {
         double min;
-        if(rsi6<=rsi12&&rsi6<=rsi24){
-            min=rsi6;
-        }else if(rsi12<=rsi6&&rsi12<=rsi24){
-            min=rsi12;
-        }else{
-            min=rsi24;
+        if (rsi6 <= rsi12 && rsi6 <= rsi24) {
+            min = rsi6;
+        } else if (rsi12 <= rsi6 && rsi12 <= rsi24) {
+            min = rsi12;
+        } else {
+            min = rsi24;
         }
         return min;
     }
+
     //调试使用，找到rsi6、rsi12、rsi24中的最大值
-    public double getMaxRsi(){
+    public double getMaxRsi() {
         double max;
-        if(rsi6>=rsi12&&rsi6>=rsi24){
-            max=rsi6;
-        }else if(rsi12>=rsi6&&rsi12>=rsi24){
-            max=rsi12;
-        }else{
-            max=rsi24;
+        if (rsi6 >= rsi12 && rsi6 >= rsi24) {
+            max = rsi6;
+        } else if (rsi12 >= rsi6 && rsi12 >= rsi24) {
+            max = rsi12;
+        } else {
+            max = rsi24;
         }
         return max;
     }
-
-
-
 
 
     @Override

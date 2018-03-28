@@ -41,8 +41,8 @@ public class KView extends KLayoutView {
      */
     public void setTimeSharingData(List<Quotes> quotesList, KBaseView.TimeSharingListener timeSharingListener) {
         if (quotesList == null || quotesList.isEmpty()) {
-            Toast.makeText(getContext(), "数据异常", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "setTimeSharingData: 数据异常");
+            Toast.makeText(getContext(), "数据异常1111", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "setTimeSharingData: 数据异常111");
             return;
         }
         mMasterView.setTimeSharingData(quotesList,timeSharingListener);
@@ -50,18 +50,19 @@ public class KView extends KLayoutView {
     }
 
     /**
-     * 实时推送过来的数据，实时更新
+     * 实时推送过来的数据，实时更新。
+     * 这个地方可以优化：因为用户不知道什么时候可以Push过来数据，如果不处理。可能存在一种情况：数据还没加载完毕，push就过来了就会出现异常。
      *
      * @param quotes
      */
-    public void pushingTimeSharingData(Quotes quotes, ForexTab forexTab) {
+    public void pushingTimeSharingData(Quotes quotes, long period) {
         if (quotes == null) {
-            Toast.makeText(getContext(), "数据异常", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "setTimeSharingData: 数据异常");
+            //Toast.makeText(getContext(), "数据异常", Toast.LENGTH_SHORT).show();
+            //Log.e(TAG, "setTimeSharingData: 数据异常");
             return;
         }
-        mMasterView.pushingTimeSharingData(quotes,forexTab);
-        mMinorView.pushingTimeSharingData(quotes,forexTab);
+        mMasterView.pushingTimeSharingData(quotes,period);
+        mMinorView.pushingTimeSharingData(quotes,period);
     }
 
     /**

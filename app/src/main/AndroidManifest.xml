@@ -6,13 +6,13 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="${app_names}"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:name=".MyApplication">
+        android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -20,18 +20,22 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ui.activity.FundActivity">
+        <activity android:name=".demo.beginner.ui.FundActivity">
         </activity>
-        <activity android:name=".ui.activity.KViewVerticalActivity">
+        <activity android:name=".demo.beginner.ui.KViewVerticalActivity">
         </activity>
         <activity
-            android:name=".ui.activity.KViewHorizontalActivityActivity"
+            android:name=".demo.beginner.ui.KViewHorizontalActivityActivity"
             android:screenOrientation="landscape"
             android:theme="@style/AppTheme_Fullscreen">
         </activity>
-        <activity android:name=".ui.activity.ForexListActivity">
+        <activity android:name=".demo.forex.ui.ForexListActivity">
         </activity>
-        <activity android:name=".ui.activity.ForexActivity">
+        <activity android:name=".demo.forex.ui.ForexActivity">
+        </activity>
+        <activity android:name=".demo.btc.ui.HuobiListActivity">
+        </activity>
+        <activity android:name=".demo.btc.ui.HuobiActivity">
         </activity>
     </application>
 

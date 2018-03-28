@@ -508,9 +508,9 @@ public abstract class KBaseView extends BaseView {
      * 实时推送过来的数据，实时更新
      *
      * @param quotes
-     * @param forexTab
+     * @param period 对应的数据的类型 ms
      */
-    public void pushingTimeSharingData(Quotes quotes, ForexTab forexTab) {
+    public void pushingTimeSharingData(Quotes quotes, long period) {
         if (quotes == null) {
             Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
             Log.e(TAG, "setTimeSharingData: 数据异常");
@@ -525,13 +525,13 @@ public abstract class KBaseView extends BaseView {
          */
         Quotes q = mQuotesList.get(mQuotesList.size() - 1);
         if (quotes.t < q.t) return;
-        if (forexTab!=null&&((quotes.t-q.t)/1000.0)<=forexTab.getTypeLength()) {
+        if (period != 0 && ((quotes.t - q.t) / 1000.0) <= period / 1000) {
             //这个时候替换最后一个原有数据
             q.c = quotes.c;//绘制分时图是根据闭市价格算的
 
             //判断最大值和最小值，及时更新
-            if(quotes.c>q.h) q.h=quotes.c;
-            if(quotes.c<q.l) q.l=quotes.c;
+            if (quotes.c > q.h) q.h = quotes.c;
+            if (quotes.c < q.l) q.l = quotes.c;
 
 
             mQuotesList.set(mQuotesList.size() - 1, q);
@@ -539,8 +539,6 @@ public abstract class KBaseView extends BaseView {
             //new ?Add it!
             mQuotesList.add(quotes);
         }
-
-
 
 
         //如果是在左右移动，则不去实时更新K线图，但是要把数据加进去
@@ -632,6 +630,7 @@ public abstract class KBaseView extends BaseView {
     public int getDigits() {
         return mDigits;
     }
+
     //产品的小数位数
     public void setDigits(int digits) {
         mDigits = digits;
