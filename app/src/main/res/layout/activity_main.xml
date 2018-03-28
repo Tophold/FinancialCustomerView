@@ -44,7 +44,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:onClick="kViewEvaluation"
-        android:text="KView数据校验"
+        android:text="KView数据校验(外汇demo)"
         android:textAllCaps="false"
         />
 
