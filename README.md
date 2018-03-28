@@ -41,3 +41,7 @@
 * Android-Charts：[https://github.com/limccn/Android-Charts](https://github.com/limccn/Android-Charts)
 
 
+## 我的公众号
+> flag立了无数，还是不能做到每天都更新。涉及到平时开发的所思所想都会有所记录，或许对你有用~
+
+![](http://o71uhokgf.bkt.clouddn.com/15222472645930.jpg)
