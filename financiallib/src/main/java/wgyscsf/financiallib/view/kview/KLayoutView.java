@@ -13,7 +13,7 @@ import android.widget.LinearLayout;
  * ============================================================
  **/
 public class KLayoutView extends LinearLayout {
-    protected static  String TAG ;
+    protected static String TAG;
     protected MasterView mMasterView;
     protected MinorView mMinorView;
     //副图高度占全部高度比
@@ -31,7 +31,7 @@ public class KLayoutView extends LinearLayout {
 
     public KLayoutView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        TAG=this.getClass().getSimpleName();
+        TAG = this.getClass().getSimpleName();
         layoutViews();
         initDefAttrs();
     }
@@ -48,7 +48,6 @@ public class KLayoutView extends LinearLayout {
     }
 
 
-
     private void initDefAttrs() {
         setShowMinor(true);
     }
@@ -57,7 +56,7 @@ public class KLayoutView extends LinearLayout {
         setOrientation(VERTICAL);
 
         mMasterView = new MasterView(getContext());
-       // mMasterView.setBackgroundColor(getResources().getColor(R.color.color_fundView_brokenLineColor));
+        // mMasterView.setBackgroundColor(getResources().getColor(R.color.color_fundView_brokenLineColor));
         LayoutParams params = new LayoutParams(
                 LayoutParams.MATCH_PARENT, 0);
         params.weight = 1 - mMinorHRatio;
@@ -65,7 +64,7 @@ public class KLayoutView extends LinearLayout {
         addView(mMasterView);
 
         mMinorView = new MinorView(getContext());
-       // mMinorView.setBackgroundColor(getResources().getColor(R.color.color_fundView_xLineColor));
+        // mMinorView.setBackgroundColor(getResources().getColor(R.color.color_fundView_xLineColor));
         LayoutParams params2 = new LayoutParams(
                 LayoutParams.MATCH_PARENT, 0);
         params2.weight = mMinorHRatio;
@@ -73,6 +72,26 @@ public class KLayoutView extends LinearLayout {
         addView(mMinorView);
 
         mMasterView.setMasterListener(mMinorView.getMasterListener());
+    }
+
+
+    //-----------------------对开发者暴露可以修改的参数-------
+    public MasterView getMasterView() {
+        return mMasterView;
+    }
+
+    public KLayoutView setMasterView(MasterView masterView) {
+        mMasterView = masterView;
+        return this;
+    }
+
+    public MinorView getMinorView() {
+        return mMinorView;
+    }
+
+    public KLayoutView setMinorView(MinorView minorView) {
+        mMinorView = minorView;
+        return this;
     }
 
     public float getMinorHRatio() {
@@ -96,5 +115,4 @@ public class KLayoutView extends LinearLayout {
             mMinorView.setVisibility(VISIBLE);
         }
     }
-
 }

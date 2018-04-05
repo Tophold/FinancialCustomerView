@@ -32,21 +32,21 @@ public abstract class KBaseView extends BaseView {
      * 默认参数及常量
      */
     //右侧内边距，默认情况下结束点距离右边边距（单位：sp）
-    protected static final float DEF_INNER_RIGHT_BLANK_PADDING = 60;
+    protected static float DEF_INNER_RIGHT_BLANK_PADDING = 60;
 
     //加载更多阀值。当在左侧不可见范围内还剩多少数据时开始加载更多。（单位：数据个数）
-    protected static final int DEF_MINLEN_LOADMORE = 10;
+    protected static int def_minlen_loadmore = 10;
 
     //缩放最小值，该值理论上可以最小为3。为了美观，这个值不能太小，不然就成一条线了。不能定义为final,程序可能会对该值进行修改（容错）
-    protected static int DEF_SCALE_MINNUM = 10;
+    protected static int def_scale_minnum = 10;
     //缩放最大值，该值最大理论上可为数据集合的大小
-    protected static int DEF_SCALE_MAXNUM = 300;
+    protected static int def_scale_maxnum = 300;
 
     //上下左右padding，这里不再采用系统属性padding，因为用户容易忘记设置padding,直接在这里更改即可。
-    protected float mPaddingTop = 20;
-    protected float mPaddingBottom = 10;
-    protected float mPaddingLeft = 8;
-    protected float mPaddingRight = 90;
+    protected float mBasePaddingTop = 20;
+    protected float mBasePaddingBottom = 10;
+    protected float mBasePaddingLeft = 8;
+    protected float mBasePaddingRight = 90;
 
     //可见的显示的条数，屏幕上显示的并不是所有的数据，只是部分数据，这个数据就是“可见的条数”
     protected int mShownMaxCount = 30;
@@ -69,12 +69,10 @@ public abstract class KBaseView extends BaseView {
 
 
     //事件监听回调
-    protected TimeSharingListener mTimeSharingListener;
+    protected KViewListener.MasterTouchListener mMasterTouchListener;
     //是否可以加载更多,出现这个属性的原因，防止多次加载更多，不可修改
     protected boolean mCanLoadMore = true;
 
-    //view类型：是分时图还是蜡烛图
-    protected ViewType mViewType = ViewType.TIMESHARING;
 
     /**
      * 绘制分时图：
@@ -112,7 +110,7 @@ public abstract class KBaseView extends BaseView {
     //按下的时刻
     protected long mPressTime;
     //手指移动的类型，默认在最后边
-    protected PullType mPullType = PullType.PULL_RIGHT_STOP;
+    protected KViewType.PullType mPullType = KViewType.PullType.PULL_RIGHT_STOP;
 
 
     /**
@@ -239,7 +237,7 @@ public abstract class KBaseView extends BaseView {
                 mPressTime = event.getDownTime();
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (event.getEventTime() - mPressTime > DEF_LONGPRESS_LENGTH) {
+                if (event.getEventTime() - mPressTime > def_longpress_length) {
                     innerLongClickListener(event.getX(), event.getY());
                 }
                 //判断是否是手指移动
@@ -247,7 +245,7 @@ public abstract class KBaseView extends BaseView {
                 float moveLen = currentPressedX - mPressedX;
                 //重置当前按下的位置
                 mPressedX = currentPressedX;
-                if (Math.abs(moveLen) > DEF_PULL_LENGTH &&
+                if (Math.abs(moveLen) > def_pull_length &&
                         mFingerPressedCount == 1 &&
                         !mDrawLongPress) {
                     //移动k线图
@@ -256,7 +254,7 @@ public abstract class KBaseView extends BaseView {
                 break;
             case MotionEvent.ACTION_UP:
                 //单击事件
-                if (event.getEventTime() - mPressTime < DEF_CLICKPRESS_LENGTH) {
+                if (event.getEventTime() - mPressTime < def_clickpress_length) {
                     //单击并且是在绘制十字
                     if (mDrawLongPress) {
                         //取消掉长按十字
@@ -344,22 +342,22 @@ public abstract class KBaseView extends BaseView {
     protected void showLoadingPaint(Canvas canvas) {
         if (!mDrawLoadingPaint) return;
         //这里特别注意，x轴的起始点要减去文字宽度的一半
-        canvas.drawText(mLoadingText, mWidth / 2 - mLoadingPaint.measureText(mLoadingText) / 2,
-                mHeight / 2, mLoadingPaint);
+        canvas.drawText(mLoadingText, mBaseWidth / 2 - mLoadingPaint.measureText(mLoadingText) / 2,
+                mBaseHeight / 2, mLoadingPaint);
     }
 
     protected void drawOuterLine(Canvas canvas) {
         //先绘制x轴
-        canvas.drawLine(mPaddingLeft, mPaddingTop,
-                mWidth - mPaddingRight, mPaddingTop, mOuterPaint);
-        canvas.drawLine(mPaddingLeft, mHeight - mPaddingBottom,
-                mWidth - mPaddingRight, mHeight - mPaddingBottom, mOuterPaint);
+        canvas.drawLine(mBasePaddingLeft, mBasePaddingTop,
+                mBaseWidth - mBasePaddingRight, mBasePaddingTop, mOuterPaint);
+        canvas.drawLine(mBasePaddingLeft, mBaseHeight - mBasePaddingBottom,
+                mBaseWidth - mBasePaddingRight, mBaseHeight - mBasePaddingBottom, mOuterPaint);
 
         //绘制y轴
-        canvas.drawLine(mPaddingLeft, mPaddingTop,
-                mPaddingLeft, mHeight - mPaddingBottom, mOuterPaint);
-        canvas.drawLine(mWidth - mPaddingRight, mPaddingTop,
-                mWidth - mPaddingRight, mHeight - mPaddingBottom, mOuterPaint);
+        canvas.drawLine(mBasePaddingLeft, mBasePaddingTop,
+                mBasePaddingLeft, mBaseHeight - mBasePaddingBottom, mOuterPaint);
+        canvas.drawLine(mBaseWidth - mBasePaddingRight, mBasePaddingTop,
+                mBaseWidth - mBasePaddingRight, mBaseHeight - mBasePaddingBottom, mOuterPaint);
     }
 
     /**
@@ -376,10 +374,10 @@ public abstract class KBaseView extends BaseView {
 
     private void drawInnerY(Canvas canvas) {
         //绘制y轴
-        double perWidth = (mWidth - mPaddingLeft - mPaddingRight) / 4;
+        double perWidth = (mBaseWidth - mBasePaddingLeft - mBasePaddingRight) / 4;
         for (int i = 1; i <= 3; i++) {
-            canvas.drawLine((float) (mPaddingLeft + perWidth * i), mPaddingTop,
-                    (float) (mPaddingLeft + perWidth * i), mHeight - mPaddingBottom,
+            canvas.drawLine((float) (mBasePaddingLeft + perWidth * i), mBasePaddingTop,
+                    (float) (mBasePaddingLeft + perWidth * i), mBaseHeight - mBasePaddingBottom,
                     mInnerXyPaint);
         }
     }
@@ -387,10 +385,10 @@ public abstract class KBaseView extends BaseView {
     private void drawInnerX(Canvas canvas) {
         //先绘制x轴
         //计算每一段x的高度
-        double perhight = (mHeight - mPaddingTop - mPaddingBottom) / 4;
+        double perhight = (mBaseHeight - mBasePaddingTop - mBasePaddingBottom) / 4;
         for (int i = 1; i <= 3; i++) {
-            canvas.drawLine(mPaddingLeft, (float) (mPaddingTop + perhight * i),
-                    mWidth - mPaddingRight, (float) (mPaddingTop + perhight * i),
+            canvas.drawLine(mBasePaddingLeft, (float) (mBasePaddingTop + perhight * i),
+                    mBaseWidth - mBasePaddingRight, (float) (mBasePaddingTop + perhight * i),
                     mInnerXyPaint);
         }
     }
@@ -433,36 +431,16 @@ public abstract class KBaseView extends BaseView {
         Toast.makeText(mContext, "加载更多，没有数据了...", Toast.LENGTH_SHORT).show();
     }
 
-    protected enum PullType {
-        PULL_RIGHT,//向右滑动
-        PULL_LEFT,//向左滑动
-        PULL_RIGHT_STOP,//滑动到最右边
-        PULL_LEFT_STOP,//滑动到最左边
-    }
-
-    public enum ViewType {
-        TIMESHARING,
-        CANDLE
-    }
-
-    //监听回调
-    public interface TimeSharingListener {
-        void onLongTouch(Quotes preQuotes, Quotes currentQuotes);
-
-        void onUnLongTouch();
-
-        void needLoadMore();
-    }
 
     /**
      * 数据设置入口
      *
      * @param quotesList
-     * @param timeSharingListener
+     * @param masterTouchListener
      */
-    public void setTimeSharingData(List<Quotes> quotesList, TimeSharingListener timeSharingListener) {
+    public void setTimeSharingData(List<Quotes> quotesList, KViewListener.MasterTouchListener masterTouchListener) {
         //绑定监听
-        mTimeSharingListener = timeSharingListener;
+        mMasterTouchListener = masterTouchListener;
         //添加数据
         setTimeSharingData(quotesList);
     }
@@ -475,7 +453,7 @@ public abstract class KBaseView extends BaseView {
     public void setTimeSharingData(List<Quotes> quotesList) {
         if (quotesList == null || quotesList.isEmpty()) {
             Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "setTimeSharingData: 数据异常");
+            Log.e(TAG, "setKViewData: 数据异常");
             return;
         }
         mQuotesList = quotesList;
@@ -513,7 +491,7 @@ public abstract class KBaseView extends BaseView {
     public void pushingTimeSharingData(Quotes quotes, long period) {
         if (quotes == null) {
             Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "setTimeSharingData: 数据异常");
+            Log.e(TAG, "setKViewData: 数据异常");
             return;
         }
         if (StringUtils.isEmpty(mQuotesList)) return;
@@ -542,8 +520,8 @@ public abstract class KBaseView extends BaseView {
 
 
         //如果是在左右移动，则不去实时更新K线图，但是要把数据加进去
-        if (mPullType == PullType.PULL_RIGHT_STOP) {
-            //Log.e(TAG, "pushingTimeSharingData: 处理实时更新操作...");
+        if (mPullType == KViewType.PullType.PULL_RIGHT_STOP) {
+            //Log.e(TAG, "pushKViewData: 处理实时更新操作...");
             seekBeginAndEndByNewer();
             seekAndCalculateCellData();
         }
@@ -557,7 +535,7 @@ public abstract class KBaseView extends BaseView {
     public void loadMoreTimeSharingData(List<Quotes> quotesList) {
         if (quotesList == null || quotesList.isEmpty()) {
             Toast.makeText(mContext, "数据异常", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "setTimeSharingData: 数据异常");
+            Log.e(TAG, "setKViewData: 数据异常");
             return;
         }
         mQuotesList.addAll(0, quotesList);
@@ -602,18 +580,6 @@ public abstract class KBaseView extends BaseView {
         mIsShowInnerY = showInnerY;
     }
 
-    public ViewType getViewType() {
-        return mViewType;
-    }
-
-    public void setViewType(ViewType viewType) {
-        if (viewType == mViewType) return;
-        mViewType = viewType;
-
-        //重绘
-        invalidate();
-    }
-
     protected void innerClickListener() {
     }
 
@@ -627,12 +593,533 @@ public abstract class KBaseView extends BaseView {
     protected void innerLongClickListener(float x, float y) {
     }
 
+
+    //-----------------------对开发者暴露可以修改的参数-------
+
+
+    public static int getDef_minlen_loadmore() {
+        return def_minlen_loadmore;
+    }
+
+    public static void setDef_minlen_loadmore(int def_minlen_loadmore) {
+        KBaseView.def_minlen_loadmore = def_minlen_loadmore;
+    }
+
+    public static int getDef_scale_minnum() {
+        return def_scale_minnum;
+    }
+
+    public static void setDef_scale_minnum(int def_scale_minnum) {
+        KBaseView.def_scale_minnum = def_scale_minnum;
+    }
+
+    public static int getDef_scale_maxnum() {
+        return def_scale_maxnum;
+    }
+
+    public static void setDef_scale_maxnum(int def_scale_maxnum) {
+        KBaseView.def_scale_maxnum = def_scale_maxnum;
+    }
+
+    public float getBasePaddingTop() {
+        return mBasePaddingTop;
+    }
+
+    public KBaseView setBasePaddingTop(float basePaddingTop) {
+        mBasePaddingTop = basePaddingTop;
+        return this;
+    }
+
+    public float getBasePaddingBottom() {
+        return mBasePaddingBottom;
+    }
+
+    public KBaseView setBasePaddingBottom(float basePaddingBottom) {
+        mBasePaddingBottom = basePaddingBottom;
+        return this;
+    }
+
+    public float getBasePaddingLeft() {
+        return mBasePaddingLeft;
+    }
+
+    public KBaseView setBasePaddingLeft(float basePaddingLeft) {
+        mBasePaddingLeft = basePaddingLeft;
+        return this;
+    }
+
+    public float getBasePaddingRight() {
+        return mBasePaddingRight;
+    }
+
+    public KBaseView setBasePaddingRight(float basePaddingRight) {
+        mBasePaddingRight = basePaddingRight;
+        return this;
+    }
+
+    public int getShownMaxCount() {
+        return mShownMaxCount;
+    }
+
+    public KBaseView setShownMaxCount(int shownMaxCount) {
+        mShownMaxCount = shownMaxCount;
+        return this;
+    }
+
     public int getDigits() {
         return mDigits;
     }
 
-    //产品的小数位数
-    public void setDigits(int digits) {
+    public KBaseView setDigits(int digits) {
         mDigits = digits;
+        return this;
+    }
+
+    public int getBeginIndex() {
+        return mBeginIndex;
+    }
+
+    public KBaseView setBeginIndex(int beginIndex) {
+        mBeginIndex = beginIndex;
+        return this;
+    }
+
+    public int getEndIndex() {
+        return mEndIndex;
+    }
+
+    public KBaseView setEndIndex(int endIndex) {
+        mEndIndex = endIndex;
+        return this;
+    }
+
+    public List<Quotes> getQuotesList() {
+        return mQuotesList;
+    }
+
+    public KBaseView setQuotesList(List<Quotes> quotesList) {
+        mQuotesList = quotesList;
+        return this;
+    }
+
+    public float getInnerRightBlankPadding() {
+        return mInnerRightBlankPadding;
+    }
+
+    public KBaseView setInnerRightBlankPadding(float innerRightBlankPadding) {
+        mInnerRightBlankPadding = innerRightBlankPadding;
+        return this;
+    }
+
+    public float getInnerTopBlankPadding() {
+        return mInnerTopBlankPadding;
+    }
+
+    public KBaseView setInnerTopBlankPadding(float innerTopBlankPadding) {
+        mInnerTopBlankPadding = innerTopBlankPadding;
+        return this;
+    }
+
+    public float getInnerBottomBlankPadding() {
+        return mInnerBottomBlankPadding;
+    }
+
+    public KBaseView setInnerBottomBlankPadding(float innerBottomBlankPadding) {
+        mInnerBottomBlankPadding = innerBottomBlankPadding;
+        return this;
+    }
+
+    public KViewListener.MasterTouchListener getMasterTouchListener() {
+        return mMasterTouchListener;
+    }
+
+    public KBaseView setMasterTouchListener(KViewListener.MasterTouchListener masterTouchListener) {
+        mMasterTouchListener = masterTouchListener;
+        return this;
+    }
+
+    public boolean isCanLoadMore() {
+        return mCanLoadMore;
+    }
+
+    public KBaseView setCanLoadMore(boolean canLoadMore) {
+        mCanLoadMore = canLoadMore;
+        return this;
+    }
+
+    public float getPerX() {
+        return mPerX;
+    }
+
+    public KBaseView setPerX(float perX) {
+        mPerX = perX;
+        return this;
+    }
+
+    public float getPerY() {
+        return mPerY;
+    }
+
+    public KBaseView setPerY(float perY) {
+        mPerY = perY;
+        return this;
+    }
+
+    public Quotes getMinColseQuotes() {
+        return mMinColseQuotes;
+    }
+
+    public KBaseView setMinColseQuotes(Quotes minColseQuotes) {
+        mMinColseQuotes = minColseQuotes;
+        return this;
+    }
+
+    public Quotes getMaxCloseQuotes() {
+        return mMaxCloseQuotes;
+    }
+
+    public KBaseView setMaxCloseQuotes(Quotes maxCloseQuotes) {
+        mMaxCloseQuotes = maxCloseQuotes;
+        return this;
+    }
+
+    public Quotes getBeginQuotes() {
+        return mBeginQuotes;
+    }
+
+    public KBaseView setBeginQuotes(Quotes beginQuotes) {
+        mBeginQuotes = beginQuotes;
+        return this;
+    }
+
+    public Quotes getEndQuotes() {
+        return mEndQuotes;
+    }
+
+    public KBaseView setEndQuotes(Quotes endQuotes) {
+        mEndQuotes = endQuotes;
+        return this;
+    }
+
+    public int getFingerPressedCount() {
+        return mFingerPressedCount;
+    }
+
+    public KBaseView setFingerPressedCount(int fingerPressedCount) {
+        mFingerPressedCount = fingerPressedCount;
+        return this;
+    }
+
+    public boolean isPullRight() {
+        return mPullRight;
+    }
+
+    public KBaseView setPullRight(boolean pullRight) {
+        mPullRight = pullRight;
+        return this;
+    }
+
+    public float getPressedX() {
+        return mPressedX;
+    }
+
+    public KBaseView setPressedX(float pressedX) {
+        mPressedX = pressedX;
+        return this;
+    }
+
+    public float getPressedY() {
+        return mPressedY;
+    }
+
+    public KBaseView setPressedY(float pressedY) {
+        mPressedY = pressedY;
+        return this;
+    }
+
+    public long getPressTime() {
+        return mPressTime;
+    }
+
+    public KBaseView setPressTime(long pressTime) {
+        mPressTime = pressTime;
+        return this;
+    }
+
+    public KViewType.PullType getPullType() {
+        return mPullType;
+    }
+
+    public KBaseView setPullType(KViewType.PullType pullType) {
+        mPullType = pullType;
+        return this;
+    }
+
+    public ScaleGestureDetector getScaleGestureDetector() {
+        return mScaleGestureDetector;
+    }
+
+    public KBaseView setScaleGestureDetector(ScaleGestureDetector scaleGestureDetector) {
+        mScaleGestureDetector = scaleGestureDetector;
+        return this;
+    }
+
+    public Paint getLoadingPaint() {
+        return mLoadingPaint;
+    }
+
+    public KBaseView setLoadingPaint(Paint loadingPaint) {
+        mLoadingPaint = loadingPaint;
+        return this;
+    }
+
+    public float getLoadingTextSize() {
+        return mLoadingTextSize;
+    }
+
+    public KBaseView setLoadingTextSize(float loadingTextSize) {
+        mLoadingTextSize = loadingTextSize;
+        return this;
+    }
+
+    public int getLoadingTextColor() {
+        return mLoadingTextColor;
+    }
+
+    public KBaseView setLoadingTextColor(int loadingTextColor) {
+        mLoadingTextColor = loadingTextColor;
+        return this;
+    }
+
+    public String getLoadingText() {
+        return mLoadingText;
+    }
+
+    public boolean isDrawLoadingPaint() {
+        return mDrawLoadingPaint;
+    }
+
+    public KBaseView setDrawLoadingPaint(boolean drawLoadingPaint) {
+        mDrawLoadingPaint = drawLoadingPaint;
+        return this;
+    }
+
+    public Paint getOuterPaint() {
+        return mOuterPaint;
+    }
+
+    public KBaseView setOuterPaint(Paint outerPaint) {
+        mOuterPaint = outerPaint;
+        return this;
+    }
+
+    public float getOuterLineWidth() {
+        return mOuterLineWidth;
+    }
+
+    public KBaseView setOuterLineWidth(float outerLineWidth) {
+        mOuterLineWidth = outerLineWidth;
+        return this;
+    }
+
+    public int getOuterLineColor() {
+        return mOuterLineColor;
+    }
+
+    public KBaseView setOuterLineColor(int outerLineColor) {
+        mOuterLineColor = outerLineColor;
+        return this;
+    }
+
+    public Paint getXYTxtPaint() {
+        return mXYTxtPaint;
+    }
+
+    public KBaseView setXYTxtPaint(Paint XYTxtPaint) {
+        mXYTxtPaint = XYTxtPaint;
+        return this;
+    }
+
+    public float getXYTxtSize() {
+        return mXYTxtSize;
+    }
+
+    public int getXYTxtColor() {
+        return mXYTxtColor;
+    }
+
+    public KBaseView setXYTxtColor(int XYTxtColor) {
+        mXYTxtColor = XYTxtColor;
+        return this;
+    }
+
+    public float getRightTxtPadding() {
+        return mRightTxtPadding;
+    }
+
+    public float getBottomTxtPadding() {
+        return mBottomTxtPadding;
+    }
+
+    public Paint getInnerXyPaint() {
+        return mInnerXyPaint;
+    }
+
+    public KBaseView setInnerXyPaint(Paint innerXyPaint) {
+        mInnerXyPaint = innerXyPaint;
+        return this;
+    }
+
+    public float getInnerXyLineWidth() {
+        return mInnerXyLineWidth;
+    }
+
+    public KBaseView setInnerXyLineWidth(float innerXyLineWidth) {
+        mInnerXyLineWidth = innerXyLineWidth;
+        return this;
+    }
+
+    public int getInnerXyLineColor() {
+        return mInnerXyLineColor;
+    }
+
+    public KBaseView setInnerXyLineColor(int innerXyLineColor) {
+        mInnerXyLineColor = innerXyLineColor;
+        return this;
+    }
+
+    public boolean isInnerXyLineDashed() {
+        return mIsInnerXyLineDashed;
+    }
+
+    public KBaseView setInnerXyLineDashed(boolean innerXyLineDashed) {
+        mIsInnerXyLineDashed = innerXyLineDashed;
+        return this;
+    }
+
+    public Paint getLegendPaint() {
+        return mLegendPaint;
+    }
+
+    public KBaseView setLegendPaint(Paint legendPaint) {
+        mLegendPaint = legendPaint;
+        return this;
+    }
+
+    public int getLegendColor() {
+        return mLegendColor;
+    }
+
+    public KBaseView setLegendColor(int legendColor) {
+        mLegendColor = legendColor;
+        return this;
+    }
+
+    public double getLegendPaddingTop() {
+        return mLegendPaddingTop;
+    }
+
+    public KBaseView setLegendPaddingTop(double legendPaddingTop) {
+        mLegendPaddingTop = legendPaddingTop;
+        return this;
+    }
+
+    public double getLegendPaddingRight() {
+        return mLegendPaddingRight;
+    }
+
+    public KBaseView setLegendPaddingRight(double legendPaddingRight) {
+        mLegendPaddingRight = legendPaddingRight;
+        return this;
+    }
+
+    public float getLegendTxtSize() {
+        return mLegendTxtSize;
+    }
+
+    public KBaseView setLegendTxtSize(float legendTxtSize) {
+        mLegendTxtSize = legendTxtSize;
+        return this;
+    }
+
+    public int getLineWidth() {
+        return mLineWidth;
+    }
+
+    public KBaseView setLineWidth(int lineWidth) {
+        mLineWidth = lineWidth;
+        return this;
+    }
+
+    public double getLegendPaddingLeft() {
+        return mLegendPaddingLeft;
+    }
+
+    public KBaseView setLegendPaddingLeft(double legendPaddingLeft) {
+        mLegendPaddingLeft = legendPaddingLeft;
+        return this;
+    }
+
+    public double getLegendTxtTopPadding() {
+        return mLegendTxtTopPadding;
+    }
+
+    public KBaseView setLegendTxtTopPadding(double legendTxtTopPadding) {
+        mLegendTxtTopPadding = legendTxtTopPadding;
+        return this;
+    }
+
+    public boolean isDrawLongPress() {
+        return mDrawLongPress;
+    }
+
+    public KBaseView setDrawLongPress(boolean drawLongPress) {
+        mDrawLongPress = drawLongPress;
+        return this;
+    }
+
+    public float getMovingX() {
+        return mMovingX;
+    }
+
+    public KBaseView setMovingX(float movingX) {
+        mMovingX = movingX;
+        return this;
+    }
+
+    public Paint getLongPressPaint() {
+        return mLongPressPaint;
+    }
+
+    public KBaseView setLongPressPaint(Paint longPressPaint) {
+        mLongPressPaint = longPressPaint;
+        return this;
+    }
+
+    public int getLongPressColor() {
+        return mLongPressColor;
+    }
+
+    public KBaseView setLongPressColor(int longPressColor) {
+        mLongPressColor = longPressColor;
+        return this;
+    }
+
+    public float getLongPressLineWidth() {
+        return mLongPressLineWidth;
+    }
+
+    public KBaseView setLongPressLineWidth(float longPressLineWidth) {
+        mLongPressLineWidth = longPressLineWidth;
+        return this;
+    }
+
+    public Quotes getCurrLongPressQuotes() {
+        return mCurrLongPressQuotes;
+    }
+
+    public KBaseView setCurrLongPressQuotes(Quotes currLongPressQuotes) {
+        mCurrLongPressQuotes = currLongPressQuotes;
+        return this;
     }
 }

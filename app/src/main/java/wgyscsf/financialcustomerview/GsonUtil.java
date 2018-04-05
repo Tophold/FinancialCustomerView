@@ -1,4 +1,4 @@
-package wgyscsf.financiallib.utils;
+package wgyscsf.financialcustomerview;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

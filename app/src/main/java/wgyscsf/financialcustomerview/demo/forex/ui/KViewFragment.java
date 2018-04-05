@@ -24,9 +24,9 @@ import wgyscsf.financialcustomerview.demo.forex.model.Forex;
 import wgyscsf.financialcustomerview.demo.forex.model.WsPrice;
 import wgyscsf.financialcustomerview.demo.forex.model.XcfdQuotes;
 import wgyscsf.financiallib.utils.StringUtils;
-import wgyscsf.financiallib.view.kview.ForexTab;
-import wgyscsf.financiallib.view.kview.KBaseView;
+import wgyscsf.financialcustomerview.ForexTab;
 import wgyscsf.financiallib.view.kview.KView;
+import wgyscsf.financiallib.view.kview.KViewListener;
 import wgyscsf.financiallib.view.kview.Quotes;
 
 public class KViewFragment extends BaseFragment {
@@ -136,7 +136,7 @@ public class KViewFragment extends BaseFragment {
 
     private void drawKView(boolean isLoadMore) {
         if (!isLoadMore) {
-            mFkKvKview.setTimeSharingData(mQuotesList, new KBaseView.TimeSharingListener() {
+            mFkKvKview.setKViewData(mQuotesList, new KViewListener.MasterTouchListener() {
                 @Override
                 public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
                     ((ForexActivity) getActivity()).showContanier(preQuotes, currentQuotes);
@@ -154,12 +154,12 @@ public class KViewFragment extends BaseFragment {
                         return;
                     }
                     Quotes quotes = mQuotesList.get(0);
-                    String showTime = quotes.showTime;
+                    String showTime = quotes.getShowTime();
                     loadData(showTime, true);
                 }
             });
         } else {
-            mFkKvKview.loadMoreTimeSharingData(mQuotesList);
+            mFkKvKview.loadKViewData(mQuotesList);
         }
     }
 
@@ -174,28 +174,6 @@ public class KViewFragment extends BaseFragment {
     }
 
     private void initListener() {
-        //        mFkKvKview.setTimeSharingData(mQuotesList, new KBaseView.TimeSharingListener() {
-        //            @Override
-        //            public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
-        //                ((ForexActivity) getActivity()).showContanier(preQuotes, currentQuotes);
-        //            }
-        //
-        //            @Override
-        //            public void onUnLongTouch() {
-        //                ((ForexActivity) getActivity()).hidenContainer();
-        //            }
-        //
-        //            @Override
-        //            public void needLoadMore() {
-        //                if (StringUtils.isEmpty(mQuotesList)) {
-        //                    mFkKvKview.loadMoreNoData();
-        //                    return;
-        //                }
-        //                Quotes quotes = mQuotesList.get(0);
-        //                String showTime = quotes.showTime;
-        //                loadData(showTime);
-        //            }
-        //        });
     }
 
     @Override
@@ -211,6 +189,6 @@ public class KViewFragment extends BaseFragment {
 
         Quotes quotes = new Quotes(currPriceStr, currPriceStr, currPriceStr, currPriceStr, wsPrice.lastUpdateTime, wsPrice.lastUpdateTime);
 
-        mFkKvKview.pushingTimeSharingData(quotes, mForexTab.getTypeLength() * 1000);
+        mFkKvKview.pushKViewData(quotes, mForexTab.getTypeLength() * 1000);
     }
 }

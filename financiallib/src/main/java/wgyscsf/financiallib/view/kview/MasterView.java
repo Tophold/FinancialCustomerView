@@ -23,7 +23,7 @@ import wgyscsf.financiallib.utils.TimeUtils;
  * ============================================================
  * 作 者 :    wgyscsf@163.com
  * 更细日期 ：2018/01/14 12:03
- * 描 述 ：主图。该View可以实现绘制分时图和蜡烛图。通过void setViewType(ViewType viewType)方法控制，该方法暴漏给使用者。
+ * 描 述 ：主图。该View可以实现绘制分时图和蜡烛图。通过void setViewType(KViewType.MasterViewType viewType)方法控制，该方法暴漏给使用者。
  * 为了模拟真实环境，拿到的数据没有直接使用，而是做了适配转换处理。没有使用任何第三方框架，
  * rx的使用仅仅在模拟网络环境获取数据的时候进行了线程的切换处理，控件中并没有使用。
  * <p>
@@ -63,7 +63,7 @@ public class MasterView extends KBaseView {
     //折线下面的浅蓝色
     int mBrokenLineBgColor;
     //透明度，可更改
-    int mAlpha = 40;
+    int mBrokenLineBgAlpha = 40;
 
     //画笔:最后一个小圆点的半径。对于是否显示小圆点，根据PullType.PULL_RIGHT_STOP判断
     Paint mDotPaint;
@@ -110,7 +110,7 @@ public class MasterView extends KBaseView {
     //单个蜡烛最大值最小值对应的y轴方向的线宽度
     int mCanldeHighLowWidth = 1;
     //指标类型
-    MasterType mMasterType = MasterType.NONE;
+    KViewType.MasterIndicatrixType mMasterType = KViewType.MasterIndicatrixType.NONE;
 
     //MA
     Paint mMa5Paint;
@@ -128,6 +128,9 @@ public class MasterView extends KBaseView {
     int mBollMbColor;
     Paint mBollDnPaint;
     int mBollDnColor;
+
+    //view类型：是分时图还是蜡烛图
+    protected KViewType.MasterViewType mViewType = KViewType.MasterViewType.TIMESHARING;
 
     /**
      * 绘制蜡烛图：y轴，可以根据可视范围内的最大high值（A）和最小low值（B）以及有效y轴高度（C）计算出
@@ -150,9 +153,9 @@ public class MasterView extends KBaseView {
     protected float mCandleDiverWidthRatio = 0.1f;
 
     //持有副图长按，方便监听
-    private MinorView.MasterListener mMasterListener;
+    private KViewListener.MasterListener mMasterListener;
 
-    public void setMasterListener(MinorView.MasterListener masterListener) {
+    public void setMasterListener(KViewListener.MasterListener masterListener) {
         mMasterListener = masterListener;
     }
 
@@ -218,9 +221,9 @@ public class MasterView extends KBaseView {
         mScaleGestureDetector = new ScaleGestureDetector(mContext, mOnScaleGestureListener);
 
         //是分时图还是蜡烛图,def
-        setViewType(ViewType.TIMESHARING);
+        setViewType(KViewType.MasterViewType.TIMESHARING);
         //底部距离
-        mPaddingBottom = 35;
+        mBasePaddingBottom = 35;
     }
 
     @Override
@@ -310,7 +313,7 @@ public class MasterView extends KBaseView {
         mBrokenLineBgPaint.setColor(mBrokenLineBgColor);
         mBrokenLineBgPaint.setStyle(Paint.Style.FILL);
         mBrokenLineBgPaint.setAntiAlias(true);
-        mBrokenLineBgPaint.setAlpha(mAlpha);
+        mBrokenLineBgPaint.setAlpha(mBrokenLineBgAlpha);
     }
 
     private void initCandlePaint() {
@@ -400,15 +403,15 @@ public class MasterView extends KBaseView {
         for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes quotes = mQuotesList.get(i);
             //mPerX/2.0f：为了让取点为单个单元的x的中间位置
-            float floatX = mPaddingLeft + mPerX / 2.0f + mPerX * (i - mBeginIndex);
+            float floatX = mBasePaddingLeft + mPerX / 2.0f + mPerX * (i - mBeginIndex);
             float floatY = 0;
 
             //分时图和蜡烛图要分开对待，测量标准不一致。只要有测量的，全部要区分对待。
-            if (mViewType == ViewType.TIMESHARING) {
-                floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
+            if (mViewType == KViewType.MasterViewType.TIMESHARING) {
+                floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
                         mPerY * (quotes.c - mMinColseQuotes.c));
-            } else if (mViewType == ViewType.CANDLE) {
-                floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
+            } else if (mViewType == KViewType.MasterViewType.CANDLE) {
+                floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
                         mPerY * (quotes.c - mCandleMinY));
             }
 
@@ -419,7 +422,7 @@ public class MasterView extends KBaseView {
 
             //边界位置修正
             //不是在最新的位置（其实也就是最新点靠近右侧边框），并且是最后一个点则向右加一个mPerX/2.0f。
-            if (mPullType != PullType.PULL_RIGHT_STOP) {
+            if (mPullType != KViewType.PullType.PULL_RIGHT_STOP) {
                 if (i == mEndIndex - 1) {
                     quotes.floatX += mPerX / 2.0f;
                 }
@@ -459,7 +462,7 @@ public class MasterView extends KBaseView {
     }
 
     private void drawMasterLegend(Canvas canvas) {
-        if (mViewType != ViewType.CANDLE) return;
+        if (mViewType != KViewType.MasterViewType.CANDLE) return;
 
         //长按
         if (mDrawLongPress) {
@@ -471,96 +474,96 @@ public class MasterView extends KBaseView {
             mBollUpPaint.setStyle(Paint.Style.FILL);
             mBollMbPaint.setStyle(Paint.Style.FILL);
             String showTxt = "";
-            if (mMasterType == MasterType.MA) {
+            if (mMasterType == KViewType.MasterIndicatrixType.MA) {
                 showTxt = "• MA5 " + FormatUtil.formatBySubString(mCurrLongPressQuotes.ma5, mDigits) + " ";
-                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft),
-                        (float) (mLegendPaddingTop + mPaddingTop), mMa5Paint);
+                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mBasePaddingLeft),
+                        (float) (mLegendPaddingTop + mBasePaddingTop), mMa5Paint);
 
                 float leftWidth = mMa5Paint.measureText(showTxt);
                 showTxt = "• MA10 " + FormatUtil.formatBySubString(mCurrLongPressQuotes.ma10, mDigits) + " ";
-                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft + leftWidth),
-                        (float) (mLegendPaddingTop + mPaddingTop), mMa10Paint);
+                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mBasePaddingLeft + leftWidth),
+                        (float) (mLegendPaddingTop + mBasePaddingTop), mMa10Paint);
 
                 float leftWidth2 = mMa10Paint.measureText(showTxt);
                 showTxt = "• MA20 " + FormatUtil.formatBySubString(mCurrLongPressQuotes.ma20, mDigits) + " ";
-                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft + leftWidth + leftWidth2),
-                        (float) (mLegendPaddingTop + mPaddingTop), mMa20Paint);
-            } else if (mMasterType == MasterType.BOLL) {
+                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mBasePaddingLeft + leftWidth + leftWidth2),
+                        (float) (mLegendPaddingTop + mBasePaddingTop), mMa20Paint);
+            } else if (mMasterType == KViewType.MasterIndicatrixType.BOLL) {
                 showTxt = "• UPPER " + FormatUtil.formatBySubString(mCurrLongPressQuotes.up, mDigits) + " ";
-                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft),
-                        (float) (mLegendPaddingTop + mPaddingTop), mBollMbPaint);
+                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mBasePaddingLeft),
+                        (float) (mLegendPaddingTop + mBasePaddingTop), mBollMbPaint);
 
                 float leftWidth = mBollMbPaint.measureText(showTxt);
                 showTxt = "• MID " + FormatUtil.formatBySubString(mCurrLongPressQuotes.mb, mDigits) + " ";
-                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft + leftWidth),
-                        (float) (mLegendPaddingTop + mPaddingTop), mBollUpPaint);
+                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mBasePaddingLeft + leftWidth),
+                        (float) (mLegendPaddingTop + mBasePaddingTop), mBollUpPaint);
 
                 float leftWidth2 = mBollUpPaint.measureText(showTxt);
                 showTxt = "• LOWER " + FormatUtil.formatBySubString(mCurrLongPressQuotes.dn, mDigits) + " ";
-                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft + leftWidth + leftWidth2),
-                        (float) (mLegendPaddingTop + mPaddingTop), mBollDnPaint);
+                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mBasePaddingLeft + leftWidth + leftWidth2),
+                        (float) (mLegendPaddingTop + mBasePaddingTop), mBollDnPaint);
 
-            } else if (mMasterType == MasterType.MA_BOLL) {
+            } else if (mMasterType == KViewType.MasterIndicatrixType.MA_BOLL) {
                 showTxt = "• MA5 " + FormatUtil.formatBySubString(mCurrLongPressQuotes.ma5, mDigits) + " ";
-                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft),
-                        (float) (mLegendPaddingTop + mPaddingTop), mMa5Paint);
+                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mBasePaddingLeft),
+                        (float) (mLegendPaddingTop + mBasePaddingTop), mMa5Paint);
 
                 float leftWidth = mMa5Paint.measureText(showTxt);
                 showTxt = "• MA10 " + FormatUtil.formatBySubString(mCurrLongPressQuotes.ma10, mDigits) + " ";
-                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft + leftWidth),
-                        (float) (mLegendPaddingTop + mPaddingTop), mMa10Paint);
+                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mBasePaddingLeft + leftWidth),
+                        (float) (mLegendPaddingTop + mBasePaddingTop), mMa10Paint);
 
                 float leftWidth2 = mMa10Paint.measureText(showTxt);
                 showTxt = "• MA20 " + FormatUtil.formatBySubString(mCurrLongPressQuotes.ma20, mDigits) + " ";
-                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft + leftWidth + leftWidth2),
-                        (float) (mLegendPaddingTop + mPaddingTop), mMa20Paint);
+                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mBasePaddingLeft + leftWidth + leftWidth2),
+                        (float) (mLegendPaddingTop + mBasePaddingTop), mMa20Paint);
 
 
                 double high = getFontHeight(mLegendTxtSize, mMa5Paint);
                 high += mLegendTxtTopPadding;
                 showTxt = "• UPPER " + FormatUtil.formatBySubString(mCurrLongPressQuotes.mb, mDigits) + " ";
-                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft),
-                        (float) (mLegendPaddingTop + mPaddingTop + high), mBollMbPaint);
+                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mBasePaddingLeft),
+                        (float) (mLegendPaddingTop + mBasePaddingTop + high), mBollMbPaint);
 
                 float leftWidth3 = mBollMbPaint.measureText(showTxt);
                 showTxt = "• MID " + FormatUtil.formatBySubString(mCurrLongPressQuotes.up, mDigits) + " ";
-                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft + leftWidth3),
-                        (float) (mLegendPaddingTop + mPaddingTop + high), mBollUpPaint);
+                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mBasePaddingLeft + leftWidth3),
+                        (float) (mLegendPaddingTop + mBasePaddingTop + high), mBollUpPaint);
 
                 float leftWidth23 = mBollUpPaint.measureText(showTxt);
                 showTxt = "• LOWER " + FormatUtil.formatBySubString(mCurrLongPressQuotes.dn, mDigits) + " ";
-                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mPaddingLeft + leftWidth23 + leftWidth3),
-                        (float) (mLegendPaddingTop + mPaddingTop + high), mBollDnPaint);
+                canvas.drawText(showTxt, (float) (mLegendPaddingLeft + mBasePaddingLeft + leftWidth23 + leftWidth3),
+                        (float) (mLegendPaddingTop + mBasePaddingTop + high), mBollDnPaint);
 
             }
         } else {
             //非长按
             String showTxt = "";
-            if (mMasterType == MasterType.MA) {
+            if (mMasterType == KViewType.MasterIndicatrixType.MA) {
                 showTxt = "MA(5,10,20)";
-            } else if (mMasterType == MasterType.BOLL) {
+            } else if (mMasterType == KViewType.MasterIndicatrixType.BOLL) {
                 showTxt = "BOLL(26)";
 
-            } else if (mMasterType == MasterType.MA_BOLL) {
+            } else if (mMasterType == KViewType.MasterIndicatrixType.MA_BOLL) {
                 showTxt = "BOLL(26)&MA(5,10,20)";
             }
             canvas.drawText(showTxt,
-                    (float) (mWidth - mLegendPaddingRight - mPaddingRight - mLegendPaint.measureText(showTxt)),
-                    (float) (mLegendPaddingTop + mPaddingTop), mLegendPaint);
+                    (float) (mBaseWidth - mLegendPaddingRight - mBasePaddingRight - mLegendPaint.measureText(showTxt)),
+                    (float) (mLegendPaddingTop + mBasePaddingTop), mLegendPaint);
         }
     }
 
     private void drawMasterIndicatrix(Canvas canvas) {
         //指标展示的前提是蜡烛图
-        if (mViewType != ViewType.CANDLE) return;
+        if (mViewType != KViewType.MasterViewType.CANDLE) return;
 
-        if (mMasterType == MasterType.NONE) {
+        if (mMasterType == KViewType.MasterIndicatrixType.NONE) {
 
-        } else if (mMasterType == MasterType.MA) {
+        } else if (mMasterType == KViewType.MasterIndicatrixType.MA) {
             drawMa(canvas);
-        } else if (mMasterType == MasterType.BOLL) {
+        } else if (mMasterType == KViewType.MasterIndicatrixType.BOLL) {
             drawBoll(canvas);
-        } else if (mMasterType == MasterType.MA_BOLL) {
+        } else if (mMasterType == KViewType.MasterIndicatrixType.MA_BOLL) {
             drawMa(canvas);
             drawBoll(canvas);
         }
@@ -583,7 +586,7 @@ public class MasterView extends KBaseView {
             //在绘制蜡烛图的时候已经计算了
             float floatX = quotes.floatX;
 
-            float floatY = getMasterDetailFloatY(quotes, MasterDetailType.MA5);
+            float floatY = getMasterDetailFloatY(quotes, KViewType.MasterIndicatrixDetailType.MA5);
 
             //异常,在View的行为就是不显示而已，影响不大。一般都是数据的开头部分。
             if (floatY == -1) continue;
@@ -595,7 +598,7 @@ public class MasterView extends KBaseView {
                 path5.lineTo(floatX, floatY);
             }
 
-            floatY = getMasterDetailFloatY(quotes, MasterDetailType.MA10);
+            floatY = getMasterDetailFloatY(quotes, KViewType.MasterIndicatrixDetailType.MA10);
 
             //异常
             if (floatY == -1) continue;
@@ -607,7 +610,7 @@ public class MasterView extends KBaseView {
                 path10.lineTo(floatX, floatY);
             }
 
-            floatY = getMasterDetailFloatY(quotes, MasterDetailType.MA20);
+            floatY = getMasterDetailFloatY(quotes, KViewType.MasterIndicatrixDetailType.MA20);
 
             //异常
             if (floatY == -1) continue;
@@ -625,32 +628,32 @@ public class MasterView extends KBaseView {
         canvas.drawPath(path20, mMa20Paint);
     }
 
-    private float getMasterDetailFloatY(Quotes quotes, MasterDetailType maType) {
+    private float getMasterDetailFloatY(Quotes quotes, KViewType.MasterIndicatrixDetailType maType) {
         double v = 0;
         //ma
-        if (maType == MasterDetailType.MA5) {
+        if (maType == KViewType.MasterIndicatrixDetailType.MA5) {
             v = quotes.ma5 - mCandleMinY;
-        } else if (maType == MasterDetailType.MA10) {
+        } else if (maType == KViewType.MasterIndicatrixDetailType.MA10) {
             v = quotes.ma10 - mCandleMinY;
-        } else if (maType == MasterDetailType.MA20) {
+        } else if (maType == KViewType.MasterIndicatrixDetailType.MA20) {
             v = quotes.ma20 - mCandleMinY;
         }
         //boll
-        else if (maType == MasterDetailType.BOLLUP) {
+        else if (maType == KViewType.MasterIndicatrixDetailType.BOLLUP) {
             v = quotes.up - mCandleMinY;
-        } else if (maType == MasterDetailType.BOLLMB) {
+        } else if (maType == KViewType.MasterIndicatrixDetailType.BOLLMB) {
             v = quotes.mb - mCandleMinY;
-        } else if (maType == MasterDetailType.BOLLDN) {
+        } else if (maType == KViewType.MasterIndicatrixDetailType.BOLLDN) {
             v = quotes.dn - mCandleMinY;
         }
         //异常，当不存在ma值时的处理
         if (v + mCandleMinY == 0) return -1;
 
         double h = v * mPerY;
-        float y = (float) (mHeight - h - mPaddingBottom - mInnerBottomBlankPadding);
+        float y = (float) (mBaseHeight - h - mBasePaddingBottom - mInnerBottomBlankPadding);
 
         //这里的y,存在一种情况，y超过了View的上边界或者超过了下边界，当出现这一种情况时，不显示，当作异常情况
-        if (y < mPaddingTop || y > mHeight - mPaddingBottom)
+        if (y < mBasePaddingTop || y > mBaseHeight - mBasePaddingBottom)
             return -1;
 
         return y;
@@ -672,7 +675,7 @@ public class MasterView extends KBaseView {
             float floatX = quotes.floatX;//在绘制蜡烛图的时候已经计算了
 
             //上轨线
-            float floatY = getMasterDetailFloatY(quotes, MasterDetailType.BOLLUP);
+            float floatY = getMasterDetailFloatY(quotes, KViewType.MasterIndicatrixDetailType.BOLLUP);
             //异常
             if (floatY == -1) continue;
 
@@ -683,8 +686,8 @@ public class MasterView extends KBaseView {
                 upPath.lineTo(floatX, floatY);
             }
 
-             //中轨线
-             floatY = getMasterDetailFloatY(quotes, MasterDetailType.BOLLMB);
+            //中轨线
+            floatY = getMasterDetailFloatY(quotes, KViewType.MasterIndicatrixDetailType.BOLLMB);
             //异常,在View的行为就是不显示而已，影响不大。一般都是数据的开头部分。
             if (floatY == -1) continue;
 
@@ -697,7 +700,7 @@ public class MasterView extends KBaseView {
 
 
             //下轨线
-            floatY = getMasterDetailFloatY(quotes, MasterDetailType.BOLLDN);
+            floatY = getMasterDetailFloatY(quotes, KViewType.MasterIndicatrixDetailType.BOLLDN);
             //异常
             if (floatY == -1) continue;
 
@@ -723,7 +726,7 @@ public class MasterView extends KBaseView {
      * @param quotes     目标Quotes
      */
     private void drawCandleViewProcess(Canvas canvas, float diverWidth, int i, Quotes quotes) {
-        if (mViewType != ViewType.CANDLE) return;
+        if (mViewType != KViewType.MasterViewType.CANDLE) return;
 
         float topRectY;
         float bottomRectY;
@@ -734,29 +737,29 @@ public class MasterView extends KBaseView {
         float rightLineX;
         float bottomLineY;
         //定位蜡烛矩形的四个点
-        topRectY = (float) (mPaddingTop + mInnerTopBlankPadding +
+        topRectY = (float) (mBasePaddingTop + mInnerTopBlankPadding +
                 mPerY * (mCandleMaxY - quotes.o));
-        bottomRectY = (float) (mPaddingTop + mInnerTopBlankPadding +
+        bottomRectY = (float) (mBasePaddingTop + mInnerTopBlankPadding +
                 mPerY * (mCandleMaxY - quotes.c));
         leftRectX = -mPerX / 2 + quotes.floatX + diverWidth / 2;
         rightRectX = mPerX / 2 + quotes.floatX - diverWidth / 2;
 
         //定位单个蜡烛中间线的四个点
         leftLineX = quotes.floatX;
-        topLineY = (float) (mPaddingTop + mInnerTopBlankPadding +
+        topLineY = (float) (mBasePaddingTop + mInnerTopBlankPadding +
                 mPerY * (mCandleMaxY - quotes.h));
         rightLineX = quotes.floatX;
-        bottomLineY = (float) (mPaddingTop + mInnerTopBlankPadding +
+        bottomLineY = (float) (mBasePaddingTop + mInnerTopBlankPadding +
                 mPerY * (mCandleMaxY - quotes.l));
 
         RectF rectF = new RectF();
         //边界处理
         if (i == mBeginIndex) {
-            leftRectX = leftRectX < mPaddingLeft ? mPaddingLeft : leftRectX;
-            leftLineX = leftLineX < mPaddingLeft ? mPaddingLeft : leftLineX;
+            leftRectX = leftRectX < mBasePaddingLeft ? mBasePaddingLeft : leftRectX;
+            leftLineX = leftLineX < mBasePaddingLeft ? mBasePaddingLeft : leftLineX;
         } else if (i == (mEndIndex - 1)) {
-            rightRectX = rightRectX > mWidth - mPaddingRight ? mWidth - mPaddingRight : rightRectX;
-            rightLineX = rightLineX > mWidth - mPaddingRight ? mWidth - mPaddingRight : rightLineX;
+            rightRectX = rightRectX > mBaseWidth - mBasePaddingRight ? mBaseWidth - mBasePaddingRight : rightRectX;
+            rightLineX = rightLineX > mBaseWidth - mBasePaddingRight ? mBaseWidth - mBasePaddingRight : rightLineX;
         }
 
         //上下边界一样，设置一个偏移值
@@ -775,15 +778,15 @@ public class MasterView extends KBaseView {
         if (!mDrawLongPress) return;
 
         //x轴线
-        canvas.drawLine(mPaddingLeft, finalFundMode.floatY, mWidth - mPaddingRight,
+        canvas.drawLine(mBasePaddingLeft, finalFundMode.floatY, mBaseWidth - mBasePaddingRight,
                 finalFundMode.floatY, mLongPressPaint);
         //y轴线
-        canvas.drawLine(finalFundMode.floatX, mPaddingTop, finalFundMode.floatX,
-                mHeight - mPaddingBottom, mLongPressPaint);
+        canvas.drawLine(finalFundMode.floatX, mBasePaddingTop, finalFundMode.floatX,
+                mBaseHeight - mBasePaddingBottom, mLongPressPaint);
 
         //将长按信息回调给副图，方便副图处理长按信息
         if (mMasterListener != null)
-            mMasterListener.masterLongPressListener(finalFundMode.floatX, finalFundMode);
+            mMasterListener.masterLongPressListener(finalIndex, finalFundMode);
 
 
         //接着绘制长按上方和右侧文字信息背景
@@ -791,17 +794,17 @@ public class MasterView extends KBaseView {
         //y
         float longPressTxtYPadding = 10;
         canvas.drawRect(finalFundMode.floatX -
-                        mLongPressTxtBgPaint.measureText(finalFundMode.showTime) / 2 -
+                        mLongPressTxtBgPaint.measureText(finalFundMode.getShowTime()) / 2 -
                         longPressTxtYPadding,
-                mPaddingTop,
+                mBasePaddingTop,
                 finalFundMode.floatX +
-                        mLongPressTxtBgPaint.measureText(finalFundMode.showTime) / 2 +
+                        mLongPressTxtBgPaint.measureText(finalFundMode.getShowTime()) / 2 +
                         longPressTxtYPadding,
-                mPaddingTop + txtBgHight, mLongPressTxtBgPaint);
+                mBasePaddingTop + txtBgHight, mLongPressTxtBgPaint);
         //x
         //加一个左右边距
-        canvas.drawRect(mWidth - mPaddingRight, finalFundMode.floatY - txtBgHight / 2,
-                mWidth,
+        canvas.drawRect(mBaseWidth - mBasePaddingRight, finalFundMode.floatY - txtBgHight / 2,
+                mBaseWidth,
                 finalFundMode.floatY + txtBgHight / 2,
                 mLongPressTxtBgPaint);
 
@@ -811,13 +814,13 @@ public class MasterView extends KBaseView {
         //距离左边的距离
         float leftDis = 8;
         canvas.drawText(FormatUtil.numFormat(finalFundMode.c, mDigits),
-                mWidth - mPaddingRight + leftDis,
+                mBaseWidth - mBasePaddingRight + leftDis,
                 finalFundMode.floatY + txtHight / 4//这特么的又是需要+/4,理论应该是-/2,原因不明
                 , mLongPressTxtPaint);
         //y
-        canvas.drawText(finalFundMode.showTime,
-                finalFundMode.floatX - mLongPressTxtPaint.measureText(finalFundMode.showTime) / 2,
-                mPaddingTop + txtHight - 6
+        canvas.drawText(finalFundMode.getShowTime(),
+                finalFundMode.floatX - mLongPressTxtPaint.measureText(finalFundMode.getShowTime()) / 2,
+                mBasePaddingTop + txtHight - 6
                 , mLongPressTxtPaint);
 
         //在这里回调数据信息
@@ -826,15 +829,15 @@ public class MasterView extends KBaseView {
                 (0 <= finalIndex - 1 && finalIndex - 1 < size))
             //记录当前Quotes
             mCurrLongPressQuotes = mQuotesList.get(finalIndex);
-        if (mTimeSharingListener != null) {
+        if (mMasterTouchListener != null) {
             //回调,需要两个数据，便于计算涨跌百分比
-            mTimeSharingListener.onLongTouch(mQuotesList.get(finalIndex - 1),
+            mMasterTouchListener.onLongTouch(mQuotesList.get(finalIndex - 1),
                     mQuotesList.get(finalIndex));
         }
     }
 
     private void drawTimSharing(Canvas canvas, Path brokenLinePath, Path brokenLineBgPath) {
-        if (mViewType != ViewType.TIMESHARING) return;
+        if (mViewType != KViewType.MasterViewType.TIMESHARING) return;
 
         canvas.drawPath(brokenLinePath, mBrokenLinePaint);
         canvas.drawPath(brokenLineBgPath, mBrokenLineBgPaint);
@@ -844,50 +847,50 @@ public class MasterView extends KBaseView {
         if (i == mEndIndex - 1) {
             //这里滑动到最右端
             //绘制小圆点
-            if (mPullType == PullType.PULL_RIGHT_STOP) {
+            if (mPullType == KViewType.PullType.PULL_RIGHT_STOP) {
                 //对于蜡烛图不需要绘制小圆点，但是需要绘制实时横线
-                if (mViewType == ViewType.TIMESHARING) {
+                if (mViewType == KViewType.MasterViewType.TIMESHARING) {
                     canvas.drawCircle(quotes.floatX, quotes.floatY, mDotRadius, mDotPaint);
                 }
             } else {
                 //这里隐藏小圆点并且重新计算Y值。这里这样处理，对应现象的问题：横线划出界面。
                 Quotes endQuotes = mQuotesList.get(mQuotesList.size() - 1);
                 //分时图
-                if (mViewType == ViewType.TIMESHARING) {
-                    quotes.floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
+                if (mViewType == KViewType.MasterViewType.TIMESHARING) {
+                    quotes.floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
                             mPerY * (endQuotes.c - mMinColseQuotes.c));
                 } else {
                     //蜡烛图
-                    quotes.floatY = (float) (mHeight - mPaddingBottom - mInnerBottomBlankPadding -
+                    quotes.floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
                             mPerY * (endQuotes.c - mCandleMinY));
                 }
             }
 
             //实时数据展示的前提是在指定范围内。不处理对应的异常：实时横线显示在底部横线的下面...
-            if (mPaddingTop < quotes.floatY && quotes.floatY < mHeight - mPaddingBottom) {
+            if (mBasePaddingTop < quotes.floatY && quotes.floatY < mBaseHeight - mBasePaddingBottom) {
                 //接着画实时横线
-                canvas.drawLine(mPaddingLeft, quotes.floatY, mWidth - mPaddingRight, quotes.floatY,
+                canvas.drawLine(mBasePaddingLeft, quotes.floatY, mBaseWidth - mBasePaddingRight, quotes.floatY,
                         mTimingLinePaint);
 
                 //接着绘制实时横线的右侧数据与背景
                 //文字高度
                 float txtHight = getFontHeight(mTimingTxtWidth, mTimingTxtBgPaint);
                 //绘制背景
-                canvas.drawRect(mWidth - mPaddingRight, quotes.floatY - txtHight / 2, mWidth,
+                canvas.drawRect(mBaseWidth - mBasePaddingRight, quotes.floatY - txtHight / 2, mBaseWidth,
                         quotes.floatY + txtHight / 2, mTimingTxtBgPaint);
 
                 //绘制实时数据
                 //距离左边的距离
                 float leftDis = 8;
                 canvas.drawText(FormatUtil.numFormat(quotes.c, mDigits),
-                        mWidth - mPaddingRight + leftDis, quotes.floatY + txtHight / 4,
+                        mBaseWidth - mBasePaddingRight + leftDis, quotes.floatY + txtHight / 4,
                         mTimingTxtPaint);
             }
         }
     }
 
     private void drawTimSharingProcess(Quotes quotes, int i, Path path, Path path2) {
-        if (mViewType != ViewType.TIMESHARING) return;
+        if (mViewType != KViewType.MasterViewType.TIMESHARING) return;
 
         if (i == mBeginIndex) {
             path.moveTo(quotes.floatX, quotes.floatY);
@@ -902,8 +905,8 @@ public class MasterView extends KBaseView {
         if (i == mEndIndex - 1) {
             //在这里把path圈起来，添加阴影。特别注意，这里处理下方阴影和折线边框。采用两个画笔和两个Path处理的，
             // 貌似没有一个Paint可以同时绘制边框和填充色。
-            path2.lineTo(quotes.floatX, mHeight - mPaddingBottom);
-            path2.lineTo(mPaddingLeft, mHeight - mPaddingBottom);
+            path2.lineTo(quotes.floatX, mBaseHeight - mBasePaddingBottom);
+            path2.lineTo(mBasePaddingLeft, mBaseHeight - mBasePaddingBottom);
             path2.close();
         }
     }
@@ -925,17 +928,17 @@ public class MasterView extends KBaseView {
         double dataDis = 0;
 
         //对于分时图和蜡烛图的最大值和最小值计算是不一样的，因此测量的时候也要分开对待
-        if (mViewType == ViewType.TIMESHARING) {
+        if (mViewType == KViewType.MasterViewType.TIMESHARING) {
             dataDis = mMaxCloseQuotes.c - mMinColseQuotes.c;
-        } else if (mViewType == ViewType.CANDLE) {
+        } else if (mViewType == KViewType.MasterViewType.CANDLE) {
             dataDis = mCandleMaxY - mCandleMinY;
         }
 
-        double yDis = (mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding -
+        double yDis = (mBaseHeight - mBasePaddingTop - mBasePaddingBottom - mInnerTopBlankPadding -
                 mInnerBottomBlankPadding);
         double perY = dataDis / yDis;
 
-        if (mViewType == ViewType.TIMESHARING) {
+        if (mViewType == KViewType.MasterViewType.TIMESHARING) {
             minBorderData = mMinColseQuotes.c - mInnerBottomBlankPadding * perY;
             maxBorderData = mMaxCloseQuotes.c + mInnerTopBlankPadding * perY;
         } else {
@@ -949,29 +952,25 @@ public class MasterView extends KBaseView {
         //现将最小值、最大值画好
         float rightBorderPadding = mRightTxtPadding;
         canvas.drawText(FormatUtil.numFormat(minBorderData, mDigits),
-                mWidth - mPaddingRight + rightBorderPadding,
-                mHeight - mPaddingBottom + halfTxtHight, mXYTxtPaint);
+                mBaseWidth - mBasePaddingRight + rightBorderPadding,
+                mBaseHeight - mBasePaddingBottom + halfTxtHight, mXYTxtPaint);
         //draw max
         canvas.drawText(FormatUtil.numFormat(maxBorderData, mDigits),
-                mWidth - mPaddingRight + rightBorderPadding,
-                mPaddingTop + halfTxtHight, mXYTxtPaint);
+                mBaseWidth - mBasePaddingRight + rightBorderPadding,
+                mBasePaddingTop + halfTxtHight, mXYTxtPaint);
         //因为横线是均分的，所以只要取到最大值最小值的差值，均分即可。
         float perYValues = (float) ((maxBorderData - minBorderData) / 4);
-        float perYWidth = (mHeight - mPaddingBottom - mPaddingTop) / 4;
+        float perYWidth = (mBaseHeight - mBasePaddingBottom - mBasePaddingTop) / 4;
         //从下到上依次画
         for (int i = 1; i <= 3; i++) {
             canvas.drawText(FormatUtil.numFormat(minBorderData + perYValues * i, mDigits),
-                    mWidth - mPaddingRight + rightBorderPadding,
-                    mHeight - mPaddingBottom - perYWidth * i + halfTxtHight, mXYTxtPaint);
+                    mBaseWidth - mBasePaddingRight + rightBorderPadding,
+                    mBaseHeight - mBasePaddingBottom - perYWidth * i + halfTxtHight, mXYTxtPaint);
         }
     }
 
     public boolean isDrawLongPress() {
         return mDrawLongPress;
-    }
-
-    public void setDrawLongPress(boolean drawLongPress) {
-        mDrawLongPress = drawLongPress;
     }
 
     /**
@@ -986,8 +985,8 @@ public class MasterView extends KBaseView {
         float halfTxtWidth = mXYTxtPaint.measureText("00:00") / 2;
 
         //单位间距，注意这里需要加上右边内边距
-        double perXWith = (mWidth - mPaddingLeft - mPaddingRight) / 4;
-        double xDis = (mWidth - mPaddingLeft - mPaddingRight - mInnerRightBlankPadding);
+        double perXWith = (mBaseWidth - mBasePaddingLeft - mBasePaddingRight) / 4;
+        double xDis = (mBaseWidth - mBasePaddingLeft - mBasePaddingRight - mInnerRightBlankPadding);
         long timeDis = mEndQuotes.t - mBeginQuotes.t;
         long perXTime = (long) (timeDis / xDis);
         String showTime;
@@ -1003,18 +1002,18 @@ public class MasterView extends KBaseView {
                         new SimpleDateFormat("HH:mm", Locale.getDefault()));
             }
             canvas.drawText(showTime,
-                    (float) (mPaddingLeft + perXWith * i - finalHalfTxtWidth),
-                    mHeight - mPaddingBottom + mBottomTxtPadding, mXYTxtPaint);
+                    (float) (mBasePaddingLeft + perXWith * i - finalHalfTxtWidth),
+                    mBaseHeight - mBasePaddingBottom + mBottomTxtPadding, mXYTxtPaint);
         }
     }
 
 
     @Override
     protected void seekAndCalculateCellData() {
-        if (mQuotesList==null||mQuotesList.isEmpty()) return;
+        if (mQuotesList == null || mQuotesList.isEmpty()) return;
 
         //对于蜡烛图，需要计算以下指标。
-        if (mViewType == ViewType.CANDLE) {
+        if (mViewType == KViewType.MasterViewType.CANDLE) {
             //ma
             FinancialAlgorithm.calculateMA(mQuotesList, 5);
             FinancialAlgorithm.calculateMA(mQuotesList, 10);
@@ -1051,7 +1050,7 @@ public class MasterView extends KBaseView {
             }
 
             //蜡烛图
-            if (mViewType == ViewType.CANDLE) {
+            if (mViewType == KViewType.MasterViewType.CANDLE) {
                 double max = FinancialAlgorithm.getMasterMaxY(quotes, mMasterType);
                 if (max > mCandleMaxY) {
                     mCandleMaxY = max;
@@ -1063,14 +1062,14 @@ public class MasterView extends KBaseView {
             }
         }
 
-        mPerX = (mWidth - mPaddingLeft - mPaddingRight - mInnerRightBlankPadding)
+        mPerX = (mBaseWidth - mBasePaddingLeft - mBasePaddingRight - mInnerRightBlankPadding)
                 / (mShownMaxCount);
         //不要忘了减去内部的上下Padding
-        if (mViewType == ViewType.TIMESHARING) {
-            mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
+        if (mViewType == KViewType.MasterViewType.TIMESHARING) {
+            mPerY = (float) ((mBaseHeight - mBasePaddingTop - mBasePaddingBottom - mInnerTopBlankPadding
                     - mInnerBottomBlankPadding) / (mMaxCloseQuotes.c - mMinColseQuotes.c));
-        } else if (mViewType == ViewType.CANDLE) {
-            mPerY = (float) ((mHeight - mPaddingTop - mPaddingBottom - mInnerTopBlankPadding
+        } else if (mViewType == KViewType.MasterViewType.CANDLE) {
+            mPerY = (float) ((mBaseHeight - mBasePaddingTop - mBasePaddingBottom - mInnerTopBlankPadding
                     - mInnerBottomBlankPadding) / (mCandleMaxY - mCandleMinY));
         }
 
@@ -1100,18 +1099,18 @@ public class MasterView extends KBaseView {
                     if (changeNum == 0 || helfChangeNum == 0) return true;
 
                     //容错处理,获取最大最小值
-                    if (DEF_SCALE_MINNUM < 3) {
-                        DEF_SCALE_MINNUM = 3;
+                    if (def_scale_minnum < 3) {
+                        def_scale_minnum = 3;
                     }
-                    if (DEF_SCALE_MAXNUM > mQuotesList.size()) {
-                        DEF_SCALE_MAXNUM = mQuotesList.size();
+                    if (def_scale_maxnum > mQuotesList.size()) {
+                        def_scale_maxnum = mQuotesList.size();
                     }
 
                     //变大了(拉伸了)，数量变少了
                     int tempCount = isBigger ? mShownMaxCount - changeNum : mShownMaxCount + changeNum;
 
                     //缩小大到最小了或者放大到很大了
-                    if (tempCount > DEF_SCALE_MAXNUM || tempCount < DEF_SCALE_MINNUM) return true;
+                    if (tempCount > def_scale_maxnum || tempCount < def_scale_minnum) return true;
 
                     mShownMaxCount = tempCount;
 
@@ -1144,28 +1143,6 @@ public class MasterView extends KBaseView {
             };
 
     /**
-     * 主图上面的技术指标类型
-     */
-    public enum MasterType {
-        NONE,//无
-        MA,//MA5、10、20
-        BOLL,//BOLL(26)
-        MA_BOLL//MA5、10、20和BOLL(26)同时展示
-    }
-
-    /**
-     * 主图上面的详细技术指标类型，主要用于判断何种具体的线，进行相应的处理
-     */
-    public enum MasterDetailType {
-        MA5,
-        MA10,
-        MA20,
-        BOLLUP,
-        BOLLMB,
-        BOLLDN
-    }
-
-    /**
      * 移动K线图计算移动的单位和重新计算起始位置和结束位置
      *
      * @param moveLen
@@ -1178,31 +1155,31 @@ public class MasterView extends KBaseView {
         int moveCount = (int) Math.ceil(Math.abs(moveLen) / mPerX);
         if (mPullRight) {
             int len = mBeginIndex - moveCount;
-            if (len < DEF_MINLEN_LOADMORE) {
+            if (len < def_minlen_loadmore) {
                 //加载更多
-                if (mTimeSharingListener != null && mCanLoadMore) {
+                if (mMasterTouchListener != null && mCanLoadMore) {
                     loadMoreIng();
-                    mTimeSharingListener.needLoadMore();
+                    mMasterTouchListener.needLoadMore();
                 }
             }
             if (len < 0) {
                 mBeginIndex = 0;
-                mPullType = PullType.PULL_LEFT_STOP;
+                mPullType = KViewType.PullType.PULL_LEFT_STOP;
             } else {
                 mBeginIndex = len;
-                mPullType = PullType.PULL_LEFT;
+                mPullType = KViewType.PullType.PULL_LEFT;
             }
         } else {
             int len = mBeginIndex + moveCount;
             if (len + mShownMaxCount > mQuotesList.size()) {
                 mBeginIndex = mQuotesList.size() - mShownMaxCount;
                 //到最左边啦
-                mPullType = PullType.PULL_RIGHT_STOP;
+                mPullType = KViewType.PullType.PULL_RIGHT_STOP;
                 //重置到之前的状态
                 mInnerRightBlankPadding = DEF_INNER_RIGHT_BLANK_PADDING;
             } else {
                 mBeginIndex = len;
-                mPullType = PullType.PULL_RIGHT;
+                mPullType = KViewType.PullType.PULL_RIGHT;
             }
         }
         mEndIndex = mBeginIndex + mShownMaxCount;
@@ -1218,15 +1195,15 @@ public class MasterView extends KBaseView {
     @Override
     protected void innerClickListener() {
         super.innerClickListener();
-        if (mViewType == ViewType.CANDLE) {
-            if (mMasterType == MasterType.NONE) {
-                mMasterType = MasterType.MA;
-            } else if (mMasterType == MasterType.MA) {
-                mMasterType = MasterType.BOLL;
-            } else if (mMasterType == MasterType.BOLL) {
-                mMasterType = MasterType.MA_BOLL;
-            } else if (mMasterType == MasterType.MA_BOLL) {
-                mMasterType = MasterType.NONE;
+        if (mViewType == KViewType.MasterViewType.CANDLE) {
+            if (mMasterType == KViewType.MasterIndicatrixType.NONE) {
+                mMasterType = KViewType.MasterIndicatrixType.MA;
+            } else if (mMasterType == KViewType.MasterIndicatrixType.MA) {
+                mMasterType = KViewType.MasterIndicatrixType.BOLL;
+            } else if (mMasterType == KViewType.MasterIndicatrixType.BOLL) {
+                mMasterType = KViewType.MasterIndicatrixType.MA_BOLL;
+            } else if (mMasterType == KViewType.MasterIndicatrixType.MA_BOLL) {
+                mMasterType = KViewType.MasterIndicatrixType.NONE;
             }
             //刷新界面,重绘前需要么重新计算y的边界
             seekAndCalculateCellData();
@@ -1246,7 +1223,7 @@ public class MasterView extends KBaseView {
         super.innerHiddenLongClick();
         mDrawLongPress = false;
         invalidate();
-        if (mTimeSharingListener != null) mTimeSharingListener.onUnLongTouch();
+        if (mMasterTouchListener != null) mMasterTouchListener.onUnLongTouch();
         if (mMasterListener != null) mMasterListener.masterNoLongPressListener();
     }
 
@@ -1255,4 +1232,431 @@ public class MasterView extends KBaseView {
         super.innerMoveViewListener(moveXLen);
         moveKView(moveXLen);
     }
+
+
+
+    //-----------------------对开发者暴露可以修改的参数-------
+
+    public KViewType.MasterViewType getViewType() {
+        return mViewType;
+    }
+
+    public void setViewType(KViewType.MasterViewType viewType) {
+        if (viewType == mViewType) return;
+        mViewType = viewType;
+
+        //重绘
+        invalidate();
+    }
+
+
+    public Paint getBrokenLinePaint() {
+        return mBrokenLinePaint;
+    }
+
+    public MasterView setBrokenLinePaint(Paint brokenLinePaint) {
+        mBrokenLinePaint = brokenLinePaint;
+        return this;
+    }
+
+    public float getBrokenLineWidth() {
+        return mBrokenLineWidth;
+    }
+
+    public MasterView setBrokenLineWidth(float brokenLineWidth) {
+        mBrokenLineWidth = brokenLineWidth;
+        return this;
+    }
+
+    public int getBrokenLineColor() {
+        return mBrokenLineColor;
+    }
+
+    public MasterView setBrokenLineColor(int brokenLineColor) {
+        mBrokenLineColor = brokenLineColor;
+        return this;
+    }
+
+    public boolean isBrokenLineDashed() {
+        return mIsBrokenLineDashed;
+    }
+
+    public MasterView setBrokenLineDashed(boolean brokenLineDashed) {
+        mIsBrokenLineDashed = brokenLineDashed;
+        return this;
+    }
+
+    public Paint getBrokenLineBgPaint() {
+        return mBrokenLineBgPaint;
+    }
+
+    public MasterView setBrokenLineBgPaint(Paint brokenLineBgPaint) {
+        mBrokenLineBgPaint = brokenLineBgPaint;
+        return this;
+    }
+
+    public int getBrokenLineBgColor() {
+        return mBrokenLineBgColor;
+    }
+
+    public MasterView setBrokenLineBgColor(int brokenLineBgColor) {
+        mBrokenLineBgColor = brokenLineBgColor;
+        return this;
+    }
+
+    public Paint getDotPaint() {
+        return mDotPaint;
+    }
+
+    public MasterView setDotPaint(Paint dotPaint) {
+        mDotPaint = dotPaint;
+        return this;
+    }
+
+    public float getDotRadius() {
+        return mDotRadius;
+    }
+
+    public MasterView setDotRadius(float dotRadius) {
+        mDotRadius = dotRadius;
+        return this;
+    }
+
+    public int getDotColor() {
+        return mDotColor;
+    }
+
+    public MasterView setDotColor(int dotColor) {
+        mDotColor = dotColor;
+        return this;
+    }
+
+    public Paint getTimingLinePaint() {
+        return mTimingLinePaint;
+    }
+
+    public MasterView setTimingLinePaint(Paint timingLinePaint) {
+        mTimingLinePaint = timingLinePaint;
+        return this;
+    }
+
+    public float getTimingLineWidth() {
+        return mTimingLineWidth;
+    }
+
+    public MasterView setTimingLineWidth(float timingLineWidth) {
+        mTimingLineWidth = timingLineWidth;
+        return this;
+    }
+
+    public int getTimingLineColor() {
+        return mTimingLineColor;
+    }
+
+    public MasterView setTimingLineColor(int timingLineColor) {
+        mTimingLineColor = timingLineColor;
+        return this;
+    }
+
+    public boolean isTimingLineDashed() {
+        return mIsTimingLineDashed;
+    }
+
+    public MasterView setTimingLineDashed(boolean timingLineDashed) {
+        mIsTimingLineDashed = timingLineDashed;
+        return this;
+    }
+
+    public Paint getTimingTxtBgPaint() {
+        return mTimingTxtBgPaint;
+    }
+
+    public MasterView setTimingTxtBgPaint(Paint timingTxtBgPaint) {
+        mTimingTxtBgPaint = timingTxtBgPaint;
+        return this;
+    }
+
+    public Paint getTimingTxtPaint() {
+        return mTimingTxtPaint;
+    }
+
+    public MasterView setTimingTxtPaint(Paint timingTxtPaint) {
+        mTimingTxtPaint = timingTxtPaint;
+        return this;
+    }
+
+    public float getTimingTxtWidth() {
+        return mTimingTxtWidth;
+    }
+
+    public MasterView setTimingTxtWidth(float timingTxtWidth) {
+        mTimingTxtWidth = timingTxtWidth;
+        return this;
+    }
+
+    public int getTimingTxtColor() {
+        return mTimingTxtColor;
+    }
+
+    public MasterView setTimingTxtColor(int timingTxtColor) {
+        mTimingTxtColor = timingTxtColor;
+        return this;
+    }
+
+    public int getTimingTxtBgColor() {
+        return mTimingTxtBgColor;
+    }
+
+    public MasterView setTimingTxtBgColor(int timingTxtBgColor) {
+        mTimingTxtBgColor = timingTxtBgColor;
+        return this;
+    }
+
+    public Paint getLongPressTxtPaint() {
+        return mLongPressTxtPaint;
+    }
+
+    public MasterView setLongPressTxtPaint(Paint longPressTxtPaint) {
+        mLongPressTxtPaint = longPressTxtPaint;
+        return this;
+    }
+
+    public Paint getLongPressTxtBgPaint() {
+        return mLongPressTxtBgPaint;
+    }
+
+    public MasterView setLongPressTxtBgPaint(Paint longPressTxtBgPaint) {
+        mLongPressTxtBgPaint = longPressTxtBgPaint;
+        return this;
+    }
+
+    public int getLongPressTxtColor() {
+        return mLongPressTxtColor;
+    }
+
+    public MasterView setLongPressTxtColor(int longPressTxtColor) {
+        mLongPressTxtColor = longPressTxtColor;
+        return this;
+    }
+
+    public float getLongPressTxtSize() {
+        return mLongPressTxtSize;
+    }
+
+    public MasterView setLongPressTxtSize(float longPressTxtSize) {
+        mLongPressTxtSize = longPressTxtSize;
+        return this;
+    }
+
+    public int getLongPressTxtBgColor() {
+        return mLongPressTxtBgColor;
+    }
+
+    public MasterView setLongPressTxtBgColor(int longPressTxtBgColor) {
+        mLongPressTxtBgColor = longPressTxtBgColor;
+        return this;
+    }
+
+    public Paint getCandlePaint() {
+        return mCandlePaint;
+    }
+
+    public MasterView setCandlePaint(Paint candlePaint) {
+        mCandlePaint = candlePaint;
+        return this;
+    }
+
+    public int getRedCandleColor() {
+        return mRedCandleColor;
+    }
+
+    public MasterView setRedCandleColor(int redCandleColor) {
+        mRedCandleColor = redCandleColor;
+        return this;
+    }
+
+    public int getGreenCandleColor() {
+        return mGreenCandleColor;
+    }
+
+    public MasterView setGreenCandleColor(int greenCandleColor) {
+        mGreenCandleColor = greenCandleColor;
+        return this;
+    }
+
+    public int getCanldeHighLowWidth() {
+        return mCanldeHighLowWidth;
+    }
+
+    public MasterView setCanldeHighLowWidth(int canldeHighLowWidth) {
+        mCanldeHighLowWidth = canldeHighLowWidth;
+        return this;
+    }
+
+    public KViewType.MasterIndicatrixType getMasterType() {
+        return mMasterType;
+    }
+
+    public MasterView setMasterType(KViewType.MasterIndicatrixType masterType) {
+        mMasterType = masterType;
+        return this;
+    }
+
+    public Paint getMa5Paint() {
+        return mMa5Paint;
+    }
+
+    public MasterView setMa5Paint(Paint ma5Paint) {
+        mMa5Paint = ma5Paint;
+        return this;
+    }
+
+    public int getMa5Color() {
+        return mMa5Color;
+    }
+
+    public MasterView setMa5Color(int ma5Color) {
+        mMa5Color = ma5Color;
+        return this;
+    }
+
+    public Paint getMa10Paint() {
+        return mMa10Paint;
+    }
+
+    public MasterView setMa10Paint(Paint ma10Paint) {
+        mMa10Paint = ma10Paint;
+        return this;
+    }
+
+    public int getMa10Color() {
+        return mMa10Color;
+    }
+
+    public MasterView setMa10Color(int ma10Color) {
+        mMa10Color = ma10Color;
+        return this;
+    }
+
+    public Paint getMa20Paint() {
+        return mMa20Paint;
+    }
+
+    public MasterView setMa20Paint(Paint ma20Paint) {
+        mMa20Paint = ma20Paint;
+        return this;
+    }
+
+    public int getMa20Color() {
+        return mMa20Color;
+    }
+
+    public MasterView setMa20Color(int ma20Color) {
+        mMa20Color = ma20Color;
+        return this;
+    }
+
+    public Paint getBollUpPaint() {
+        return mBollUpPaint;
+    }
+
+    public MasterView setBollUpPaint(Paint bollUpPaint) {
+        mBollUpPaint = bollUpPaint;
+        return this;
+    }
+
+    public int getBollUpColor() {
+        return mBollUpColor;
+    }
+
+    public MasterView setBollUpColor(int bollUpColor) {
+        mBollUpColor = bollUpColor;
+        return this;
+    }
+
+    public Paint getBollMbPaint() {
+        return mBollMbPaint;
+    }
+
+    public MasterView setBollMbPaint(Paint bollMbPaint) {
+        mBollMbPaint = bollMbPaint;
+        return this;
+    }
+
+    public int getBollMbColor() {
+        return mBollMbColor;
+    }
+
+    public MasterView setBollMbColor(int bollMbColor) {
+        mBollMbColor = bollMbColor;
+        return this;
+    }
+
+    public Paint getBollDnPaint() {
+        return mBollDnPaint;
+    }
+
+    public MasterView setBollDnPaint(Paint bollDnPaint) {
+        mBollDnPaint = bollDnPaint;
+        return this;
+    }
+
+    public int getBollDnColor() {
+        return mBollDnColor;
+    }
+
+    public MasterView setBollDnColor(int bollDnColor) {
+        mBollDnColor = bollDnColor;
+        return this;
+    }
+
+    public double getCandleMinY() {
+        return mCandleMinY;
+    }
+
+    public MasterView setCandleMinY(double candleMinY) {
+        mCandleMinY = candleMinY;
+        return this;
+    }
+
+    public double getCandleMaxY() {
+        return mCandleMaxY;
+    }
+
+    public MasterView setCandleMaxY(double candleMaxY) {
+        mCandleMaxY = candleMaxY;
+        return this;
+    }
+
+    public float getCandleDiverWidthRatio() {
+        return mCandleDiverWidthRatio;
+    }
+
+    public MasterView setCandleDiverWidthRatio(float candleDiverWidthRatio) {
+        mCandleDiverWidthRatio = candleDiverWidthRatio;
+        return this;
+    }
+
+    public KViewListener.MasterListener getMasterListener() {
+        return mMasterListener;
+    }
+
+    public ScaleGestureDetector.OnScaleGestureListener getOnScaleGestureListener() {
+        return mOnScaleGestureListener;
+    }
+
+    public MasterView setOnScaleGestureListener(ScaleGestureDetector.OnScaleGestureListener onScaleGestureListener) {
+        mOnScaleGestureListener = onScaleGestureListener;
+        return this;
+    }
+
+    public int getBrokenLineBgAlpha() {
+        return mBrokenLineBgAlpha;
+    }
+
+    public MasterView setBrokenLineBgAlpha(int brokenLineBgAlpha) {
+        mBrokenLineBgAlpha = brokenLineBgAlpha;
+        return this;
+    }
+
 }

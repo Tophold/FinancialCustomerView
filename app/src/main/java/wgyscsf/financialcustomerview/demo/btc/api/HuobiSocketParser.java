@@ -7,7 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import wgyscsf.financialcustomerview.demo.btc.model.HuobiWsQuote;
-import wgyscsf.financiallib.utils.GsonUtil;
+import wgyscsf.financialcustomerview.GsonUtil;
 
 /**
  * ============================================================

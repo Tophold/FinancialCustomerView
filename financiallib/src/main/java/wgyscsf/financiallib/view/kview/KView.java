@@ -15,12 +15,12 @@ import java.util.List;
  * 描 述 ：KView入口
  * ============================================================
  **/
-public class KView extends KLayoutView {
+public final class KView extends KLayoutView {
 
     //主图展示的是蜡烛图还是分时图
-    protected boolean isShowTimSharing=true;
+    protected boolean isShowTimSharing = true;
     //设置数据精度
-    protected int mDigit=4;
+    protected int mDigit = 4;
 
     public KView(Context context) {
         this(context, null);
@@ -39,14 +39,14 @@ public class KView extends KLayoutView {
      *
      * @param quotesList
      */
-    public void setTimeSharingData(List<Quotes> quotesList, KBaseView.TimeSharingListener timeSharingListener) {
+    public void setKViewData(List<Quotes> quotesList, KViewListener.MasterTouchListener masterTouchListener) {
         if (quotesList == null || quotesList.isEmpty()) {
             Toast.makeText(getContext(), "数据异常1111", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "setTimeSharingData: 数据异常111");
+            Log.e(TAG, "setKViewData: 数据异常111");
             return;
         }
-        mMasterView.setTimeSharingData(quotesList,timeSharingListener);
-        mMinorView.setTimeSharingData(quotesList,timeSharingListener);
+        mMasterView.setTimeSharingData(quotesList, masterTouchListener);
+        mMinorView.setTimeSharingData(quotesList, masterTouchListener);
     }
 
     /**
@@ -55,14 +55,14 @@ public class KView extends KLayoutView {
      *
      * @param quotes
      */
-    public void pushingTimeSharingData(Quotes quotes, long period) {
+    public void pushKViewData(Quotes quotes, long period) {
         if (quotes == null) {
             //Toast.makeText(getContext(), "数据异常", Toast.LENGTH_SHORT).show();
-            //Log.e(TAG, "setTimeSharingData: 数据异常");
+            //Log.e(TAG, "setKViewData: 数据异常");
             return;
         }
-        mMasterView.pushingTimeSharingData(quotes,period);
-        mMinorView.pushingTimeSharingData(quotes,period);
+        mMasterView.pushingTimeSharingData(quotes, period);
+        mMinorView.pushingTimeSharingData(quotes, period);
     }
 
     /**
@@ -70,29 +70,21 @@ public class KView extends KLayoutView {
      *
      * @param quotesList
      */
-    public void loadMoreTimeSharingData(List<Quotes> quotesList) {
+    public void loadKViewData(List<Quotes> quotesList) {
         if (quotesList == null || quotesList.isEmpty()) {
             Toast.makeText(getContext(), "数据异常", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "setTimeSharingData: 数据异常");
+            Log.e(TAG, "setKViewData: 数据异常");
             return;
         }
         mMasterView.loadMoreTimeSharingData(quotesList);
         mMinorView.loadMoreTimeSharingData(quotesList);
     }
-    public int getDigit() {
-        return mDigit;
-    }
 
-    public void setDigit(int digit) {
-        mDigit = digit;
-        mMasterView.setDigits(mDigit);
-        mMinorView.setDigits(mDigit);
-    }
     /**
      * 加载更多失败，在这里添加逻辑
      */
     public void loadMoreError() {
-      mMasterView.loadMoreError();
+        mMasterView.loadMoreError();
     }
 
     /**
@@ -116,12 +108,25 @@ public class KView extends KLayoutView {
         mMasterView.loadMoreNoData();
     }
 
+
+    //-----------------------对开发者暴露可以修改的参数-------
+
     public boolean isShowTimSharing() {
         return isShowTimSharing;
     }
 
     public void setShowTimSharing(boolean showTimSharing) {
         isShowTimSharing = showTimSharing;
-        mMasterView.setViewType(showTimSharing? KBaseView.ViewType.TIMESHARING: KBaseView.ViewType.CANDLE);
+        mMasterView.setViewType(showTimSharing ? KViewType.MasterViewType.TIMESHARING : KViewType.MasterViewType.CANDLE);
+    }
+
+    public int getDigit() {
+        return mDigit;
+    }
+
+    public void setDigit(int digit) {
+        mDigit = digit;
+        mMasterView.setDigits(mDigit);
+        mMinorView.setDigits(mDigit);
     }
 }

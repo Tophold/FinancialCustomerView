@@ -13,29 +13,31 @@ import static android.view.View.MeasureSpec.AT_MOST;
 /**
  * ============================================================
  * 作 者 :    wgyscsf@163.com
- * 更细日期 ：2018/01/14 12:03
- * 描 述 ：整个自定义View共有的数据特征全部在这里处理。
+ * 更新时间 ： 20180404
+ * 描 述 ：整个自定义view最基础的类，在这里做一些基础重复的操作。
  * ============================================================
- **/
-public class BaseView extends View {
+ */
+public abstract class BaseView extends View {
 
     protected String TAG;
+
     protected Context mContext;
 
-    //长按阀值，默认多长时间算长按（ms）
-    protected static final long DEF_LONGPRESS_LENGTH = 700;
+    //长按阀值，默认多长时间算长按（ms）。不再设置为final,允许用户修改。
+    protected long def_longpress_length = 700;
     //单击阀值
-    protected static final long DEF_CLICKPRESS_LENGTH = 100;
+    protected long def_clickpress_length = 100;
     //移动阀值。手指移动多远算移动的阀值（单位：sp）
-    protected static final long DEF_PULL_LENGTH = 5;
+    protected long def_pull_length = 5;
 
-    //控件默认宽高。当控件的宽高设置为wrap_content时会采用该参数进行默认的设置（单位：sp）。子类可以修改。
-    protected float DEF_WIDTH = 650;
-    protected float DEF_HIGHT = 400;
+    //控件默认宽高。当控件的宽高设置为wrap_content时会采用该参数进行默认的设置（单位：sp）。
+    //不允许用户修改，想要修改宽高，使用mWidth、mBaseHeight。
+    protected final float DEF_WIDTH = 650;
+    protected final float DEF_HIGHT = 400;
 
     //测量的控件宽高，会在onMeasure中进行测量。
-    protected int mWidth;
-    protected int mHeight;
+    protected int mBaseWidth;
+    protected int mBaseHeight;
 
 
     public BaseView(Context context) {
@@ -68,8 +70,8 @@ public class BaseView extends View {
         } else {
             setMeasuredDimension(widthSpecSize, heightSpecSize);
         }
-        mWidth = getMeasuredWidth();
-        mHeight = getMeasuredHeight();
+        mBaseWidth = getMeasuredWidth();
+        mBaseHeight = getMeasuredHeight();
     }
 
     @Override
@@ -77,6 +79,11 @@ public class BaseView extends View {
         super.onLayout(changed, left, top, right, bottom);
     }
 
+    /**
+     * 根据颜色id获取颜色
+     * @param colorId
+     * @return
+     */
     protected int getColor(@ColorRes int colorId) {
         return getResources().getColor(colorId);
     }
@@ -87,6 +94,7 @@ public class BaseView extends View {
 
     /**
      * 测量指定画笔的文字的高度
+     *
      * @param fontSize
      * @param paint
      * @return
@@ -97,11 +105,54 @@ public class BaseView extends View {
         return (float) (Math.ceil(fm.descent - fm.top) + 2f);
     }
 
-    public void setFWidth(int width) {
-        mWidth = width;
+
+    //----------------------对用户暴露可以修改的参数------------------
+
+    public long getDef_longpress_length() {
+        return def_longpress_length;
     }
 
-    public void setFHeight(int height) {
-        mHeight = height;
+    public void setDef_longpress_length(long def_longpress_length) {
+        this.def_longpress_length = def_longpress_length;
+    }
+
+    public long getDef_clickpress_length() {
+        return def_clickpress_length;
+    }
+
+    public void setDef_clickpress_length(long def_clickpress_length) {
+        this.def_clickpress_length = def_clickpress_length;
+    }
+
+    public long getDef_pull_length() {
+        return def_pull_length;
+    }
+
+    public void setDef_pull_length(long def_pull_length) {
+        this.def_pull_length = def_pull_length;
+    }
+
+    public float getDEF_WIDTH() {
+        return DEF_WIDTH;
+    }
+
+    public float getDEF_HIGHT() {
+        return DEF_HIGHT;
+    }
+
+    public int getBaseWidth() {
+        return mBaseWidth;
+    }
+
+    public void setBaseWidth(int baseWidth) {
+        mBaseWidth = baseWidth;
+    }
+
+    public int getBaseHeight() {
+        return mBaseHeight;
+    }
+
+    public void setBaseHeight(int baseHeight) {
+        mBaseHeight = baseHeight;
     }
 }

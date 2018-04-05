@@ -28,8 +28,8 @@ import wgyscsf.financialcustomerview.demo.btc.model.HuobiSymbol;
 import wgyscsf.financialcustomerview.demo.btc.model.HuobiTab;
 import wgyscsf.financialcustomerview.demo.btc.model.HuobiWsQuote;
 import wgyscsf.financiallib.utils.StringUtils;
-import wgyscsf.financiallib.view.kview.KBaseView;
 import wgyscsf.financiallib.view.kview.KView;
+import wgyscsf.financiallib.view.kview.KViewListener;
 import wgyscsf.financiallib.view.kview.Quotes;
 
 /**
@@ -167,7 +167,7 @@ public class HuobiFragment extends BaseFragment {
 
     private void drawKView(boolean isLoadMore) {
         if (!isLoadMore) {
-            mFkKvKview.setTimeSharingData(mQuotesList, new KBaseView.TimeSharingListener() {
+            mFkKvKview.setKViewData(mQuotesList, new KViewListener.MasterTouchListener() {
                 @Override
                 public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
                     ((HuobiActivity) getActivity()).showContanier(preQuotes, currentQuotes);
@@ -185,12 +185,12 @@ public class HuobiFragment extends BaseFragment {
                         return;
                     }
                     Quotes quotes = mQuotesList.get(0);
-                    String showTime = quotes.showTime;
+                    String showTime = quotes.getShowTime();
                     //loadKLineData(showTime, true);火币不支持分页
                 }
             });
         } else {
-            mFkKvKview.loadMoreTimeSharingData(mQuotesList);
+            mFkKvKview.loadKViewData(mQuotesList);
         }
     }
 
@@ -227,7 +227,7 @@ public class HuobiFragment extends BaseFragment {
         HuobiWsQuote.TickBean tick = huobiWsQuote.tick;
         Quotes quotes = new Quotes(tick.open, tick.high, tick.low, tick.close, huobiWsQuote.ts);
 
-        mFkKvKview.pushingTimeSharingData(quotes, mForexTab.getTypeLength() * 1000);
+        mFkKvKview.pushKViewData(quotes, mForexTab.getTypeLength() * 1000);
     }
 
 

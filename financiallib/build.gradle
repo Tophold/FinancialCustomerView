@@ -1,25 +1,24 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 26
-
-
 
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 26
         versionCode 1
-        versionName "1.0"
+        versionName "0.0.1"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }
 
     buildTypes {
-        debug{
+        debug {
 
         }
-        beta{
+        beta {
 
         }
         release {
@@ -28,17 +27,21 @@ android {
         }
 
     }
-
+    lintOptions {
+        abortOnError false
+    }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
     implementation 'com.android.support:appcompat-v7:26.1.0'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
-
-    //use lib
-    implementation 'com.google.code.gson:gson:2.8.2'
+}
+//添加
+publish {
+    repoName ='maven'//和在Bintray网站创建的仓库名对应
+    userOrg = 'wgyscsf'//bintray.com用户名
+    groupId = 'com.gy'//jcenter上的路径
+    artifactId = 'financiallib'//项目名称
+    publishVersion = '0.0.1'//版本号
+    desc = 'this is the first version'//描述，不重要
+    website = 'https://github.com/scsfwgy/FinancialCustomerView'//网站，不重要；尽量模拟github上的地址，例如我这样的；当然你有地址最好了
 }

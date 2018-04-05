@@ -16,14 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import wgyscsf.financialcustomerview.R;
-import wgyscsf.financialcustomerview.demo.btc.ui.HuobiActivity;
 import wgyscsf.financialcustomerview.demo.forex.api.WebSocketApi;
 import wgyscsf.financialcustomerview.demo.forex.model.Forex;
 import wgyscsf.financialcustomerview.BaseActivity;
 import wgyscsf.financialcustomerview.NoScrollViewPager;
 import wgyscsf.financiallib.utils.FormatUtil;
 import wgyscsf.financiallib.utils.TimeUtils;
-import wgyscsf.financiallib.view.kview.ForexTab;
+import wgyscsf.financialcustomerview.ForexTab;
 import wgyscsf.financiallib.view.kview.Quotes;
 
 public class ForexActivity extends BaseActivity {
@@ -194,7 +193,7 @@ public class ForexActivity extends BaseActivity {
         Bundle bundle = new Bundle();
         bundle.putBoolean(KEY_HORIZONTAL, true);
         bundle.putSerializable(KEY_FOREX, mForex);
-        go(HuobiActivity.class, bundle);
+        go(ForexActivity.class, bundle);
     }
 
     public boolean isHorizontal() {

@@ -20,7 +20,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         mAppContext = this;
-        //ForexWebSocket.getInstance().init();
+        ForexWebSocket.getInstance().init();
         HuobiWebSocket.getInstance().init();
     }
 }

@@ -14,14 +14,14 @@ import java.util.List;
  **/
 // TODO: 2017/12/18 这里的算法需要核实！包括异常情况的处理和边界的处理是否合适。
 public class FinancialAlgorithm {
-    final static String TAG = "FinancialAlgorithm";
+    final static String TAG = FinancialAlgorithm.class.getSimpleName();
 
     public static void calculateKDJ(List<Quotes> quotesList) {
         calculateKDJ(quotesList, 9, 3, 3);
     }
 
     /**
-     * 计算数据集合的kdj。由以下计算过程可以看出只有kPeriod有用，dPeriod、jPeriod暂时无用。
+     * 【该算法核对过，但是和线上的APP有细微的差距，不知道是否有错！】计算数据集合的kdj。
      *
      * @param quotesList 对应的数据集合
      * @param kPeriod    k所对应的周期，可以是：分钟、小时、天等
@@ -108,9 +108,9 @@ public class FinancialAlgorithm {
      * MACD:`2*(DIF-DEA)`
      *
      * @param quotesList 数据集合
-     * @param d1 平滑指数，一般为12
-     * @param d2 平滑指数，一般为26
-     * @param z  暂时未知
+     * @param d1         平滑指数，一般为12
+     * @param d2         平滑指数，一般为26
+     * @param z          暂时未知
      */
     public static void calculateMACD(List<Quotes> quotesList, int d1, int d2, int z) {
         //容错
@@ -162,13 +162,13 @@ public class FinancialAlgorithm {
     }
 
     /**
-     * 计算RSI。RSI(x,y,z)，一般取RSI(6,12,24)。
-     * RSI(x,y,z)，x、y、z均为周期单位，计算算法一直，只是周期不同。
+     * 【该算法已核实】计算RSI。RSI(x,y,z)，一般取RSI(6,12,24)。
+     * RSI(x,y,z)，x、y、z均为周期单位，计算算法一致，只是周期不同。
      * RSIx,在周期x内，upSum="在周期x内的上涨总点数"，downSum="在周期x内的下跌总点数"；`RSIx=upSum/(upSum+downSum)*100`;
      * 注意：RSIx对于最开始的x+1周期内，不存在对应RSI,在图像上表示就是不显示对应RSIx即可。
      *
      * @param quotes 对应的数据集合
-     * @param period    周期
+     * @param period 周期
      */
     public static void calculateRSI(List<Quotes> quotes, int period) {
         //容错
@@ -185,8 +185,8 @@ public class FinancialAlgorithm {
         for (int i = 0; i < quotes.size(); i++) {
             Quotes q = quotes.get(i);
             if (i > 0) {
-                dis= q.c - quotes.get(i - 1).c;
-                if (dis>= 0) {
+                dis = q.c - quotes.get(i - 1).c;
+                if (dis >= 0) {
                     upSum += dis;
                 } else {
                     downSum -= dis;
@@ -194,17 +194,17 @@ public class FinancialAlgorithm {
 
                 //上面加，这里减。要保证累计的和周期为：period
                 if (i + 1 > period) {
-                    dis=quotes.get(i-period+1).c - quotes.get(i - period).c;
+                    dis = quotes.get(i - period + 1).c - quotes.get(i - period).c;
                     if (dis >= 0) {
                         upSum -= dis;
                     } else {
                         downSum += dis;
-                     }
+                    }
                     rsi = upSum / (upSum + downSum) * 100;
-                    if(period==6) q.rsi6=rsi;
-                    else if(period==12) q.rsi12=rsi;
-                    else if(period==24) q.rsi24=rsi;
-                    else Log.e(TAG, "calculateRSI: 不存在该周期："+period );
+                    if (period == 6) q.rsi6 = rsi;
+                    else if (period == 12) q.rsi12 = rsi;
+                    else if (period == 24) q.rsi24 = rsi;
+                    else Log.e(TAG, "calculateRSI: 不存在该周期：" + period);
                 }
             }
         }
@@ -326,10 +326,10 @@ public class FinancialAlgorithm {
      * @param masterType
      * @return
      */
-    public static double getMasterMinY(Quotes quotes, MasterView.MasterType masterType) {
+    public static double getMasterMinY(Quotes quotes, KViewType.MasterIndicatrixType masterType) {
         double min = Integer.MAX_VALUE;
         //ma
-        if (masterType == MasterView.MasterType.MA || masterType == MasterView.MasterType.MA_BOLL) {
+        if (masterType == KViewType.MasterIndicatrixType.MA || masterType == KViewType.MasterIndicatrixType.MA_BOLL) {
             if (quotes.ma5 != 0 && quotes.ma5 < min) {
                 min = quotes.ma5;
             }
@@ -341,7 +341,7 @@ public class FinancialAlgorithm {
             }
         }
         //boll
-        if (masterType == MasterView.MasterType.BOLL || masterType == MasterView.MasterType.MA_BOLL) {
+        if (masterType == KViewType.MasterIndicatrixType.BOLL || masterType == KViewType.MasterIndicatrixType.MA_BOLL) {
             //boll
             if (quotes.mb != 0 && quotes.mb < min) {
                 min = quotes.mb;
@@ -372,11 +372,11 @@ public class FinancialAlgorithm {
      * @param masterType
      * @return
      */
-    public static double getMasterMaxY(Quotes quotes, MasterView.MasterType masterType) {
+    public static double getMasterMaxY(Quotes quotes, KViewType.MasterIndicatrixType masterType) {
         double max = Integer.MIN_VALUE;
         //ma
         //只有在存在ma的情况下才计算
-        if (masterType == MasterView.MasterType.MA || masterType == MasterView.MasterType.MA_BOLL) {
+        if (masterType == KViewType.MasterIndicatrixType.MA || masterType == KViewType.MasterIndicatrixType.MA_BOLL) {
             if (quotes.ma5 != 0 && quotes.ma5 > max) {
                 max = quotes.ma5;
             }
@@ -389,7 +389,7 @@ public class FinancialAlgorithm {
         }
 
         //boll
-        if (masterType == MasterView.MasterType.BOLL || masterType == MasterView.MasterType.MA_BOLL) {
+        if (masterType == KViewType.MasterIndicatrixType.BOLL || masterType == KViewType.MasterIndicatrixType.MA_BOLL) {
             if (quotes.mb != 0 && quotes.mb > max) {
                 max = quotes.mb;
             }
@@ -419,10 +419,10 @@ public class FinancialAlgorithm {
      * @param minorType
      * @return
      */
-    public static double getMasterMinY(Quotes quotes, MinorView.MinorType minorType) {
+    public static double getMasterMinY(Quotes quotes, KViewType.MinorIndicatrixType minorType) {
         double min = Integer.MAX_VALUE;
         //macd
-        if (minorType == MinorView.MinorType.MACD) {
+        if (minorType == KViewType.MinorIndicatrixType.MACD) {
             if (quotes.dif != 0 && quotes.dif < min) {
                 min = quotes.dif;
             }
@@ -434,7 +434,7 @@ public class FinancialAlgorithm {
             }
         }
         //RSI
-        if (minorType == MinorView.MinorType.RSI) {
+        if (minorType == KViewType.MinorIndicatrixType.RSI) {
             if (quotes.rsi6 != 0 && quotes.rsi6 < min) {
                 min = quotes.rsi6;
             }
@@ -446,7 +446,7 @@ public class FinancialAlgorithm {
             }
         }
         //KDJ
-        if (minorType == MinorView.MinorType.KDJ) {
+        if (minorType == KViewType.MinorIndicatrixType.KDJ) {
             if (quotes.k != 0 && quotes.k < min) {
                 min = quotes.k;
             }
@@ -464,6 +464,7 @@ public class FinancialAlgorithm {
         return min;
 
     }
+
     /**
      * 副图：找到单个报价中的最大值
      *
@@ -471,10 +472,10 @@ public class FinancialAlgorithm {
      * @param minorType
      * @return
      */
-    public static double getMasterMaxY(Quotes quotes, MinorView.MinorType minorType) {
+    public static double getMasterMaxY(Quotes quotes, KViewType.MinorIndicatrixType minorType) {
         double max = Integer.MIN_VALUE;
         //macd
-        if (minorType == MinorView.MinorType.MACD) {
+        if (minorType == KViewType.MinorIndicatrixType.MACD) {
             if (quotes.dif != 0 && quotes.dif > max) {
                 max = quotes.dif;
             }
@@ -486,7 +487,7 @@ public class FinancialAlgorithm {
             }
         }
         //RSI
-        if (minorType == MinorView.MinorType.RSI) {
+        if (minorType == KViewType.MinorIndicatrixType.RSI) {
             if (quotes.rsi6 != 0 && quotes.rsi6 > max) {
                 max = quotes.rsi6;
             }
@@ -498,7 +499,7 @@ public class FinancialAlgorithm {
             }
         }
         //KDJ
-        if (minorType == MinorView.MinorType.KDJ) {
+        if (minorType == KViewType.MinorIndicatrixType.KDJ) {
             if (quotes.k != 0 && quotes.k > max) {
                 max = quotes.k;
             }

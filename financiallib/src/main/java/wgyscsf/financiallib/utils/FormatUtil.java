@@ -5,7 +5,7 @@ import android.util.Log;
 import java.math.BigDecimal;
 import java.util.Locale;
 
-@SuppressWarnings({"WeakerAccess", "SameParameterValue"})
+
 public class FormatUtil {
 
     /**

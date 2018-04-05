@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import java.util.List;
 
 import wgyscsf.financialcustomerview.demo.btc.model.HuobiTab;
-import wgyscsf.financiallib.view.kview.ForexTab;
 
 /**
  * ============================================================

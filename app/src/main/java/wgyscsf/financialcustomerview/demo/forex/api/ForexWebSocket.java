@@ -24,7 +24,8 @@ public class ForexWebSocket {
     private static final int DEFAULT_TIME_OUT = 5;//超时时间 5s
     private static final int DEFAULT_READ_TIME_OUT = 10;
     //temp quotes
-    private static final String BASE_URL = "http://***";
+    private static final String BASE_URL = "http://***:8990/websocket";
+    private static final String TOKEN="eyJ0eXAiOiJKV1QiLCJhbGc***Y2NvdW50SWQiOiJFVVI2MTQxLjAwMSIsImlhdCI6MTUyMjgxOTE0NiwiZXhwIjoxNTIzNDIzOTQ2fQ.je5e76RSNh07ZYtu3_yOA8BsBl_wH0_tkqxlgX5hhww";
 
     Request mRequest;
     okhttp3.WebSocket mWebSocket;
@@ -60,7 +61,7 @@ public class ForexWebSocket {
     }
 
     public void init() {
-        mRequest = new Request.Builder().header("Sec-HuobiWebSocket-Protocol", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhY2NvdW50SWQiOiJQS0Q2MzA5LjAwMSIsImlhdCI6MTUyMTcyNzI4MywiZXhwIjoxNTIyMzMyMDgzfQ.vGdS1wNLXgGhNiqqadRsokAg-C6Z_ZGrW0_XvHtGHEY").url(BASE_URL).build();
+        mRequest = new Request.Builder().header("Sec-WebSocket-Protocol", TOKEN).url(BASE_URL).build();
         mWebSocket = client.newWebSocket(mRequest, new WebSocketListener() {
             @Override
             public void onOpen(okhttp3.WebSocket webSocket, Response response) {

@@ -6,7 +6,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 import java.util.List;
 
-import wgyscsf.financiallib.view.kview.ForexTab;
+import wgyscsf.financialcustomerview.ForexTab;
 
 /**
  * ============================================================

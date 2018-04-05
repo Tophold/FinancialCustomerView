@@ -24,11 +24,11 @@ import wgyscsf.financialcustomerview.R;
 import wgyscsf.financialcustomerview.demo.beginner.api.KViewSimulateNetAPI;
 import wgyscsf.financialcustomerview.demo.beginner.model.OriginQuotes;
 import wgyscsf.financiallib.utils.FormatUtil;
-import wgyscsf.financiallib.utils.GsonUtil;
+import wgyscsf.financialcustomerview.GsonUtil;
 import wgyscsf.financiallib.utils.StringUtils;
 import wgyscsf.financiallib.utils.TimeUtils;
-import wgyscsf.financiallib.view.kview.KBaseView;
 import wgyscsf.financiallib.view.kview.KView;
+import wgyscsf.financiallib.view.kview.KViewListener;
 import wgyscsf.financiallib.view.kview.Quotes;
 
 /**
@@ -77,7 +77,7 @@ public class KViewVerticalActivity extends BaseActivity {
                         data -> {
                             int size = mPushData.size();
                             if (data < size) {
-                                mAkvKvKview.pushingTimeSharingData(mPushData.get(data.intValue()), 0);
+                                mAkvKvKview.pushKViewData(mPushData.get(data.intValue()), 0);
                             } else {
 
                             }
@@ -176,7 +176,7 @@ public class KViewVerticalActivity extends BaseActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         data -> {
-                            mAkvKvKview.setTimeSharingData(mQuotesList, new KBaseView.TimeSharingListener() {
+                            mAkvKvKview.setKViewData(mQuotesList, new KViewListener.MasterTouchListener() {
                                 @Override
                                 public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
                                     showContanier(preQuotes, currentQuotes);
@@ -218,7 +218,7 @@ public class KViewVerticalActivity extends BaseActivity {
                             }
                             List<Quotes> loadList = mLoadMoreData.subList(index, index + loadSize);
                             index = index + loadSize;//重置起始位置
-                            mAkvKvKview.loadMoreTimeSharingData(loadList);
+                            mAkvKvKview.loadKViewData(loadList);
                         }
                         , throwable -> throwable.printStackTrace());
         unSubscription(disposable);

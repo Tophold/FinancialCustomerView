@@ -19,7 +19,7 @@ public class RetrofitManager {
     private static final int DEFAULT_TIME_OUT = 5;//超时时间 5s
     private static final int DEFAULT_READ_TIME_OUT = 10;
     //temp quotes
-    private static final String BASE_URL = "http://***";
+    private static final String BASE_URL = "http://***:8700/";
     private Retrofit mRetrofit;
 
     private RetrofitManager() {
