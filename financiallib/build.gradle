@@ -39,8 +39,8 @@ dependencies {
 publish {
     repoName ='maven'//和在Bintray网站创建的仓库名对应
     userOrg = 'wgyscsf'//bintray.com用户名
-    groupId = 'com.gy'//jcenter上的路径
-    artifactId = 'financiallib'//项目名称
+    groupId = 'com.wgyscsf'//jcenter上的路径
+    artifactId = 'financialLib'//项目名称
     publishVersion = '0.0.1'//版本号
     desc = 'this is the first version'//描述，不重要
     website = 'https://github.com/scsfwgy/FinancialCustomerView'//网站，不重要；尽量模拟github上的地址，例如我这样的；当然你有地址最好了
