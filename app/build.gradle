@@ -125,8 +125,6 @@ dependencies {
     implementation 'com.android.support:design:26.1.0'
     testCompile 'junit:junit:4.12'
 
-    implementation project(path: ':financiallib')
-
     //rx2.0
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
     implementation 'io.reactivex.rxjava2:rxjava:2.1.8'
@@ -140,4 +138,7 @@ dependencies {
     /**https://github.com/CymChad/BaseRecyclerViewAdapterHelper:qucik recycle*/
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.35'
     implementation 'org.greenrobot:eventbus:3.1.1'
+
+//    远程库
+    implementation 'com.gy:financiallib:0.0.1'
 }
