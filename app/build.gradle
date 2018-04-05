@@ -140,5 +140,5 @@ dependencies {
     implementation 'org.greenrobot:eventbus:3.1.1'
 
 //    远程库
-    implementation 'com.gy:financiallib:0.0.1'
+    implementation 'com.wgyscsf:financialLib:0.0.1'
 }
