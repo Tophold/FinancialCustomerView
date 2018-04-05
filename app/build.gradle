@@ -16,7 +16,7 @@ android {
         minSdkVersion 17
         targetSdkVersion 26
         versionCode getMyVersionCode() as int//查询versioncode即可找到对应git历史
-        versionName "1.5"
+        versionName "0.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
 
@@ -105,7 +105,7 @@ android {
             signingConfig signingConfigs.release
 
             manifestPlaceholders = [app_names: "金融View"]
-            debuggable false
+            debuggable true
         }
     }
     compileOptions {

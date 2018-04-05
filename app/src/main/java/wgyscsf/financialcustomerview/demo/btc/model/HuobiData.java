@@ -1,5 +1,7 @@
 package wgyscsf.financialcustomerview.demo.btc.model;
 
+import java.io.Serializable;
+
 /**
  * ============================================================
  * 作 者 :    wgyscsf@163.com
@@ -7,7 +9,7 @@ package wgyscsf.financialcustomerview.demo.btc.model;
  * 描 述 ：
  * ============================================================
  **/
-public class HuobiData<T> {
+public class HuobiData<T> implements Serializable{
     public String status;
     public String ch;
     public long ts;
