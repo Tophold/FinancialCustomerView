@@ -73,7 +73,9 @@
 ![2-w180](http://o71uhokgf.bkt.clouddn.com/7.png?imageMogr2/thumbnail/!25p)
 ![2-w180](http://o71uhokgf.bkt.clouddn.com/8.png?imageMogr2/thumbnail/!25p)
 
+
 外汇类Demo gif:[http://o71uhokgf.bkt.clouddn.com/forex.gif](http://o71uhokgf.bkt.clouddn.com/forex.gif)
+
 数字货币类Demo gif:[http://o71uhokgf.bkt.clouddn.com/huobi.gif](http://o71uhokgf.bkt.clouddn.com/huobi.gif)
 
 ## 我的公众号
