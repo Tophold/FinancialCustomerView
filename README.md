@@ -64,20 +64,21 @@
 
 ###### KView`wgyscsf.financiallib.view.kview.KView`
 
-![2-w180](http://o71uhokgf.bkt.clouddn.com/1.png)
+![2-w180](http://o71uhokgf.bkt.clouddn.com/1.png?imageMogr2/thumbnail/!25p)
+![2-w180](http://o71uhokgf.bkt.clouddn.com/2.png?imageMogr2/thumbnail/!25p)
+![2-w180](http://o71uhokgf.bkt.clouddn.com/3.png?imageMogr2/thumbnail/!25p)
+![2-w180](http://o71uhokgf.bkt.clouddn.com/4.png?imageMogr2/thumbnail/!25p)
+![2-w180](http://o71uhokgf.bkt.clouddn.com/5.png?imageMogr2/thumbnail/!25p)
+![2-w180](http://o71uhokgf.bkt.clouddn.com/6.png?imageMogr2/thumbnail/!25p)
+![2-w180](http://o71uhokgf.bkt.clouddn.com/7.png?imageMogr2/thumbnail/!25p)
+![2-w180](http://o71uhokgf.bkt.clouddn.com/8.png?imageMogr2/thumbnail/!25p)
 
-![2-w180](http://o71uhokgf.bkt.clouddn.com/2.png)
-
-![2-w180](http://o71uhokgf.bkt.clouddn.com/3.png)
-![2-w180](http://o71uhokgf.bkt.clouddn.com/4.png)
-![2-w180](http://o71uhokgf.bkt.clouddn.com/5.png)
-![2-w180](http://o71uhokgf.bkt.clouddn.com/6.png)
-![2-w180](http://o71uhokgf.bkt.clouddn.com/7.png)
-![2-w180](http://o71uhokgf.bkt.clouddn.com/8.png)
-![forex](http://o71uhokgf.bkt.clouddn.com/forex.gif)
-![huobi](http://o71uhokgf.bkt.clouddn.com/huobi.gif)
+外汇类Demo gif:[http://o71uhokgf.bkt.clouddn.com/forex.gif](http://o71uhokgf.bkt.clouddn.com/forex.gif)
+数字货币类Demo gif:[http://o71uhokgf.bkt.clouddn.com/huobi.gif](http://o71uhokgf.bkt.clouddn.com/huobi.gif)
 
 ## 我的公众号
 > flag立了无数，还是不能做到每天都更新。涉及到平时开发的所思所想都会有所记录，或许对你有用~
 
 ![](http://o71uhokgf.bkt.clouddn.com/15222472645930.jpg)
+
+
