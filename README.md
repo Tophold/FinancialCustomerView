@@ -12,7 +12,7 @@
 * https://github.com/scsfwgy/FinancialCustomerView/tree/master/%E8%B5%84%E6%96%99%E4%B8%8E%E6%96%87%E6%A1%A3
 * Java版实现：FinancialAlgorithm.java
 
-#### 开源库使用
+#### Usage
 
 1. Add the following to your project level build.gradle:
 
@@ -68,6 +68,7 @@
 ![2-w180](http://o71uhokgf.bkt.clouddn.com/2.png?imageMogr2/thumbnail/!25p)
 ![2-w180](http://o71uhokgf.bkt.clouddn.com/3.png?imageMogr2/thumbnail/!25p)
 ![2-w180](http://o71uhokgf.bkt.clouddn.com/4.png?imageMogr2/thumbnail/!25p)
+
 ![2-w180](http://o71uhokgf.bkt.clouddn.com/5.png?imageMogr2/thumbnail/!25p)
 ![2-w180](http://o71uhokgf.bkt.clouddn.com/6.png?imageMogr2/thumbnail/!25p)
 ![2-w180](http://o71uhokgf.bkt.clouddn.com/7.png?imageMogr2/thumbnail/!25p)
