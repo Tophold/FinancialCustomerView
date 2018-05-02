@@ -4,6 +4,7 @@
 * 收集整理相关算法、文档以及专业资料
 * 开源实现的金融自定View，已经核对过指标算法数据
 * 开源库已成功接入外汇、数字货币KView
+* 开源库不依赖第三方，继承系统View实现
 
 #### 实现思路及资料
 * https://github.com/scsfwgy/FinancialCustomerView/tree/master/%E8%B5%84%E6%96%99%E4%B8%8E%E6%96%87%E6%A1%A3
@@ -24,7 +25,7 @@
         
 2. Add this to your app build.gradle:
 
-        implementation 'com.wgyscsf:financialLib:0.0.1'
+        implementation 'com.wgyscsf:financialLib:0.0.2'
 
 3. 在布局文件中引入需要使用的自定义View(`wgyscsf.financiallib.view.fund.FundView`、`wgyscsf.financiallib.view.kview.KView`)
 4. 个性化设置，like this
@@ -78,10 +79,3 @@
 外汇类Demo gif:[http://o71uhokgf.bkt.clouddn.com/forex.gif](http://o71uhokgf.bkt.clouddn.com/forex.gif)
 
 数字货币类Demo gif:[http://o71uhokgf.bkt.clouddn.com/huobi.gif](http://o71uhokgf.bkt.clouddn.com/huobi.gif)
-
-## 我的公众号
-> flag立了无数，还是不能做到每天都更新。涉及到平时开发的所思所想都会有所记录，或许对你有用~
-
-![](http://o71uhokgf.bkt.clouddn.com/15222472645930.jpg)
-
-
