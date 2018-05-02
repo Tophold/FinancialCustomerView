@@ -79,3 +79,9 @@
 外汇类Demo gif:[http://o71uhokgf.bkt.clouddn.com/forex.gif](http://o71uhokgf.bkt.clouddn.com/forex.gif)
 
 数字货币类Demo gif:[http://o71uhokgf.bkt.clouddn.com/huobi.gif](http://o71uhokgf.bkt.clouddn.com/huobi.gif)
+
+#### 计划
+1. onFling滑动效果
+2. view上箭头标记最大值最小值
+3. 入场动画
+4. 成交量
