@@ -5,10 +5,9 @@ android {
     compileSdkVersion 26
 
     defaultConfig {
-        minSdkVersion 17
-        targetSdkVersion 26
-        versionCode 1
-        versionName "0.0.1"
+        minSdkVersion 14
+        versionCode 2
+        versionName "0.0.2"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -33,15 +32,23 @@ android {
 }
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:26.1.0'
+    compile 'com.android.support:appcompat-v7:26.1.0'
 }
+
+
+
+//        ./gradlew clean build bintrayUpload
+// -PbintrayUser=wgyscsf
+// -PbintrayKey=xxxxxxxxxxxxxxxxxxxxxx
+// -PdryRun=false
+
 //添加
 publish {
     repoName ='maven'//和在Bintray网站创建的仓库名对应
     userOrg = 'wgyscsf'//bintray.com用户名
     groupId = 'com.wgyscsf'//jcenter上的路径
     artifactId = 'financialLib'//项目名称
-    publishVersion = '0.0.1'//版本号
+    publishVersion = '0.0.2'//版本号
     desc = 'this is the first version'//描述，不重要
     website = 'https://github.com/scsfwgy/FinancialCustomerView'//网站，不重要；尽量模拟github上的地址，例如我这样的；当然你有地址最好了
 }
