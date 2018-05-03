@@ -1234,7 +1234,6 @@ public class MasterView extends KBaseView {
     }
 
 
-
     //-----------------------对开发者暴露可以修改的参数-------
 
     public KViewType.MasterViewType getViewType() {
@@ -1246,7 +1245,7 @@ public class MasterView extends KBaseView {
         mViewType = viewType;
 
         //重绘
-        invalidate();
+        seekAndCalculateCellData();
     }
 
 
