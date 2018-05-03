@@ -39,7 +39,7 @@ public class HuobiWebSocket {
     private static final int DEFAULT_TIME_OUT = 5;//超时时间 5s
     private static final int DEFAULT_READ_TIME_OUT = 10;
     //temp quotes
-    private static final String BASE_URL = "https://api.huobipro.com:443/ws";
+    private static final String BASE_URL = "https://api.huobi.br.com:443/ws";
 
     Request mRequest;
     private okhttp3.WebSocket mWebSocket;

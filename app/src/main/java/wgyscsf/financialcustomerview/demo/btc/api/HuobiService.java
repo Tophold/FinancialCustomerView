@@ -21,7 +21,7 @@ public interface HuobiService {
     @GET("/market/history/kline")
     Observable<HuobiData<List<HuobiQuote>>> chartQuotes(@QueryMap Map<String, Object> params);
 
-    @GET("/v1/common/symbols ")
+    @GET("/v1/common/symbols")
     Observable<HuobiData<List<HuobiSymbol>>> getSymbolList(@QueryMap Map<String, Object> params);
 }
 

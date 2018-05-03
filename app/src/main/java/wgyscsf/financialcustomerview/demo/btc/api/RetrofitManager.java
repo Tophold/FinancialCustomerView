@@ -19,7 +19,8 @@ public class RetrofitManager {
     private static final int DEFAULT_TIME_OUT = 5;//超时时间 5s
     private static final int DEFAULT_READ_TIME_OUT = 10;
     //temp quotes
-    private static final String BASE_URL = "https://api.huobipro.com";
+//    private static final String BASE_URL = "https://api.huobipro.com";
+    private static final String BASE_URL = "https://api.huobi.br.com";
     private Retrofit mRetrofit;
 
     private RetrofitManager() {

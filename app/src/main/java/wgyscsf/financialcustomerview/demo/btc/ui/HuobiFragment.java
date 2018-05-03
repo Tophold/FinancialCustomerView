@@ -40,7 +40,7 @@ import wgyscsf.financiallib.view.kview.Quotes;
  * ============================================================
  **/
 public class HuobiFragment extends BaseFragment {
-    public static final int DEF_PAGER_SIZE = 2000;
+    public static final int DEF_PAGER_SIZE = 1000;
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     public static final int DEF_COUNT = 100;
