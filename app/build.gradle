@@ -140,4 +140,8 @@ dependencies {
     /**https://github.com/CymChad/BaseRecyclerViewAdapterHelper:qucik recycle*/
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.35'
     implementation 'org.greenrobot:eventbus:3.1.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 }
+
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'

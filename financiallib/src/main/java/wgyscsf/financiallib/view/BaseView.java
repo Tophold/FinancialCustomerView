@@ -29,6 +29,8 @@ public abstract class BaseView extends View {
     protected long def_clickpress_length = 100;
     //移动阀值。手指移动多远算移动的阀值（单位：sp）
     protected long def_pull_length = 5;
+    //onFling的阀值
+    protected float def_onfling = 5;
 
     //控件默认宽高。当控件的宽高设置为wrap_content时会采用该参数进行默认的设置（单位：sp）。
     //不允许用户修改，想要修改宽高，使用mWidth、mBaseHeight。
@@ -81,6 +83,7 @@ public abstract class BaseView extends View {
 
     /**
      * 根据颜色id获取颜色
+     *
      * @param colorId
      * @return
      */
