@@ -575,8 +575,8 @@ public class MinorView extends KBaseView {
         }
 
         //找到close最大值和最小值
-        double tempMinClosePrice = Integer.MAX_VALUE;
-        double tempMaxClosePrice = Integer.MIN_VALUE;
+        mMinY = Integer.MAX_VALUE;
+        mMaxY = Integer.MIN_VALUE;
 
 
         for (int i = mBeginIndex; i < mEndIndex; i++) {
@@ -590,13 +590,11 @@ public class MinorView extends KBaseView {
             double min = FinancialAlgorithm.getMasterMinY(quotes, mMinorType);
             double max = FinancialAlgorithm.getMasterMaxY(quotes, mMinorType);
 
-            if (min <= tempMinClosePrice) {
-                tempMinClosePrice = min;
-                mMinY = tempMinClosePrice;
+            if (min <= mMinY) {
+                mMinY = min;
             }
-            if (max >= tempMaxClosePrice) {
-                tempMaxClosePrice = max;
-                mMaxY = tempMaxClosePrice;
+            if (max >= mMaxY) {
+                mMaxY = max;
             }
 
         }
