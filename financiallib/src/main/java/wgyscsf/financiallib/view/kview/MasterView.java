@@ -386,7 +386,7 @@ public class MasterView extends KBaseView {
         Path brokenLineBgPath = new Path();
 
         /**实时横线的绘制*/
-
+        drawTimingLineProcess(canvas, mQuotesList.get(mQuotesList.size() - 1));
 
         /**蜡烛图的绘制*/
         //蜡烛图单个之间的间隙
@@ -406,10 +406,9 @@ public class MasterView extends KBaseView {
             Quotes quotes = mQuotesList.get(i);
             //mPerX/2.0f：为了让取点为单个单元的x的中间位置
             float floatX = mBasePaddingLeft + mPerX / 2.0f + mPerX * (i - mBeginIndex);
-            float floatY = 0;
-
-            floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
+            float floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
                     mPerY * (quotes.c - mCandleMinY));
+
 
             //记录下位置信息
             quotes.floatX = floatX;
@@ -430,9 +429,6 @@ public class MasterView extends KBaseView {
 
             /**分时图折现的绘制*/
             drawTimSharingProcess(quotes, i, brokenLinePath, brokenLineBgPath);
-
-            /**实时横线的绘制*/
-            drawTimingLineProcess(canvas, quotes, i);
 
             /**蜡烛图的绘制*/
             drawCandleViewProcess(canvas, diverWidth, i, quotes);
@@ -838,44 +834,49 @@ public class MasterView extends KBaseView {
         canvas.drawPath(brokenLineBgPath, mBrokenLineBgPaint);
     }
 
-    private void drawTimingLineProcess(Canvas canvas, Quotes quotes, int i) {
-        if (i == mEndIndex - 1) {
-            //这里滑动到最右端
-            //绘制小圆点
-            if (mPullType == KViewType.PullType.PULL_RIGHT_STOP) {
-                //对于蜡烛图不需要绘制小圆点，但是需要绘制实时横线
-                if (mViewType == KViewType.MasterViewType.TIMESHARING) {
-                    canvas.drawCircle(quotes.floatX, quotes.floatY, mDotRadius, mDotPaint);
-                }
-            } else {
-                //这里隐藏小圆点并且重新计算Y值。这里这样处理，对应现象的问题：横线划出界面。
-                Quotes endQuotes = mQuotesList.get(mQuotesList.size() - 1);
+    private void drawTimingLineProcess(Canvas canvas, Quotes quotes) {
+        //这里滑动到最右端
+        //绘制小圆点
+        if (mPullType == KViewType.PullType.PULL_RIGHT_STOP) {
+            //这里记录最后一个点的位置
+            float floatX =mBaseWidth-mInnerRightBlankPadding-mBasePaddingRight- mPerX / 2.0f;
+            float floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
+                    mPerY * (quotes.c - mCandleMinY));
+            quotes.floatX = floatX;
+            quotes.floatY = floatY;
 
-                //蜡烛图
-                quotes.floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
-                        mPerY * (endQuotes.c - mCandleMinY));
+            //对于蜡烛图不需要绘制小圆点，但是需要绘制实时横线
+            if (mViewType == KViewType.MasterViewType.TIMESHARING) {
+                canvas.drawCircle(quotes.floatX, quotes.floatY, mDotRadius, mDotPaint);
             }
+        } else {
+            //这里隐藏小圆点并且重新计算Y值。这里这样处理，对应现象的问题：横线划出界面。
+            Quotes endQuotes = mQuotesList.get(mQuotesList.size() - 1);
 
-            //实时数据展示的前提是在指定范围内。不处理对应的异常：实时横线显示在底部横线的下面...
-            if (mBasePaddingTop < quotes.floatY && quotes.floatY < mBaseHeight - mBasePaddingBottom) {
-                //接着画实时横线
-                canvas.drawLine(mBasePaddingLeft, quotes.floatY, mBaseWidth - mBasePaddingRight, quotes.floatY,
-                        mTimingLinePaint);
+            //蜡烛图
+            quotes.floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
+                    mPerY * (endQuotes.c - mCandleMinY));
+        }
 
-                //接着绘制实时横线的右侧数据与背景
-                //文字高度
-                float txtHight = getFontHeight(mTimingTxtWidth, mTimingTxtBgPaint);
-                //绘制背景
-                canvas.drawRect(mBaseWidth - mBasePaddingRight, quotes.floatY - txtHight / 2, mBaseWidth,
-                        quotes.floatY + txtHight / 2, mTimingTxtBgPaint);
+        //实时数据展示的前提是在指定范围内。不处理对应的异常：实时横线显示在底部横线的下面...
+        if (mBasePaddingTop < quotes.floatY && quotes.floatY < mBaseHeight - mBasePaddingBottom) {
+            //接着画实时横线
+            canvas.drawLine(mBasePaddingLeft, quotes.floatY, mBaseWidth - mBasePaddingRight, quotes.floatY,
+                    mTimingLinePaint);
 
-                //绘制实时数据
-                //距离左边的距离
-                float leftDis = 8;
-                canvas.drawText(FormatUtil.numFormat(quotes.c, mDigits),
-                        mBaseWidth - mBasePaddingRight + leftDis, quotes.floatY + txtHight / 4,
-                        mTimingTxtPaint);
-            }
+            //接着绘制实时横线的右侧数据与背景
+            //文字高度
+            float txtHight = getFontHeight(mTimingTxtWidth, mTimingTxtBgPaint);
+            //绘制背景
+            canvas.drawRect(mBaseWidth - mBasePaddingRight, quotes.floatY - txtHight / 2, mBaseWidth,
+                    quotes.floatY + txtHight / 2, mTimingTxtBgPaint);
+
+            //绘制实时数据
+            //距离左边的距离
+            float leftDis = 8;
+            canvas.drawText(FormatUtil.numFormat(quotes.c, mDigits),
+                    mBaseWidth - mBasePaddingRight + leftDis, quotes.floatY + txtHight / 4,
+                    mTimingTxtPaint);
         }
     }
 
@@ -1021,14 +1022,14 @@ public class MasterView extends KBaseView {
                 mEndQuotes = quotes;
             }
 
-            if(mViewType== KViewType.MasterViewType.CANDLE){
+            if (mViewType == KViewType.MasterViewType.CANDLE) {
                 if (quotes.l <= mCandleMinY) {
                     mCandleMinY = quotes.l;
                 }
                 if (quotes.h >= mCandleMaxY) {
                     mCandleMaxY = quotes.h;
                 }
-            }else{
+            } else {
                 if (quotes.c <= mCandleMinY) {
                     mCandleMinY = quotes.c;
                 }
@@ -1056,7 +1057,7 @@ public class MasterView extends KBaseView {
         mPerY = (float) ((mBaseHeight - mBasePaddingTop - mBasePaddingBottom - mInnerTopBlankPadding
                 - mInnerBottomBlankPadding) / (mCandleMaxY - mCandleMinY));
 
-        Log.d(Constant.ESPECIAL_TAG, "seekAndCalculateCellData,mPerY:"+mPerY);
+        Log.d(Constant.ESPECIAL_TAG, "seekAndCalculateCellData,mPerY:" + mPerY);
 
         //重绘
         invalidate();
