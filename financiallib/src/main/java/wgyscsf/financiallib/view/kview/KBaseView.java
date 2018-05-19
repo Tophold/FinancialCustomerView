@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import wgyscsf.financiallib.R;
@@ -86,9 +87,6 @@ public abstract class KBaseView extends BaseView {
     //该参数的具体逻辑由子类去实现
     protected float mPerY;
 
-    //Y轴：close价格最小值和最大值对应的Model。这里最小最大是根据close价格算的，用于分时图。
-    protected Quotes mMinColseQuotes;
-    protected Quotes mMaxCloseQuotes;
     //X轴:起始位置的时间和结束位置的时间
     protected Quotes mBeginQuotes;
     protected Quotes mEndQuotes;
@@ -274,6 +272,11 @@ public abstract class KBaseView extends BaseView {
     private void initAttrs() {
         initColorRes();
         initPaintRes();
+        initData();
+    }
+
+    private void initData() {
+        mQuotesList=new ArrayList<>();
     }
 
     private void initColorRes() {
@@ -456,7 +459,7 @@ public abstract class KBaseView extends BaseView {
             Log.e(TAG, "setKViewData: 数据异常");
             return;
         }
-        mQuotesList = quotesList;
+        mQuotesList.addAll(quotesList);
         //数据过来，隐藏加载更多
         hiddenLoadingPaint();
 
@@ -528,7 +531,9 @@ public abstract class KBaseView extends BaseView {
     }
 
     /**
-     * 加载更多数据
+     * 加载更多数据。所谓加载更多数据，加载的是历史数据。而整个数据是从左到右依次为旧的->新的，所以新过来的数据是旧的，
+     * 要插入到最左边。而这个时候，应该要保持mBeginIndex和mEndIndx和插入之前一致（不然k线会突然闪动一下）。
+     *
      *
      * @param quotesList
      */
@@ -545,13 +550,11 @@ public abstract class KBaseView extends BaseView {
 
         //特别特别注意，加载更多之后，不应该更新起始位置和结束位置，
         //因为可能在加载的过程中，原来的意图是在最左边，但是加载完毕后，又不在最左边了。
-        // 因此，只要保持原来的起始位置和结束位置即可。【原来：指的是视觉上的原来】
+        //因此，只要保持原来的起始位置和结束位置即可。【原来：指的是视觉上的原来】
         int addSize = quotesList.size();
-        mBeginIndex = mBeginIndex + addSize;
-        if (mBeginIndex + mShownMaxCount > mQuotesList.size()) {
-            mBeginIndex = mQuotesList.size() - mShownMaxCount;
-        }
-        mEndIndex = mBeginIndex + mShownMaxCount;
+        mBeginIndex += addSize;
+        mEndIndex += addSize;
+
         //重新测量一下,这里不能重新测量。因为重新测量的逻辑是寻找最新的点。
         seekAndCalculateCellData();
     }
@@ -762,24 +765,6 @@ public abstract class KBaseView extends BaseView {
 
     public KBaseView setPerY(float perY) {
         mPerY = perY;
-        return this;
-    }
-
-    public Quotes getMinColseQuotes() {
-        return mMinColseQuotes;
-    }
-
-    public KBaseView setMinColseQuotes(Quotes minColseQuotes) {
-        mMinColseQuotes = minColseQuotes;
-        return this;
-    }
-
-    public Quotes getMaxCloseQuotes() {
-        return mMaxCloseQuotes;
-    }
-
-    public KBaseView setMaxCloseQuotes(Quotes maxCloseQuotes) {
-        mMaxCloseQuotes = maxCloseQuotes;
         return this;
     }
 

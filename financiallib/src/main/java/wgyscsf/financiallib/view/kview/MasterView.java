@@ -8,6 +8,7 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
@@ -15,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import wgyscsf.financiallib.Constant;
 import wgyscsf.financiallib.R;
 import wgyscsf.financiallib.utils.FormatUtil;
 import wgyscsf.financiallib.utils.TimeUtils;
@@ -406,15 +408,8 @@ public class MasterView extends KBaseView {
             float floatX = mBasePaddingLeft + mPerX / 2.0f + mPerX * (i - mBeginIndex);
             float floatY = 0;
 
-            //分时图和蜡烛图要分开对待，测量标准不一致。只要有测量的，全部要区分对待。
-            if (mViewType == KViewType.MasterViewType.TIMESHARING) {
-                floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
-                        mPerY * (quotes.c - mMinColseQuotes.c));
-            } else if (mViewType == KViewType.MasterViewType.CANDLE) {
-                floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
-                        mPerY * (quotes.c - mCandleMinY));
-            }
-
+            floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
+                    mPerY * (quotes.c - mCandleMinY));
 
             //记录下位置信息
             quotes.floatX = floatX;
@@ -855,15 +850,10 @@ public class MasterView extends KBaseView {
             } else {
                 //这里隐藏小圆点并且重新计算Y值。这里这样处理，对应现象的问题：横线划出界面。
                 Quotes endQuotes = mQuotesList.get(mQuotesList.size() - 1);
-                //分时图
-                if (mViewType == KViewType.MasterViewType.TIMESHARING) {
-                    quotes.floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
-                            mPerY * (endQuotes.c - mMinColseQuotes.c));
-                } else {
-                    //蜡烛图
-                    quotes.floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
-                            mPerY * (endQuotes.c - mCandleMinY));
-                }
+
+                //蜡烛图
+                quotes.floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
+                        mPerY * (endQuotes.c - mCandleMinY));
             }
 
             //实时数据展示的前提是在指定范围内。不处理对应的异常：实时横线显示在底部横线的下面...
@@ -927,25 +917,15 @@ public class MasterView extends KBaseView {
         double maxBorderData;
         double dataDis = 0;
 
-        //对于分时图和蜡烛图的最大值和最小值计算是不一样的，因此测量的时候也要分开对待
-        if (mViewType == KViewType.MasterViewType.TIMESHARING) {
-            dataDis = mMaxCloseQuotes.c - mMinColseQuotes.c;
-        } else if (mViewType == KViewType.MasterViewType.CANDLE) {
-            dataDis = mCandleMaxY - mCandleMinY;
-        }
+        dataDis = mCandleMaxY - mCandleMinY;
 
         double yDis = (mBaseHeight - mBasePaddingTop - mBasePaddingBottom - mInnerTopBlankPadding -
                 mInnerBottomBlankPadding);
         double perY = dataDis / yDis;
 
-        if (mViewType == KViewType.MasterViewType.TIMESHARING) {
-            minBorderData = mMinColseQuotes.c - mInnerBottomBlankPadding * perY;
-            maxBorderData = mMaxCloseQuotes.c + mInnerTopBlankPadding * perY;
-        } else {
-            minBorderData = mCandleMinY - mInnerBottomBlankPadding * perY;
-            maxBorderData = mCandleMaxY + mInnerTopBlankPadding * perY;
-        }
 
+        minBorderData = mCandleMinY - mInnerBottomBlankPadding * perY;
+        maxBorderData = mCandleMaxY + mInnerTopBlankPadding * perY;
 
         halfTxtHight = getFontHeight(mXYTxtSize, mXYTxtPaint) / 4;//应该/2的，但是不准确，原因不明
 
@@ -1012,6 +992,12 @@ public class MasterView extends KBaseView {
     protected void seekAndCalculateCellData() {
         if (mQuotesList == null || mQuotesList.isEmpty()) return;
 
+
+        //找到close最大值和最小值
+        mCandleMinY = Integer.MAX_VALUE;
+        mCandleMaxY = Integer.MIN_VALUE;
+
+
         //对于蜡烛图，需要计算以下指标。
         if (mViewType == KViewType.MasterViewType.CANDLE) {
             //ma
@@ -1026,12 +1012,6 @@ public class MasterView extends KBaseView {
             mCandleMinY = mQuotesList.get(mBeginIndex).l;
         }
 
-
-        //找到close最大值和最小值
-        double tempMinClosePrice = Integer.MAX_VALUE;
-        double tempMaxClosePrice = Integer.MIN_VALUE;
-
-
         for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes quotes = mQuotesList.get(i);
             if (i == mBeginIndex) {
@@ -1040,13 +1020,21 @@ public class MasterView extends KBaseView {
             if (i == mEndIndex - 1) {
                 mEndQuotes = quotes;
             }
-            if (quotes.c <= tempMinClosePrice) {
-                tempMinClosePrice = quotes.c;
-                mMinColseQuotes = quotes;
-            }
-            if (quotes.c >= tempMaxClosePrice) {
-                tempMaxClosePrice = quotes.c;
-                mMaxCloseQuotes = quotes;
+
+            if(mViewType== KViewType.MasterViewType.CANDLE){
+                if (quotes.l <= mCandleMinY) {
+                    mCandleMinY = quotes.l;
+                }
+                if (quotes.h >= mCandleMaxY) {
+                    mCandleMaxY = quotes.h;
+                }
+            }else{
+                if (quotes.c <= mCandleMinY) {
+                    mCandleMinY = quotes.c;
+                }
+                if (quotes.c >= mCandleMaxY) {
+                    mCandleMaxY = quotes.c;
+                }
             }
 
             //蜡烛图
@@ -1065,13 +1053,10 @@ public class MasterView extends KBaseView {
         mPerX = (mBaseWidth - mBasePaddingLeft - mBasePaddingRight - mInnerRightBlankPadding)
                 / (mShownMaxCount);
         //不要忘了减去内部的上下Padding
-        if (mViewType == KViewType.MasterViewType.TIMESHARING) {
-            mPerY = (float) ((mBaseHeight - mBasePaddingTop - mBasePaddingBottom - mInnerTopBlankPadding
-                    - mInnerBottomBlankPadding) / (mMaxCloseQuotes.c - mMinColseQuotes.c));
-        } else if (mViewType == KViewType.MasterViewType.CANDLE) {
-            mPerY = (float) ((mBaseHeight - mBasePaddingTop - mBasePaddingBottom - mInnerTopBlankPadding
-                    - mInnerBottomBlankPadding) / (mCandleMaxY - mCandleMinY));
-        }
+        mPerY = (float) ((mBaseHeight - mBasePaddingTop - mBasePaddingBottom - mInnerTopBlankPadding
+                - mInnerBottomBlankPadding) / (mCandleMaxY - mCandleMinY));
+
+        Log.d(Constant.ESPECIAL_TAG, "seekAndCalculateCellData,mPerY:"+mPerY);
 
         //重绘
         invalidate();
@@ -1189,6 +1174,7 @@ public class MasterView extends KBaseView {
             mMasterListener.mastelPullmNewIndex(mBeginIndex, mEndIndex, mPullType, mShownMaxCount);
 
         //开始位置和结束位置确认好，就可以重绘啦~
+        Log.d(TAG, "moveKView: mBeginIndex:" + mBeginIndex + ",mEndIndex:" + mEndIndex);
         seekAndCalculateCellData();
     }
 
