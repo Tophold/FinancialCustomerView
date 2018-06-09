@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview;
+package com.tophold.example;
 
 import org.junit.Test;
 

@@ -12,7 +12,7 @@ android {
     compileSdkVersion 26
     buildToolsVersion "26.0.2"
     defaultConfig {
-        applicationId "wgyscsf.financialcustomerview"
+        applicationId "com.tophold.example"
         minSdkVersion 17
         targetSdkVersion 26
         versionCode getMyVersionCode() as int//查询versioncode即可找到对应git历史

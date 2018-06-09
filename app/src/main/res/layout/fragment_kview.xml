@@ -2,7 +2,7 @@
              android:layout_width="match_parent"
              android:layout_height="match_parent">
 
-    <wgyscsf.financiallib.view.kview.KView
+    <com.tophold.trade.view.kview.KView
         android:id="@+id/fk_kv_kview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

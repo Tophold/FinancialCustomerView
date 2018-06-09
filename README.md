@@ -27,7 +27,7 @@
 
         implementation 'com.wgyscsf:financialLib:0.0.2'
 
-3. 在布局文件中引入需要使用的自定义View(`wgyscsf.financiallib.view.fund.FundView`、`wgyscsf.financiallib.view.kview.KView`)
+3. 在布局文件中引入需要使用的自定义View(`com.tophold.trade.view.fund.FundView`、`com.tophold.trade.view.kview.KView`)
 4. 个性化设置，like this
 
           /**
@@ -57,13 +57,13 @@
 
 #### 效果图
 
-###### 基金收益折线图`wgyscsf.financiallib.view.fund.FundView`
+###### 基金收益折线图`com.tophold.trade.view.fund.FundView`
 
 ![](https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/v1.1_img_nopress.png?raw=true)
 
 ![](https://github.com/scsfwgy/FinancialCustomerView/blob/master/img/v1.1_img_press.png?raw=true)
 
-###### KView`wgyscsf.financiallib.view.kview.KView`
+###### KView`com.tophold.trade.view.kview.KView`
 
 ![2-w180](http://o71uhokgf.bkt.clouddn.com/1.png?imageMogr2/thumbnail/!25p)
 ![2-w180](http://o71uhokgf.bkt.clouddn.com/2.png?imageMogr2/thumbnail/!25p)

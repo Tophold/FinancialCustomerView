@@ -157,7 +157,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <wgyscsf.financiallib.view.kview.KView
+    <com.tophold.trade.view.kview.KView
         android:id="@+id/akv_kv_kview"
         android:layout_width="match_parent"
         android:layout_height="0dp"

@@ -1,4 +1,4 @@
-package wgyscsf.financialcustomerview;
+package com.tophold.example;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("wgyscsf.financialcustomerview", appContext.getPackageName());
+        assertEquals("com.tophold.example", appContext.getPackageName());
     }
 }
