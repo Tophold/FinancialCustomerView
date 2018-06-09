@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.support.annotation.Nullable;
+import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -119,6 +120,11 @@ public abstract class KBaseView extends BaseView {
      */
 
     protected ScaleGestureDetector mScaleGestureDetector;
+
+    protected GestureDetectorCompat mFlingDetector;
+
+    //移动的模式：是一点一点移动还是具有onFling()效果？
+    protected KViewType.MoveType mMoveType = KViewType.MoveType.STEP;
 
 
     /**
@@ -245,7 +251,8 @@ public abstract class KBaseView extends BaseView {
                 mPressedX = currentPressedX;
                 if (Math.abs(moveLen) > def_pull_length &&
                         mFingerPressedCount == 1 &&
-                        !mDrawLongPress) {
+                        !mDrawLongPress &&
+                        mMoveType == KViewType.MoveType.STEP) {
                     //移动k线图
                     innerMoveViewListener(moveLen);
                 }
@@ -1105,6 +1112,15 @@ public abstract class KBaseView extends BaseView {
 
     public KBaseView setCurrLongPressQuotes(Quotes currLongPressQuotes) {
         mCurrLongPressQuotes = currLongPressQuotes;
+        return this;
+    }
+
+    public KViewType.MoveType getMoveType() {
+        return mMoveType;
+    }
+
+    public KBaseView setMoveType(KViewType.MoveType moveType) {
+        mMoveType = moveType;
         return this;
     }
 }

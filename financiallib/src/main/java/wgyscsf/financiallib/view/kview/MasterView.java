@@ -7,8 +7,10 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
+import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
@@ -222,15 +224,24 @@ public class MasterView extends KBaseView {
         //手势
         mScaleGestureDetector = new ScaleGestureDetector(mContext, mOnScaleGestureListener);
 
+        mFlingDetector = new GestureDetectorCompat(mContext, mSimpleOnScaleGestureListener);
+        mFlingDetector.setIsLongpressEnabled(false);
+
+
         //是分时图还是蜡烛图,def
         setViewType(KViewType.MasterViewType.TIMESHARING);
         //底部距离
         mBasePaddingBottom = 35;
+
+        setMoveType(KViewType.MoveType.ONFLING);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         mScaleGestureDetector.onTouchEvent(event);
+        if (mMoveType == KViewType.MoveType.ONFLING) {
+            mFlingDetector.onTouchEvent(event);
+        }
         return super.onTouchEvent(event);
     }
 
@@ -1127,6 +1138,47 @@ public class MasterView extends KBaseView {
                     return true;
                 }
             };
+
+    /**
+     * 滑动手势
+     */
+    GestureDetector.SimpleOnGestureListener mSimpleOnScaleGestureListener
+            = new GestureDetector.SimpleOnGestureListener() {
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, final float distanceX, float distanceY) {
+            Log.d(TAG, "onFling0: " + distanceX + "，" + distanceY);
+            //降噪处理
+            if (Math.abs(distanceX) > def_onfling) {
+                //x轴幅度大于y轴
+                if (Math.abs(distanceX) > Math.abs(distanceY)) {
+                    /**
+                     * 为什么加延迟？这个取决于onFling的时机。如果不加的话，手指离开就立马结束了onFling效果。
+                     * TODO:其实这样实现效果并不是太好，是否有其他更好的解决方案？
+                     */
+                    postDelayed(() -> innerMoveViewListener(-distanceX), 200);
+                    return true;
+                }
+            }
+
+            //y轴类似
+
+            return true;
+        }
+
+        /**
+         * 这个方法是最终滑动到的位置，onScroll()才是onFling的效果回调
+         * @param e1
+         * @param e2
+         * @param distanceX
+         * @param distanceY
+         * @return
+         */
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            return super.onFling(e1, e2, distanceX, distanceY);
+        }
+    };
+
 
     /**
      * 移动K线图计算移动的单位和重新计算起始位置和结束位置

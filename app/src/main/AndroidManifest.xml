@@ -37,6 +37,8 @@
         </activity>
         <activity android:name=".demo.btc.ui.HuobiActivity">
         </activity>
+        <activity android:name=".FlingActivity">
+        </activity>
     </application>
 
 </manifest>

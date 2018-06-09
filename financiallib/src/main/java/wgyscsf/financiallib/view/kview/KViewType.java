@@ -57,4 +57,12 @@ public class KViewType {
         RSI,
         KDJ
     }
+
+    /**
+     * 滑动的类型
+     */
+    public enum MoveType {
+        STEP,//一点一点移动
+        ONFLING//具有onfling效果
+    }
 }

@@ -49,4 +49,8 @@ public class MainActivity extends BaseActivity {
     public void btnDemo(View view) {
         go(HuobiListActivity.class);
     }
+
+    public void onFlingTest(View view) {
+        go(FlingActivity.class);
+    }
 }
