@@ -425,19 +425,6 @@ public class MasterView extends KBaseView {
             quotes.floatX = floatX;
             quotes.floatY = floatY;
 
-            //边界位置修正
-            //不是在最新的位置（其实也就是最新点靠近右侧边框），并且是最后一个点则向右加一个mPerX/2.0f。
-            if (mPullType != KViewType.PullType.PULL_RIGHT_STOP) {
-                if (i == mEndIndex - 1) {
-                    quotes.floatX += mPerX / 2.0f;
-                }
-            }
-            //如果是开始位置，则减去一个mPerX/2.0f
-            if (i == mBeginIndex) {
-                quotes.floatX -= mPerX / 2.0f;
-            }
-
-
             /**分时图折现的绘制*/
             drawTimSharingProcess(quotes, i, brokenLinePath, brokenLineBgPath);
 
@@ -755,14 +742,6 @@ public class MasterView extends KBaseView {
                 mPerY * (mCandleMaxY - quotes.l));
 
         RectF rectF = new RectF();
-        //边界处理
-        if (i == mBeginIndex) {
-            leftRectX = leftRectX < mBasePaddingLeft ? mBasePaddingLeft : leftRectX;
-            leftLineX = leftLineX < mBasePaddingLeft ? mBasePaddingLeft : leftLineX;
-        } else if (i == (mEndIndex - 1)) {
-            rightRectX = rightRectX > mBaseWidth - mBasePaddingRight ? mBaseWidth - mBasePaddingRight : rightRectX;
-            rightLineX = rightLineX > mBaseWidth - mBasePaddingRight ? mBaseWidth - mBasePaddingRight : rightLineX;
-        }
 
         //上下边界一样，设置一个偏移值
         if (topRectY == bottomRectY) bottomRectY += 1;
@@ -850,7 +829,7 @@ public class MasterView extends KBaseView {
         //绘制小圆点
         if (mPullType == KViewType.PullType.PULL_RIGHT_STOP) {
             //这里记录最后一个点的位置
-            float floatX =mBaseWidth-mInnerRightBlankPadding-mBasePaddingRight- mPerX / 2.0f;
+            float floatX = mBaseWidth - mInnerRightBlankPadding - mBasePaddingRight - mPerX / 2.0f;
             float floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
                     mPerY * (quotes.c - mCandleMinY));
             quotes.floatX = floatX;
@@ -895,21 +874,31 @@ public class MasterView extends KBaseView {
         if (mViewType != KViewType.MasterViewType.TIMESHARING) return;
 
         if (i == mBeginIndex) {
-            path.moveTo(quotes.floatX, quotes.floatY);
-            path2.moveTo(quotes.floatX, quotes.floatY);
+            path.moveTo((float) (quotes.floatX - mPerX / 2.0), quotes.floatY);
+            path2.moveTo((float) (quotes.floatX - mPerX / 2.0), quotes.floatY);
+        } else if (i == mEndIndex-1) {
+            //在这里把path圈起来，添加阴影。特别注意，这里处理下方阴影和折线边框。采用两个画笔和两个Path处理的，
+            // 貌似没有一个Paint可以同时绘制边框和填充色。
+            float bootomY = mBaseHeight - mBasePaddingBottom;
+            if (mPullType == KViewType.PullType.PULL_RIGHT_STOP) {
+                path.lineTo(quotes.floatX, quotes.floatY);
+                //开始绘制path
+                path2.lineTo(quotes.floatX, quotes.floatY);
+                path2.lineTo(quotes.floatX, bootomY);
+                path2.lineTo(mBasePaddingLeft, bootomY);
+            } else {
+                float x = (float) (quotes.floatX + mPerX / 2.0);
+                path.lineTo(x, quotes.floatY);
+                //开始绘制path
+                path2.lineTo(x, quotes.floatY);
+                path2.lineTo(x, bootomY);
+                path2.lineTo(mBasePaddingLeft, bootomY);
+            }
+            path2.close();
         } else {
             path.lineTo(quotes.floatX, quotes.floatY);
             //开始绘制path
             path2.lineTo(quotes.floatX, quotes.floatY);
-        }
-
-        //最后一个点
-        if (i == mEndIndex - 1) {
-            //在这里把path圈起来，添加阴影。特别注意，这里处理下方阴影和折线边框。采用两个画笔和两个Path处理的，
-            // 貌似没有一个Paint可以同时绘制边框和填充色。
-            path2.lineTo(quotes.floatX, mBaseHeight - mBasePaddingBottom);
-            path2.lineTo(mBasePaddingLeft, mBaseHeight - mBasePaddingBottom);
-            path2.close();
         }
     }
 
@@ -1191,6 +1180,7 @@ public class MasterView extends KBaseView {
 
         mPullRight = moveLen > 0;
         int moveCount = (int) Math.ceil(Math.abs(moveLen) / mPerX);
+        //向右拉
         if (mPullRight) {
             int len = mBeginIndex - moveCount;
             if (len < def_minlen_loadmore) {
@@ -1200,27 +1190,30 @@ public class MasterView extends KBaseView {
                     mMasterTouchListener.needLoadMore();
                 }
             }
-            if (len < 0) {
+            if (len <= 0) {
                 mBeginIndex = 0;
                 mPullType = KViewType.PullType.PULL_LEFT_STOP;
             } else {
                 mBeginIndex = len;
                 mPullType = KViewType.PullType.PULL_LEFT;
             }
+
+            mEndIndex = mBeginIndex + mShownMaxCount;
+            mEndIndex = mEndIndex > mQuotesList.size() ? mQuotesList.size() : mEndIndex;
         } else {
-            int len = mBeginIndex + moveCount;
-            if (len + mShownMaxCount > mQuotesList.size()) {
-                mBeginIndex = mQuotesList.size() - mShownMaxCount;
-                //到最左边啦
+            int len = mEndIndex + moveCount;
+            if (len >= mQuotesList.size()) {
+                mEndIndex = mQuotesList.size();
                 mPullType = KViewType.PullType.PULL_RIGHT_STOP;
                 //重置到之前的状态
                 mInnerRightBlankPadding = DEF_INNER_RIGHT_BLANK_PADDING;
             } else {
-                mBeginIndex = len;
+                mEndIndex += moveCount;
                 mPullType = KViewType.PullType.PULL_RIGHT;
             }
+            mBeginIndex = mEndIndex - mShownMaxCount;
+            mBeginIndex = mBeginIndex < 0 ? 0 : mBeginIndex;
         }
-        mEndIndex = mBeginIndex + mShownMaxCount;
 
         //回调给副图
         if (mMasterListener != null)
