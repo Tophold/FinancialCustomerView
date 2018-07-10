@@ -223,10 +223,10 @@ public abstract class KBaseView extends BaseView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         //默认加载loading界面
-        showLoadingPaint(canvas);
-        if (mQuotesList == null || mQuotesList.isEmpty()) {
-            return;
-        }
+//        showLoadingPaint(canvas);
+//        if (mQuotesList == null || mQuotesList.isEmpty()) {
+//            return;
+//        }
         drawOuterLine(canvas);
         drawInnerXy(canvas);
     }
