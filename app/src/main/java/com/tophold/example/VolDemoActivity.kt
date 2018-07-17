@@ -29,7 +29,7 @@ class VolDemoActivity : BaseActivity() {
             mDataList.add(volModel)
         }
 
-        avd_vv_vol.setVolDataList(mDataList)
+//        avd_vv_vol.setVolDataList(mDataList)
     }
 
     /**

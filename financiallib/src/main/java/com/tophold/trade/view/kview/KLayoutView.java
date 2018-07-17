@@ -17,6 +17,7 @@ public class KLayoutView extends LinearLayout {
     public static final float DEF_MINORHRATIO = 0.25f;
     protected MasterView mMasterView;
     protected MinorView mMinorView;
+    protected VolView mVolView;
     //副图高度占全部高度比
     protected float mMinorHRatio = DEF_MINORHRATIO;
     //是否展示副图
