@@ -37,6 +37,7 @@ android {
 
 dependencies {
     compile 'com.android.support:appcompat-v7:26.1.0'
+    api 'com.google.code.gson:gson:2.8.2'
 }
 
 

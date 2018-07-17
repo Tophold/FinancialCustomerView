@@ -10,6 +10,7 @@ import com.tophold.example.demo.beginner.ui.KViewVerticalActivity;
 import com.tophold.example.demo.btc.ui.HuobiActivity;
 import com.tophold.example.demo.btc.ui.HuobiListActivity;
 import com.tophold.example.demo.forex.ui.ForexListActivity;
+import com.tophold.example.demo.pie.PieChartActivity;
 
 public class MainActivity extends BaseActivity {
     TextView mTextView;
@@ -50,7 +51,8 @@ public class MainActivity extends BaseActivity {
         go(HuobiListActivity.class);
     }
 
-    public void onFlingTest(View view) {
-        go(FlingActivity.class);
+
+    public void onPieTest(View view) {
+        go(PieChartActivity.class);
     }
 }

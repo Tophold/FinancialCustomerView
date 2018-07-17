@@ -39,6 +39,8 @@
         </activity>
         <activity android:name=".FlingActivity">
         </activity>
+        <activity android:name=".demo.pie.PieChartActivity">
+        </activity>
     </application>
 
 </manifest>

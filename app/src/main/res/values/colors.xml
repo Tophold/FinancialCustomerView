@@ -9,4 +9,9 @@
     <color name="color_tb_selectedTxt">#ef1e13</color>
     <color name="color_tb_Txt">#8a8a8b</color>
 
+    <!--交易分析四个颜色-->
+    <color name="trade_analyze_pie_1">#f5b5ff</color>
+    <color name="trade_analyze_pie_2">#aaacff</color>
+    <color name="trade_analyze_pie_3">#96e0ff</color>
+    <color name="trade_analyze_pie_4">#ffcf97</color>
 </resources>

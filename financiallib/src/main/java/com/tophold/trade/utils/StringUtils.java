@@ -11,6 +11,26 @@ import java.util.Random;
  * ============================================================
  **/
 public class StringUtils {
+
+    public static boolean isEmptyString(String str) {
+        if (str == null || str.isEmpty()) return true;
+        return false;
+    }
+
+    public static boolean isNotEmptyString(String str) {
+        return !isEmptyString(str);
+    }
+
+    public static boolean isEmptyList(List list) {
+        if (list == null || list.isEmpty()) return true;
+        return false;
+    }
+
+    public static boolean isNotEmptyList(List list) {
+        return !isEmptyList(list);
+    }
+
+
     public static boolean isBlank(String... strs) {
         for (String str : strs) {
             if (str == null || str.equals("")) return true;

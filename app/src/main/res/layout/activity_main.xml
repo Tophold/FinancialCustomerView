@@ -56,12 +56,13 @@
         android:text="去看数字货币demo"
         android:textAllCaps="false"
         />
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:onClick="onFlingTest"
-        android:text="去看OnFling"
+        android:onClick="onPieTest"
+        android:text="去看PieChart"
         android:textAllCaps="false"
         />
 
