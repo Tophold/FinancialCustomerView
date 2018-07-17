@@ -80,8 +80,13 @@
 
 数字货币类Demo gif:[http://o71uhokgf.bkt.clouddn.com/huobi.gif](http://o71uhokgf.bkt.clouddn.com/huobi.gif)
 
+###### PieChartView`com.tophold.trade.view.pie.PieChartView` (git branch:dev)
+
+![](http://o71uhokgf.bkt.clouddn.com/15318159501817.jpg)
+
 #### 计划
 1. onFling滑动效果
 2. view上箭头标记最大值最小值
 3. 入场动画
 4. 成交量
+
