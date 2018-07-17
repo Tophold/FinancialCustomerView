@@ -24,4 +24,9 @@ public class PieEntrys {
         this.highLight = highLight;
         this.symbol = symbol;
     }
+
+    //一些额外的字段辅助画图
+    //单个item需要扫过的角度
+    public float mSweepAngle;
+
 }

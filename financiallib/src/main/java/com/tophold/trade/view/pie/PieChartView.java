@@ -77,6 +77,15 @@ public class PieChartView extends BaseView {
     //没有数据显示
     String mEmptyTxt = "还没有交易哦";
 
+    //开始角度
+    float mBeginAngle = -90;
+
+    /**
+     * 自定义动画
+     */
+    private PieChartAnimation mAnimation;
+    long mAnim = 1000;
+
     //私有属性，不对外暴露
     private float centerX;
     private float centerY;
@@ -97,7 +106,8 @@ public class PieChartView extends BaseView {
     }
 
     private void initAttrs() {
-
+        mAnimation = new PieChartAnimation();
+        mAnimation.setDuration(mAnim);
     }
 
     @Override
@@ -187,6 +197,8 @@ public class PieChartView extends BaseView {
             }
         }
 
+        mAnimation.setPieChartData(mPieEntryList, sumValue, this);
+
 
         //正式开始处理
         float valueW = getBaseWidth() - basePaddingLeft - basePaddingRight;
@@ -199,10 +211,14 @@ public class PieChartView extends BaseView {
         float bY = centerY + radius;
         //圆环外边界，但是如果圆环成整个圆之后，就是内边界了。
         RectF rectF = new RectF(lX, tY, rX, bY);
-        float beginAngle = -90;
+        float beginAngle = mBeginAngle;
         float preYpos = 0;
         for (PieEntrys pieEntry : tempPieEntrys) {
-            float sweepAngle = 360 * pieEntry.value / sumValue;
+
+            //无动画
+            //float sweepAngle = 360 * pieEntry.value / sumValue;
+            //在这里实现动画
+            float sweepAngle = pieEntry.mSweepAngle;
 
             //防止item过小
             if (sweepAngle < 360 * minPartsThreshold) {
@@ -355,6 +371,7 @@ public class PieChartView extends BaseView {
 
     public PieChartView setPieEntryList(List<PieEntrys> pieEntryList) {
         mPieEntryList = pieEntryList;
+        startAnimation(mAnimation);
         return this;
     }
 
