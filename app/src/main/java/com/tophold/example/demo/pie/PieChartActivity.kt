@@ -20,14 +20,12 @@ class PieChartActivity : BaseActivity() {
 
     private fun loadPieChart() {
         val pieEntrysList: MutableList<PieEntrys> = ArrayList()
-        pieEntrysList.add(PieEntrys(1f, "80%", getColorId(R.color.trade_analyze_pie_1), false, "澳元/美元"))
-        pieEntrysList.add(PieEntrys(5f, "胜率 86.96%", getColorId(R.color.trade_analyze_pie_2), true, "英镑/美元"))
-        pieEntrysList.add(PieEntrys(20f, "60.71%", getColorId(R.color.trade_analyze_pie_3), false, "黄金"))
-        pieEntrysList.add(PieEntrys(34f, "76.47%", getColorId(R.color.trade_analyze_pie_4), false, "欧元/美元"))
+        pieEntrysList.add(PieEntrys(10f, "80%", getColorId(R.color.trade_analyze_pie_1), false, "澳元/美元"))
+        pieEntrysList.add(PieEntrys(50f, "胜率 86.96%", getColorId(R.color.trade_analyze_pie_2), true, "英镑/美元"))
+        pieEntrysList.add(PieEntrys(1f, "60.71%", getColorId(R.color.trade_analyze_pie_3), false, "黄金"))
+        pieEntrysList.add(PieEntrys(1f, "76.47%", getColorId(R.color.trade_analyze_pie_4), false, "欧元/美元"))
 
         hatab_tapc_chart.pieEntryList = pieEntrysList
-        //不要忘了刷新
-        hatab_tapc_chart.invalidate()
     }
 
     private fun initPieChart() {

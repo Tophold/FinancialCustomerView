@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 
-import com.google.gson.reflect.TypeToken;
 import com.tophold.trade.R;
 import com.tophold.trade.utils.GsonUtil;
 import com.tophold.trade.utils.ScreenUtils;
@@ -29,6 +28,7 @@ import java.util.List;
  */
 public class PieChartView extends BaseView {
 
+    public static final float DEF_PARTSTHRESHOLD = 0.1f;
 
     List<PieEntrys> mPieEntryList;
 
@@ -50,7 +50,7 @@ public class PieChartView extends BaseView {
     //指示线距离圆环的边距
     float lineLengthMargin = 10;
     //指示线延伸长度
-    float lineLength = 75;
+    float lineLength = 85;
     //指示线的宽度
     float lineWidth = 1f;
     //是否延伸长度的阀值
@@ -70,8 +70,8 @@ public class PieChartView extends BaseView {
 
     //文字大小
     float textSize = 12;
-    //饼图item最小的占比
-    float minPartsThreshold = 0.1f;//0~1，定义最小的item,防止积压在一起。
+    //饼图item最小的占比。0~1，定义最小的item,防止积压在一起。初始值设置小一点，为了动画好看。
+    float minPartsThreshold = 0.1f;
 
 
     //没有数据显示
@@ -90,7 +90,6 @@ public class PieChartView extends BaseView {
     private float centerX;
     private float centerY;
     private boolean firstCome = true;
-
 
     public PieChartView(Context context) {
         this(context, null);
@@ -157,48 +156,49 @@ public class PieChartView extends BaseView {
         drawCircle(canvas);
     }
 
-    private void drawCircle(Canvas canvas) {
+
+    private void initPieData() {
         if (StringUtils.isEmptyList(mPieEntryList)) {
-            drawEmptyView(canvas);
             return;
         }
-
-        //拷副本，因为下面有一个对pieEntry.value的累减计算导致多次执行onDrew()时出现计算不准确。
-        List<PieEntrys> tempPieEntrys = GsonUtil.fromJson2Object(GsonUtil.toJson(mPieEntryList),
-                new TypeToken<List<PieEntrys>>() {
-                }.getType());
-
-        //数据预处理:对占比比较小的值多分配一点防止太小。
         float sumValue = 0;
         int maxIndex = 0;
         float maxData = -1;
-
-        for (int i = 0; i < tempPieEntrys.size(); i++) {
-            PieEntrys pieEntry = tempPieEntrys.get(i);
+        //数据预处理:对占比比较小的值多分配一点防止太小。
+        for (int i = 0; i < mPieEntryList.size(); i++) {
+            PieEntrys pieEntry = mPieEntryList.get(i);
             sumValue += pieEntry.value;
             if (pieEntry.value > maxData) {
                 maxData = pieEntry.value;
                 maxIndex = i;
             }
         }
-
-        for (int i = 0; i < tempPieEntrys.size(); i++) {
-            PieEntrys pieEntry = tempPieEntrys.get(i);
+        mAnimation.setPieChartData(mPieEntryList, sumValue, this);
+        /**
+         * 边界问题处理：防止item太小,出现文字积压问题。
+         */
+        PieEntrys maxPieEntry = mPieEntryList.get(maxIndex);
+        for (int i = 0; i < mPieEntryList.size(); i++) {
+            PieEntrys pieEntry = mPieEntryList.get(i);
             float tempValue = pieEntry.value;
             if (pieEntry.value / sumValue < minPartsThreshold) {
+                //该块补全最小值
                 pieEntry.value = sumValue * minPartsThreshold;
-                tempValue = pieEntry.value - tempValue;
-                //减去最大值的值
-                PieEntrys maxPieEntry = tempPieEntrys.get(maxIndex);
-                //注意这一步操作，会引起累减
-                Log.d(TAG, "aaaa1: " + maxIndex + "," + maxData + "," + maxPieEntry.value);
-                maxPieEntry.value -= tempValue;
-                Log.d(TAG, "aaaa2: " + maxIndex + "," + maxData + "," + maxPieEntry.value);
+                float disLen = pieEntry.value - tempValue;
+                //最大块减去被减去的
+                maxPieEntry.value -= disLen;
             }
         }
 
-        mAnimation.setPieChartData(mPieEntryList, sumValue, this);
+        //startAnimation的时候，如果这个View是不可见的，或者是gone的，就会导致传进去的Animation对象不执行
+        postDelayed(() -> startAnimation(mAnimation), 300);
+    }
 
+    private void drawCircle(Canvas canvas) {
+        if (StringUtils.isEmptyList(mPieEntryList)) {
+            drawEmptyView(canvas);
+            return;
+        }
 
         //正式开始处理
         float valueW = getBaseWidth() - basePaddingLeft - basePaddingRight;
@@ -213,10 +213,10 @@ public class PieChartView extends BaseView {
         RectF rectF = new RectF(lX, tY, rX, bY);
         float beginAngle = mBeginAngle;
         float preYpos = 0;
-        for (PieEntrys pieEntry : tempPieEntrys) {
+        for (PieEntrys pieEntry : mPieEntryList) {
 
             //无动画
-            //float sweepAngle = 360 * pieEntry.value / sumValue;
+            //float sweepAngle = 360 * pieEntry.value / mSumValue;
             //在这里实现动画
             float sweepAngle = pieEntry.mSweepAngle;
 
@@ -371,7 +371,7 @@ public class PieChartView extends BaseView {
 
     public PieChartView setPieEntryList(List<PieEntrys> pieEntryList) {
         mPieEntryList = pieEntryList;
-        startAnimation(mAnimation);
+        initPieData();
         return this;
     }
 

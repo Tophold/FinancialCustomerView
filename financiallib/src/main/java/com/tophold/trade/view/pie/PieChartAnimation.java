@@ -30,15 +30,8 @@ public class PieChartAnimation extends Animation {
     @Override
     protected void applyTransformation(float interpolatedTime, Transformation t) {
         super.applyTransformation(interpolatedTime, t);
-        if (StringUtils.isEmpty(mPieEntrysList) || mSumValue <= 0||mView==null) return;
+        if (StringUtils.isEmpty(mPieEntrysList) || mSumValue <= 0 || mView == null) return;
         Log.d(TAG, "applyTransformation1: " + interpolatedTime);
-
-        if(interpolatedTime<1f){
-            mView.setMinPartsThreshold(0.01f);
-        }else{
-            mView.setMinPartsThreshold(0.1f);
-        }
-
         for (int i = 0; i < mPieEntrysList.size(); i++) {
             PieEntrys data = mPieEntrysList.get(i);
             //通过总和来计算百分比
