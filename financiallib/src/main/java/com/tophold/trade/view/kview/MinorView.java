@@ -587,8 +587,8 @@ public class MinorView extends KBaseView {
             if (i == mEndIndex - 1) {
                 mEndQuotes = quotes;
             }
-            double min = FinancialAlgorithm.getMasterMinY(quotes, mMinorType);
-            double max = FinancialAlgorithm.getMasterMaxY(quotes, mMinorType);
+            double min = FinancialAlgorithm.getMinorMinY(quotes, mMinorType);
+            double max = FinancialAlgorithm.getMinorMaxY(quotes, mMinorType);
 
             if (min <= mMinY) {
                 mMinY = min;

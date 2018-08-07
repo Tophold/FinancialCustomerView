@@ -876,7 +876,7 @@ public class MasterView extends KBaseView {
         if (i == mBeginIndex) {
             path.moveTo((float) (quotes.floatX - mPerX / 2.0), quotes.floatY);
             path2.moveTo((float) (quotes.floatX - mPerX / 2.0), quotes.floatY);
-        } else if (i == mEndIndex-1) {
+        } else if (i == mEndIndex - 1) {
             //在这里把path圈起来，添加阴影。特别注意，这里处理下方阴影和折线边框。采用两个画笔和两个Path处理的，
             // 貌似没有一个Paint可以同时绘制边框和填充色。
             float bootomY = mBaseHeight - mBasePaddingBottom;
@@ -1002,9 +1002,9 @@ public class MasterView extends KBaseView {
         //对于蜡烛图，需要计算以下指标。
         if (mViewType == KViewType.MasterViewType.CANDLE) {
             //ma
-            FinancialAlgorithm.calculateMA(mQuotesList, 5);
-            FinancialAlgorithm.calculateMA(mQuotesList, 10);
-            FinancialAlgorithm.calculateMA(mQuotesList, 20);
+            FinancialAlgorithm.calculateMA(mQuotesList, 5, KViewType.MaType.ma5);
+            FinancialAlgorithm.calculateMA(mQuotesList, 10, KViewType.MaType.ma10);
+            FinancialAlgorithm.calculateMA(mQuotesList, 20, KViewType.MaType.ma20);
             //boll
             FinancialAlgorithm.calculateBOLL(mQuotesList);
 

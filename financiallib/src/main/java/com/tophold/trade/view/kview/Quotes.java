@@ -26,6 +26,9 @@ public class Quotes implements Serializable {
     //扩展一个结束时间
     public long e;
 
+    //vol 量，可选
+    public double vol;
+
     /**
      * 适配数据的构造方法，包括五个参数，全部必须。价格格式为String类型
      *
@@ -36,11 +39,7 @@ public class Quotes implements Serializable {
      * @param t 时间
      */
     public Quotes(String o, String h, String l, String c, String t) {
-        this.o = Double.parseDouble(o);
-        this.h = Double.parseDouble(h);
-        this.l = Double.parseDouble(l);
-        this.c = Double.parseDouble(c);
-        this.t = TimeUtils.date2Millis(new Date(t));
+        this(Double.parseDouble(o), Double.parseDouble(h), Double.parseDouble(l), Double.parseDouble(c), TimeUtils.date2Millis(new Date(t)));
     }
 
     /**
@@ -53,11 +52,31 @@ public class Quotes implements Serializable {
      * @param t
      */
     public Quotes(double o, double h, double l, double c, long t) {
+        this(o, h, l, c, t, -1, -1);
+    }
+
+    public Quotes(double o, double h, double l, double c, long t, double vol) {
+        this(o, h, l, c, t, -1, vol);
+    }
+
+    /**
+     * 最原始构造方法
+     *
+     * @param o
+     * @param h
+     * @param l
+     * @param c
+     * @param t
+     * @param e
+     */
+    public Quotes(double o, double h, double l, double c, long t, long e, double vol) {
         this.o = o;
         this.h = h;
         this.l = l;
         this.c = c;
         this.t = t;
+        this.e = e;
+        this.vol = vol;
     }
 
     /**
@@ -71,12 +90,8 @@ public class Quotes implements Serializable {
      * @param e
      */
     public Quotes(String o, String h, String l, String c, long s, long e) {
-        this.o = Double.parseDouble(o);
-        this.h = Double.parseDouble(h);
-        this.l = Double.parseDouble(l);
-        this.c = Double.parseDouble(c);
-        this.t = s;
-        this.e = e;
+        this(Double.parseDouble(o), Double.parseDouble(h), Double.parseDouble(l), Double.parseDouble(c), s, e, -1);
+
     }
 
     /**
@@ -118,5 +133,9 @@ public class Quotes implements Serializable {
     public double rsi6;
     public double rsi12;
     public double rsi24;
+
+    //vol
+    public double volMa5;
+    public double volMa10;
 
 }

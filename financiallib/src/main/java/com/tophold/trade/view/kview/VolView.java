@@ -16,7 +16,7 @@ import com.tophold.trade.utils.FormatUtil;
  * ============================================================
  * 作 者 :    wgyscsf@163.com
  * 创建日期 ：2017/12/14 17:56
- * 描 述 ：副图。该view提供各种副图指标。
+ * 描 述 ：量图，从本质上来说基本和副图一致。
  * ============================================================
  **/
 public class VolView extends KBaseView {
@@ -67,6 +67,9 @@ public class VolView extends KBaseView {
 
     //监听主图的长按事件
     private KViewListener.MasterListener mMasterListener;
+
+    //是否展示量图
+    private boolean mShowVol = false;
 
     public VolView(Context context) {
         this(context, null);
@@ -479,7 +482,7 @@ public class VolView extends KBaseView {
             mRsiPaint.setColor(mRsi12Color);
             canvas.drawPath(rsi12Path, mRsiPaint);
 
-             /*rsi24*/
+            /*rsi24*/
             //为什么这里重复再赋一遍值？因为下面有一个"rsiX +="操作
             rsiX = mBasePaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
             rsi24Y = (float) (v - mPerY * (quotes.rsi24 - mMinY));
@@ -545,7 +548,7 @@ public class VolView extends KBaseView {
             mKdjPaint.setColor(mDColor);
             canvas.drawPath(dPath, mKdjPaint);
 
-             /*j*/
+            /*j*/
             kdjX = mBasePaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
             jY = (float) (v - mPerY * (quotes.j - mMinY));
             if (i == mBeginIndex) {
@@ -565,14 +568,11 @@ public class VolView extends KBaseView {
     @Override
     protected void seekAndCalculateCellData() {
         if (mQuotesList == null || mQuotesList.isEmpty()) return;
+        if (!isShowVol()) return;
 
-        if (mMinorType == KViewType.MinorIndicatrixType.MACD) {
-            FinancialAlgorithm.calculateMACD(mQuotesList);
-        } else if (mMinorType == KViewType.MinorIndicatrixType.RSI) {
-            FinancialAlgorithm.calculateRSI(mQuotesList);
-        } else if (mMinorType == KViewType.MinorIndicatrixType.KDJ) {
-            FinancialAlgorithm.calculateKDJ(mQuotesList);
-        }
+        FinancialAlgorithm.calculateMA(mQuotesList, 5, KViewType.MaType.volMa5);
+        FinancialAlgorithm.calculateMA(mQuotesList, 10, KViewType.MaType.volMa10);
+
 
         //找到close最大值和最小值
         mMinY = Integer.MAX_VALUE;
@@ -587,8 +587,8 @@ public class VolView extends KBaseView {
             if (i == mEndIndex - 1) {
                 mEndQuotes = quotes;
             }
-            double min = FinancialAlgorithm.getMasterMinY(quotes, mMinorType);
-            double max = FinancialAlgorithm.getMasterMaxY(quotes, mMinorType);
+            double min = FinancialAlgorithm.getVolMinY(quotes);
+            double max = FinancialAlgorithm.getVolMaxY(quotes);
 
             if (min <= mMinY) {
                 mMinY = min;
@@ -885,5 +885,14 @@ public class VolView extends KBaseView {
 
     public KViewListener.MasterListener getMasterListener() {
         return mMasterListener;
+    }
+
+    public boolean isShowVol() {
+        return mShowVol;
+    }
+
+    public VolView setShowVol(boolean showVol) {
+        mShowVol = showVol;
+        return this;
     }
 }
