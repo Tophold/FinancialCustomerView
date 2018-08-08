@@ -234,15 +234,7 @@ public class VolView extends KBaseView {
 
     private void drawMinorIndicatrix(Canvas canvas) {
         mMacdPaint.setStyle(Paint.Style.STROKE);
-        mRsiPaint.setStyle(Paint.Style.STROKE);
-        mKdjPaint.setStyle(Paint.Style.STROKE);
-        if (mMinorType == KViewType.MinorIndicatrixType.MACD) {
-            drawMACD(canvas);
-        } else if (mMinorType == KViewType.MinorIndicatrixType.RSI) {
-            drawRSI(canvas);
-        } else if (mMinorType == KViewType.MinorIndicatrixType.KDJ) {
-            drawKDJ(canvas);
-        }
+        drawMACD(canvas);
     }
 
     private void drawLongPress(Canvas canvas) {
@@ -258,83 +250,31 @@ public class VolView extends KBaseView {
         if (!mDrawLongPress) return;
 
         mMacdPaint.setStyle(Paint.Style.FILL);
-        mRsiPaint.setStyle(Paint.Style.FILL);
-        mKdjPaint.setStyle(Paint.Style.FILL);
-
         float x = (float) (mLegendPaddingLeft + mBasePaddingLeft);
         float y = (float) (mLegendPaddingTop + mBasePaddingTop) + getFontHeight(mLegendTxtSize, mMacdPaint);
 
-        String showTxt;
-        switch (mMinorType) {
-            case MACD:
-                showTxt = "DIFF:" + FormatUtil.numFormat(mCurrLongPressQuotes.dif, mDigits) + " ";
-                mMacdPaint.setColor(mMacdDifColor);
-                canvas.drawText(showTxt, x,
-                        y, mMacdPaint);
+        String showTxt = "VOL:" + FormatUtil.numFormat(mCurrLongPressQuotes.vol, mDigits) + " ";
+        mMacdPaint.setColor(mMacdDifColor);
+        canvas.drawText(showTxt, x,
+                y, mMacdPaint);
 
-                float leftWidth11 = mMacdPaint.measureText(showTxt);
-                showTxt = "DEA:" + FormatUtil.numFormat(mCurrLongPressQuotes.dea, mDigits) + " ";
-                mMacdPaint.setColor(mMacdDeaColor);
-                canvas.drawText(showTxt, x + leftWidth11, y, mMacdPaint);
+        float leftWidth11 = mMacdPaint.measureText(showTxt);
+        showTxt = "MA5:" + FormatUtil.numFormat(mCurrLongPressQuotes.volMa5, mDigits) + " ";
+        mMacdPaint.setColor(mMacdDeaColor);
+        canvas.drawText(showTxt, x + leftWidth11, y, mMacdPaint);
 
-                float leftWidth12 = mMacdPaint.measureText(showTxt);
-                showTxt = "MACD:" + FormatUtil.numFormat(mCurrLongPressQuotes.macd, mDigits) + " ";
-                mMacdPaint.setColor(mMacdMacdColor);
-                canvas.drawText(showTxt, (x + leftWidth11 + leftWidth12),
-                        y, mMacdPaint);
-                break;
-            case RSI:
-                showTxt = "RSI6:" + FormatUtil.numFormat(mCurrLongPressQuotes.rsi6, mDigits) + " ";
-                mRsiPaint.setColor(mRsi6Color);
-                canvas.drawText(showTxt, (x),
-                        y, mRsiPaint);
+        float leftWidth12 = mMacdPaint.measureText(showTxt);
+        showTxt = "MA10:" + FormatUtil.numFormat(mCurrLongPressQuotes.volMa10, mDigits) + " ";
+        mMacdPaint.setColor(mMacdMacdColor);
+        canvas.drawText(showTxt, (x + leftWidth11 + leftWidth12),
+                y, mMacdPaint);
 
-                float leftWidth21 = mRsiPaint.measureText(showTxt);
-                showTxt = "RSI12:" + FormatUtil.numFormat(mCurrLongPressQuotes.rsi12, mDigits) + " ";
-                mRsiPaint.setColor(mRsi12Color);
-                canvas.drawText(showTxt, (x + leftWidth21),
-                        y, mRsiPaint);
-
-                float leftWidth22 = mRsiPaint.measureText(showTxt);
-                showTxt = "RSI24:" + FormatUtil.numFormat(mCurrLongPressQuotes.rsi24, mDigits) + " ";
-                mRsiPaint.setColor(mRsi24Color);
-                canvas.drawText(showTxt, (x + leftWidth21 + leftWidth22),
-                        y, mRsiPaint);
-                break;
-            case KDJ:
-                showTxt = "K:" + FormatUtil.numFormat(mCurrLongPressQuotes.k, mDigits) + " ";
-                mKdjPaint.setColor(mKColor);
-                canvas.drawText(showTxt, (x),
-                        y, mKdjPaint);
-
-                float leftWidth = mKdjPaint.measureText(showTxt);
-                showTxt = "D:" + FormatUtil.numFormat(mCurrLongPressQuotes.d, mDigits) + " ";
-                mKdjPaint.setColor(mDColor);
-                canvas.drawText(showTxt, (x + leftWidth),
-                        y, mKdjPaint);
-
-                float leftWidth2 = mKdjPaint.measureText(showTxt);
-                showTxt = "J:" + FormatUtil.numFormat(mCurrLongPressQuotes.j, mDigits) + " ";
-                mKdjPaint.setColor(mJColor);
-                canvas.drawText(showTxt, (x + leftWidth + leftWidth2),
-                        y, mKdjPaint);
-                break;
-            default:
-                break;
-        }
 
     }
 
     private void drawNoPressLegend(Canvas canvas) {
         if (mDrawLongPress) return;
-        String showTxt = "";
-        if (mMinorType == KViewType.MinorIndicatrixType.MACD) {
-            showTxt = "MACD(12,26,9)";
-        } else if (mMinorType == KViewType.MinorIndicatrixType.RSI) {
-            showTxt = "RSI(6,12,24)";
-        } else if (mMinorType == KViewType.MinorIndicatrixType.KDJ) {
-            showTxt = "KDJ(9,3,3)";
-        }
+        String showTxt = "MA(5，10)";
         canvas.drawText(showTxt,
                 (float) (mBaseWidth - mLegendPaddingRight - mBasePaddingRight - mLegendPaint.measureText(showTxt)),
                 (float) (mLegendPaddingTop + mBasePaddingTop + getFontHeight(mLegendTxtSize, mLegendPaint)), mLegendPaint);
@@ -366,28 +306,28 @@ public class VolView extends KBaseView {
         //macd
         //首先寻找"0"点，这个点是正负macd的分界点
         float v = mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding;
-        double zeroY = v - mPerY * (0 - mMinY);
         float startX, startY, stopX, stopY;
 
         //dif
         float difX, difY;
         Path difPath = new Path();
-
         //dea
         float deaX, deaY;
         Path deaPath = new Path();
 
+        boolean isFirstMa5 = true;
+        boolean isFirstMa10 = true;
         for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes quotes = mQuotesList.get(i);
 
             /*macd*/
             //找另外一个y点
-            double y = v - mPerY * (quotes.macd - mMinY);
+            double y = v - mPerY * (quotes.vol - mMinY);
             startX = mBasePaddingLeft + (i - mBeginIndex) * mPerX + mCandleDiverWidthRatio * mPerX / 2;
             stopX = mBasePaddingLeft + (i - mBeginIndex + 1) * mPerX - mCandleDiverWidthRatio * mPerX / 2;
-            startY = (float) zeroY;
+            startY = v;
             stopY = (float) y;
-            if (quotes.macd > 0) {
+            if (i > 0 && mQuotesList.get(i - 1).c < quotes.c) {
                 mMacdPaint.setColor(mMacdBuyColor);
             } else {
                 mMacdPaint.setColor(mMacdSellColor);
@@ -401,36 +341,61 @@ public class VolView extends KBaseView {
 
             /*dif*/
             difX = mBasePaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
-            difY = (float) (v - mPerY * (quotes.dif - mMinY));
-            if (i == mBeginIndex) {
-                difPath.moveTo(difX - mPerX / 2, difY);//第一个点特殊处理
-            } else {
-                if (i == mEndIndex - 1) {
-                    difX += mPerX / 2;//最后一个点特殊处理
+            difY = getMasterDetailFloatY(quotes, KViewType.MaType.volMa5);
+            if (difY != -1) {
+                if (isFirstMa5) {
+                    isFirstMa5 = false;
+                    if (quotes.volMa5 != 0) difX -= mPerX / 2;//第一个点特殊处理
+                    difPath.moveTo(difX, difY);
+                } else {
+                    if (i == mEndIndex - 1) difX += mPerX / 2;//最后一个点特殊处理
+                    difPath.lineTo(difX, difY);
                 }
-                difPath.lineTo(difX, difY);
+                mMacdPaint.setStyle(Paint.Style.STROKE);
+                mMacdPaint.setColor(mMacdDifColor);
+                canvas.drawPath(difPath, mMacdPaint);
             }
-            mMacdPaint.setStyle(Paint.Style.STROKE);
-            mMacdPaint.setColor(mMacdDifColor);
-            canvas.drawPath(difPath, mMacdPaint);
 
 
             /*dea*/
             deaX = mBasePaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
-            deaY = (float) (v - mPerY * (quotes.dea - mMinY));
-            if (i == mBeginIndex) {
-                deaPath.moveTo(deaX - mPerX / 2, deaY);//第一个点特殊处理
-            } else {
-                if (i == mEndIndex - 1) {
-                    deaX += mPerX / 2;//最后一个点特殊处理
+            deaY = getMasterDetailFloatY(quotes, KViewType.MaType.volMa10);
+            if (deaY != -1) {
+                if (isFirstMa10) {
+                    isFirstMa10 = false;
+                    if (quotes.volMa10 != 0) deaX -= mPerX / 2;//第一个点特殊处理
+                    deaPath.moveTo(deaX, deaY);
+                } else {
+                    if (i == mEndIndex - 1) deaX += mPerX / 2;//最后一个点特殊处理
+                    deaPath.lineTo(deaX, deaY);
                 }
-                deaPath.lineTo(deaX, deaY);
+                mMacdPaint.setStyle(Paint.Style.STROKE);
+                mMacdPaint.setColor(mMacdDeaColor);
+                canvas.drawPath(deaPath, mMacdPaint);
             }
-            mMacdPaint.setStyle(Paint.Style.STROKE);
-            mMacdPaint.setColor(mMacdDeaColor);
-            canvas.drawPath(deaPath, mMacdPaint);
         }
 
+    }
+
+    private float getMasterDetailFloatY(Quotes quotes, KViewType.MaType maType) {
+        double v = 0;
+        //ma
+        if (maType == KViewType.MaType.volMa5) {
+            v = quotes.volMa5 - mMinY;
+        } else if (maType == KViewType.MaType.volMa10) {
+            v = quotes.volMa10 - mMinY;
+        }
+        //异常，当不存在ma值时的处理.也就是up、mb、dn为0时，这样判断其实有问题，比如算出来的值就是0？？？
+        if (v + mMinY == 0) return -1;
+
+        double h = v * mPerY;
+        float y = (float) (mBaseHeight - h - mBasePaddingBottom - mInnerBottomBlankPadding);
+
+        //这里的y,存在一种情况，y超过了View的上边界或者超过了下边界，当出现这一种情况时，不显示，当作异常情况
+        if (y < mBasePaddingTop || y > mBaseHeight - mBasePaddingBottom)
+            return -1;
+
+        return y;
     }
 
     private void drawRSI(Canvas canvas) {

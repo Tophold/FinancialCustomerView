@@ -635,7 +635,7 @@ public class MasterView extends KBaseView {
         } else if (maType == KViewType.MasterIndicatrixDetailType.BOLLDN) {
             v = quotes.dn - mCandleMinY;
         }
-        //异常，当不存在ma值时的处理
+        //异常，当不存在ma值时的处理.也就是up、mb、dn为0时，这样判断其实有问题，比如算出来的值就是0？？？
         if (v + mCandleMinY == 0) return -1;
 
         double h = v * mPerY;

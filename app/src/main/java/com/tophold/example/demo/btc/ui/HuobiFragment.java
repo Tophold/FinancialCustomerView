@@ -110,8 +110,10 @@ public class HuobiFragment extends BaseFragment {
 
         if (((HuobiActivity) getActivity()).isHorizontal()) {
             mFkKvKview.setShowMinor(true);
+            mFkKvKview.setShowVol(true);
         } else {
             mFkKvKview.setShowMinor(false);
+            mFkKvKview.setShowVol(false);
         }
     }
 

@@ -47,6 +47,7 @@ public final class KView extends KLayoutView {
         }
         mMasterView.setTimeSharingData(quotesList, masterTouchListener);
         mMinorView.setTimeSharingData(quotesList, masterTouchListener);
+        mVolView.setTimeSharingData(quotesList, masterTouchListener);
     }
 
     /**
@@ -63,6 +64,7 @@ public final class KView extends KLayoutView {
         }
         mMasterView.pushingTimeSharingData(quotes, period);
         mMinorView.pushingTimeSharingData(quotes, period);
+        mVolView.pushingTimeSharingData(quotes, period);
     }
 
     /**
@@ -78,6 +80,7 @@ public final class KView extends KLayoutView {
         }
         mMasterView.loadMoreTimeSharingData(quotesList);
         mMinorView.loadMoreTimeSharingData(quotesList);
+        mVolView.loadMoreTimeSharingData(quotesList);
     }
 
     /**

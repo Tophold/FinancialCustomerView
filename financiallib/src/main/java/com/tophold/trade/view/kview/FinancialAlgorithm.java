@@ -246,19 +246,20 @@ public class FinancialAlgorithm {
             if (i < period - 1) {
                 continue;
             }
+            double result = sum / period;
             if (period == 5) {
-                if (isMaster) quotes.ma5 = sum / period;
-                else quotes.volMa5 = sum / period;
+                if (isMaster) quotes.ma5 = result;
+                else quotes.volMa5 = result;
             } else if (period == 10) {
-                if (isMaster) quotes.ma10 = sum / period;
-                else quotes.volMa10 = sum / period;
+                if (isMaster) quotes.ma10 = result;
+                else quotes.volMa10 = result;
             } else if (period == 20) {
-                if (isMaster) quotes.ma20 = sum / period;
+                if (isMaster) quotes.ma20 = result;
                 else {
-                    Log.e(TAG, "calculateMA: 没有该种period，TODO:完善Quotes");
+                    Log.e(TAG, "calculateMA: 没有该种period：" + period + "," + maType);
                 }
             } else {
-                Log.e(TAG, "calculateMA: 没有该种period，TODO:完善Quotes");
+                Log.e(TAG, "calculateMA: 没有该种period：" + period + "," + maType);
                 return;
             }
 
