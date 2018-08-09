@@ -66,7 +66,7 @@ public class MinorView extends KBaseView {
     protected float mCandleDiverWidthRatio = 0.1f;
 
     //监听主图的长按事件
-    private KViewListener.MasterListener mMasterListener;
+    private KViewListener.MinorListener mMinorListener;
 
     public MinorView(Context context) {
         this(context, null);
@@ -180,7 +180,7 @@ public class MinorView extends KBaseView {
     }
 
     private void initListener() {
-        mMasterListener = new KViewListener.MasterListener() {
+        mMinorListener = new KViewListener.MinorListener() {
             @Override
             public void masterLongPressListener(int pressIndex, Quotes currQuotes) {
                 mDrawLongPress = true;
@@ -878,12 +878,12 @@ public class MinorView extends KBaseView {
         return this;
     }
 
-    public MinorView setMasterListener(KViewListener.MasterListener masterListener) {
-        mMasterListener = masterListener;
+    public MinorView setMinorListener(KViewListener.MinorListener minorListener) {
+        mMinorListener = minorListener;
         return this;
     }
 
-    public KViewListener.MasterListener getMasterListener() {
-        return mMasterListener;
+    public KViewListener.MinorListener getMinorListener() {
+        return mMinorListener;
     }
 }

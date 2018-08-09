@@ -66,7 +66,7 @@ public class VolView extends KBaseView {
     protected float mCandleDiverWidthRatio = 0.1f;
 
     //监听主图的长按事件
-    private KViewListener.MasterListener mMasterListener;
+    private KViewListener.MinorListener mVolListener;
 
     //是否展示量图
     private boolean mShowVol = false;
@@ -183,7 +183,7 @@ public class VolView extends KBaseView {
     }
 
     private void initListener() {
-        mMasterListener = new KViewListener.MasterListener() {
+        mVolListener = new KViewListener.MinorListener() {
             @Override
             public void masterLongPressListener(int pressIndex, Quotes currQuotes) {
                 mDrawLongPress = true;
@@ -843,13 +843,13 @@ public class VolView extends KBaseView {
         return this;
     }
 
-    public VolView setMasterListener(KViewListener.MasterListener masterListener) {
-        mMasterListener = masterListener;
+    public VolView setVolListener(KViewListener.MinorListener volListener) {
+        mVolListener = volListener;
         return this;
     }
 
-    public KViewListener.MasterListener getMasterListener() {
-        return mMasterListener;
+    public KViewListener.MinorListener getVolListener() {
+        return mVolListener;
     }
 
     public boolean isShowVol() {

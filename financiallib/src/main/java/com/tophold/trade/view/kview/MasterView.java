@@ -157,10 +157,21 @@ public class MasterView extends KBaseView {
     protected float mCandleDiverWidthRatio = 0.1f;
 
     //持有副图长按，方便监听
-    private KViewListener.MasterListener mMasterListener;
+    private KViewListener.MinorListener mMinorListener;
+    //持有量图长按，方便监听
+    private KViewListener.MinorListener mVolListener;
 
-    public void setMasterListener(KViewListener.MasterListener masterListener) {
-        mMasterListener = masterListener;
+    public void setMinorListener(KViewListener.MinorListener minorListener) {
+        mMinorListener = minorListener;
+    }
+
+    public KViewListener.MinorListener getVolListener() {
+        return mVolListener;
+    }
+
+    public MasterView setVolListener(KViewListener.MinorListener volListener) {
+        mVolListener = volListener;
+        return this;
     }
 
     public MasterView(Context context) {
@@ -233,7 +244,7 @@ public class MasterView extends KBaseView {
         //底部距离
         mBasePaddingBottom = 35;
 
-        setMoveType(KViewType.MoveType.ONFLING);
+        setMoveType(KViewType.MoveType.STEP);
     }
 
     @Override
@@ -766,8 +777,11 @@ public class MasterView extends KBaseView {
                 mBaseHeight - mBasePaddingBottom, mLongPressPaint);
 
         //将长按信息回调给副图，方便副图处理长按信息
-        if (mMasterListener != null)
-            mMasterListener.masterLongPressListener(finalIndex, finalFundMode);
+        if (mMinorListener != null)
+            mMinorListener.masterLongPressListener(finalIndex, finalFundMode);
+
+        if (mVolListener != null)
+            mVolListener.masterLongPressListener(finalIndex, finalFundMode);
 
 
         //接着绘制长按上方和右侧文字信息背景
@@ -1096,7 +1110,8 @@ public class MasterView extends KBaseView {
                     int tempCount = isBigger ? mShownMaxCount - changeNum : mShownMaxCount + changeNum;
 
                     //缩小大到最小了或者放大到很大了
-                    if (tempCount > def_scale_maxnum || tempCount < def_scale_minnum) return true;
+                    if (tempCount > def_scale_maxnum || tempCount < def_scale_minnum)
+                        return true;
 
                     mShownMaxCount = tempCount;
 
@@ -1112,8 +1127,10 @@ public class MasterView extends KBaseView {
                     mEndIndex = mBeginIndex + mShownMaxCount;
 
                     //将新的索引回调给副图
-                    if (mMasterListener != null)
-                        mMasterListener.masteZoomlNewIndex(mBeginIndex, mEndIndex, mShownMaxCount);
+                    if (mMinorListener != null)
+                        mMinorListener.masteZoomlNewIndex(mBeginIndex, mEndIndex, mShownMaxCount);
+                    if (mVolListener != null)
+                        mVolListener.masteZoomlNewIndex(mBeginIndex, mEndIndex, mShownMaxCount);
 
                     //只要找好起始点和结束点就可以交给处理重绘的方法就好啦~
                     seekAndCalculateCellData();
@@ -1216,8 +1233,11 @@ public class MasterView extends KBaseView {
         }
 
         //回调给副图
-        if (mMasterListener != null)
-            mMasterListener.mastelPullmNewIndex(mBeginIndex, mEndIndex, mPullType, mShownMaxCount);
+        if (mMinorListener != null)
+            mMinorListener.mastelPullmNewIndex(mBeginIndex, mEndIndex, mPullType, mShownMaxCount);
+
+        if (mVolListener != null)
+            mVolListener.mastelPullmNewIndex(mBeginIndex, mEndIndex, mPullType, mShownMaxCount);
 
         //开始位置和结束位置确认好，就可以重绘啦~
         Log.d(TAG, "moveKView: mBeginIndex:" + mBeginIndex + ",mEndIndex:" + mEndIndex);
@@ -1256,7 +1276,8 @@ public class MasterView extends KBaseView {
         mDrawLongPress = false;
         invalidate();
         if (mMasterTouchListener != null) mMasterTouchListener.onUnLongTouch();
-        if (mMasterListener != null) mMasterListener.masterNoLongPressListener();
+        if (mMinorListener != null) mMinorListener.masterNoLongPressListener();
+        if (mVolListener != null) mVolListener.masterNoLongPressListener();
     }
 
     @Override
@@ -1668,15 +1689,16 @@ public class MasterView extends KBaseView {
         return this;
     }
 
-    public KViewListener.MasterListener getMasterListener() {
-        return mMasterListener;
+    public KViewListener.MinorListener getMinorListener() {
+        return mMinorListener;
     }
 
     public ScaleGestureDetector.OnScaleGestureListener getOnScaleGestureListener() {
         return mOnScaleGestureListener;
     }
 
-    public MasterView setOnScaleGestureListener(ScaleGestureDetector.OnScaleGestureListener onScaleGestureListener) {
+    public MasterView setOnScaleGestureListener(ScaleGestureDetector.OnScaleGestureListener
+                                                        onScaleGestureListener) {
         mOnScaleGestureListener = onScaleGestureListener;
         return this;
     }

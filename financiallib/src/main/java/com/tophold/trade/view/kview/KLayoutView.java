@@ -77,7 +77,8 @@ public class KLayoutView extends LinearLayout {
         addView(mMinorView);
         addView(mVolView);
 
-        mMasterView.setMasterListener(mMinorView.getMasterListener());
+        mMasterView.setMinorListener(mMinorView.getMinorListener());
+        mMasterView.setVolListener(mVolView.getVolListener());
     }
 
     private void measureHeight() {
