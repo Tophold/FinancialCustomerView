@@ -61,4 +61,7 @@ public class StringUtils {
         Random rdm = new Random();
         return rdm.nextInt(max - min + 1) + min;
     }
+    public static String getString(){
+        return getRadomNum(0,1)==0?null:"sdaas";
+    }
 }

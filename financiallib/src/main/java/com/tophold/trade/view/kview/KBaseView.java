@@ -123,7 +123,7 @@ public abstract class KBaseView extends BaseView {
 
     protected GestureDetectorCompat mFlingDetector;
 
-    //移动的模式：是一点一点移动还是具有onFling()效果？
+    //移动的模式：是一点一点移动还是具有onFling()效果？现在onfling效果有点问题
     protected KViewType.MoveType mMoveType = KViewType.MoveType.STEP;
 
 
@@ -223,10 +223,10 @@ public abstract class KBaseView extends BaseView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         //默认加载loading界面
-        showLoadingPaint(canvas);
-        if (mQuotesList == null || mQuotesList.isEmpty()) {
-            return;
-        }
+//        showLoadingPaint(canvas);
+//        if (mQuotesList == null || mQuotesList.isEmpty()) {
+//            return;
+//        }
         drawOuterLine(canvas);
         drawInnerXy(canvas);
     }
@@ -562,7 +562,7 @@ public abstract class KBaseView extends BaseView {
         mBeginIndex += addSize;
         mEndIndex += addSize;
 
-        //重新测量一下,这里不能重新测量。因为重新测量的逻辑是寻找最新的点。
+        //重新计算perx\pery等
         seekAndCalculateCellData();
     }
 

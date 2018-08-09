@@ -1,6 +1,7 @@
 package com.tophold.trade.view.kview;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
@@ -15,12 +16,18 @@ import android.widget.LinearLayout;
 public class KLayoutView extends LinearLayout {
     public static String TAG;
     public static final float DEF_MINORHRATIO = 0.25f;
+    public static final float DEF_VOLHRATIO = 0.25f;
     protected MasterView mMasterView;
     protected MinorView mMinorView;
+    protected VolView mVolView;
     //副图高度占全部高度比
     protected float mMinorHRatio = DEF_MINORHRATIO;
+    //量图高度占全部高度比
+    protected float mVolHRatio = DEF_VOLHRATIO;
     //是否展示副图
     protected boolean isShowMinor = true;
+    //是否展示量图
+    protected boolean isShowVol = true;
 
     public KLayoutView(Context context) {
         this(context, null);
@@ -61,19 +68,23 @@ public class KLayoutView extends LinearLayout {
         mMinorView = new MinorView(getContext());
         // mMinorView.setBackgroundColor(getResources().getColor(R.color.color_fundView_xLineColor));
 
+        mVolView = new VolView(getContext());
+
         //测量高度
         measureHeight();
 
         addView(mMasterView);
         addView(mMinorView);
+        addView(mVolView);
 
-        mMasterView.setMasterListener(mMinorView.getMasterListener());
+        mMasterView.setMinorListener(mMinorView.getMinorListener());
+        mMasterView.setVolListener(mVolView.getVolListener());
     }
 
     private void measureHeight() {
         LayoutParams params = new LayoutParams(
                 LayoutParams.MATCH_PARENT, 0);
-        params.weight = 1 - mMinorHRatio;
+        params.weight = 1 - mMinorHRatio - mVolHRatio;
         mMasterView.setLayoutParams(params);
 
 
@@ -81,6 +92,11 @@ public class KLayoutView extends LinearLayout {
                 LayoutParams.MATCH_PARENT, 0);
         params2.weight = mMinorHRatio;
         mMinorView.setLayoutParams(params2);
+
+        LayoutParams params3 = new LayoutParams(
+                LayoutParams.MATCH_PARENT, 0);
+        params3.weight = mVolHRatio;
+        mVolView.setLayoutParams(params3);
     }
 
 
@@ -111,8 +127,57 @@ public class KLayoutView extends LinearLayout {
         mMinorHRatio = minorHRatio;
     }
 
+
     public boolean isShowMinor() {
         return isShowMinor;
+    }
+
+    public VolView getVolView() {
+        return mVolView;
+    }
+
+    public KLayoutView setVolView(VolView volView) {
+        mVolView = volView;
+        return this;
+    }
+
+    public float getVolHRatio() {
+        return mVolHRatio;
+    }
+
+    public KLayoutView setVolHRatio(float volHRatio) {
+        mVolHRatio = volHRatio;
+        return this;
+    }
+
+    public boolean isShowVol() {
+        return isShowVol;
+    }
+
+    public KLayoutView setShowVol(boolean showVol) {
+        isShowVol = showVol;
+        if (!isShowVol) {
+            mVolHRatio = 0;
+        } else {
+            mMinorHRatio = DEF_VOLHRATIO;
+        }
+        mVolView.setShowVol(isShowVol);
+        return reloadHeight();
+
+
+    }
+
+    @NonNull
+    private KLayoutView reloadHeight() {
+        //为什么要这样刷新？先重新测量主图和副图的高度，然后再去测量各自的seekAndCalculateCellData
+        measureHeight();
+
+        postDelayed(() -> {
+            mMasterView.seekAndCalculateCellData();
+            mMinorView.seekAndCalculateCellData();
+            mVolView.seekAndCalculateCellData();
+        }, 300);
+        return this;
     }
 
     /**
@@ -124,23 +189,13 @@ public class KLayoutView extends LinearLayout {
      *
      * @param showMinor
      */
-    public void setShowMinor(boolean showMinor) {
+    public KLayoutView setShowMinor(boolean showMinor) {
         isShowMinor = showMinor;
         if (!isShowMinor) {
             mMinorHRatio = 0;
         } else {
             mMinorHRatio = DEF_MINORHRATIO;
         }
-
-        //为什么要这样刷新？先重新测量主图和副图的高度，然后再去测量各自的seekAndCalculateCellData
-        measureHeight();
-
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mMasterView.seekAndCalculateCellData();
-                mMinorView.seekAndCalculateCellData();
-            }
-        }, 300);
+        return reloadHeight();
     }
 }

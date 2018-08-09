@@ -220,9 +220,15 @@ public class FinancialAlgorithm {
      * @param quotesList 数据集合
      * @param period     MAn中的n,周期，一般是：5、10、20、30、60。
      */
-    public static void calculateMA(List<Quotes> quotesList, int period) {
+    public static void calculateMA(List<Quotes> quotesList, int period, KViewType.MaType maType) {
+        boolean isMaster = true;
+        if (maType == KViewType.MaType.volMa5 || maType == KViewType.MaType.volMa10)
+            isMaster = false;
 
         if (quotesList == null || quotesList.isEmpty()) return;
+
+        if (!isMaster && quotesList.get(0).vol <= 0)
+            throw new IllegalArgumentException("请确保设置vol参数");
 
         if (period < 0 || period > quotesList.size() - 1) return;
 
@@ -231,24 +237,29 @@ public class FinancialAlgorithm {
         for (int i = 0; i < quotesList.size(); i++) {
             //计算和
             Quotes quotes = quotesList.get(i);
-            sum += quotes.c;
+            sum += isMaster ? quotes.c : quotes.vol;
             if (i > period - 1) {
-                sum -= quotesList.get(i - period).c;
+                Quotes q = quotesList.get(i - period);
+                sum -= isMaster ? q.c : q.vol;
             }
-
             //边界
             if (i < period - 1) {
                 continue;
             }
-
+            double result = sum / period;
             if (period == 5) {
-                quotes.ma5 = sum / period;
+                if (isMaster) quotes.ma5 = result;
+                else quotes.volMa5 = result;
             } else if (period == 10) {
-                quotes.ma10 = sum / period;
+                if (isMaster) quotes.ma10 = result;
+                else quotes.volMa10 = result;
             } else if (period == 20) {
-                quotes.ma20 = sum / period;
+                if (isMaster) quotes.ma20 = result;
+                else {
+                    Log.e(TAG, "calculateMA: 没有该种period：" + period + "," + maType);
+                }
             } else {
-                Log.e(TAG, "calculateMA: 没有该种period，TODO:完善Quotes");
+                Log.e(TAG, "calculateMA: 没有该种period：" + period + "," + maType);
                 return;
             }
 
@@ -419,7 +430,7 @@ public class FinancialAlgorithm {
      * @param minorType
      * @return
      */
-    public static double getMasterMinY(Quotes quotes, KViewType.MinorIndicatrixType minorType) {
+    public static double getMinorMinY(Quotes quotes, KViewType.MinorIndicatrixType minorType) {
         double min = Integer.MAX_VALUE;
         //macd
         if (minorType == KViewType.MinorIndicatrixType.MACD) {
@@ -472,7 +483,7 @@ public class FinancialAlgorithm {
      * @param minorType
      * @return
      */
-    public static double getMasterMaxY(Quotes quotes, KViewType.MinorIndicatrixType minorType) {
+    public static double getMinorMaxY(Quotes quotes, KViewType.MinorIndicatrixType minorType) {
         double max = Integer.MIN_VALUE;
         //macd
         if (minorType == KViewType.MinorIndicatrixType.MACD) {
@@ -518,4 +529,45 @@ public class FinancialAlgorithm {
 
     }
 
+    /**
+     * 量图：找到最大值
+     *
+     * @param quotes
+     * @return
+     */
+    public static double getVolMaxY(Quotes quotes) {
+        double max = Integer.MIN_VALUE;
+        //vol、volma5,volma10
+        if (quotes.vol != 0 && quotes.vol > max) {
+            max = quotes.vol;
+        }
+        if (quotes.volMa5 != 0 && quotes.volMa5 > max) {
+            max = quotes.volMa5;
+        }
+        if (quotes.volMa10 != 0 && quotes.volMa10 > max) {
+            max = quotes.volMa10;
+        }
+        return max;
+    }
+
+    /**
+     * 量图：找到最小值
+     *
+     * @param quotes
+     * @return
+     */
+    public static double getVolMinY(Quotes quotes) {
+        double min = Integer.MAX_VALUE;
+        //vol、volma5,volma10
+        if (quotes.vol != 0 && quotes.vol < min) {
+            min = quotes.vol;
+        }
+        if (quotes.volMa5 != 0 && quotes.volMa5 < min) {
+            min = quotes.volMa5;
+        }
+        if (quotes.volMa10 != 0 && quotes.volMa10 < min) {
+            min = quotes.volMa10;
+        }
+        return min;
+    }
 }

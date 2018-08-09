@@ -65,4 +65,15 @@ public class KViewType {
         STEP,//一点一点移动
         ONFLING//具有onfling效果
     }
+
+    /**
+     * MA类型：主图：ma5,ma10,ma20;量图：ma5,ma10
+     */
+    public enum MaType {
+        ma5,//主图ma5
+        ma10,//主图ma10
+        ma20,//主图ma20
+        volMa5,//量图ma5
+        volMa10//量图ma10
+    }
 }

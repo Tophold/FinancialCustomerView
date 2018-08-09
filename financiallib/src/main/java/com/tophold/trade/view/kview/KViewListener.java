@@ -22,7 +22,7 @@ public class KViewListener {
     /**
      * 主图的监听，主要供副图使用，把这些数据回调给副图，避免副图再做复杂重复的操作。
      */
-    public interface MasterListener {
+    public interface MinorListener {
         /**
          * 长按操作
          *
