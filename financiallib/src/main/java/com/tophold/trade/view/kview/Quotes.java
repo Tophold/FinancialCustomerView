@@ -138,4 +138,36 @@ public class Quotes implements Serializable {
     public double volMa5;
     public double volMa10;
 
+    @Override
+    public String toString() {
+        return "Quotes{" +
+                "t=" + t +
+                ", o=" + o +
+                ", h=" + h +
+                ", l=" + l +
+                ", c=" + c +
+                ", e=" + e +
+                ", vol=" + vol +
+                ", showTime='" + showTime + '\'' +
+                ", floatX=" + floatX +
+                ", floatY=" + floatY +
+                ", ma5=" + ma5 +
+                ", ma10=" + ma10 +
+                ", ma20=" + ma20 +
+                ", up=" + up +
+                ", mb=" + mb +
+                ", dn=" + dn +
+                ", k=" + k +
+                ", d=" + d +
+                ", j=" + j +
+                ", dif=" + dif +
+                ", dea=" + dea +
+                ", macd=" + macd +
+                ", rsi6=" + rsi6 +
+                ", rsi12=" + rsi12 +
+                ", rsi24=" + rsi24 +
+                ", volMa5=" + volMa5 +
+                ", volMa10=" + volMa10 +
+                '}';
+    }
 }

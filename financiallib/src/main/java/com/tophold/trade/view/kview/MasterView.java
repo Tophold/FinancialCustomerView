@@ -21,6 +21,7 @@ import java.util.Locale;
 import com.tophold.trade.Constant;
 import com.tophold.trade.R;
 import com.tophold.trade.utils.FormatUtil;
+import com.tophold.trade.utils.ScreenUtils;
 import com.tophold.trade.utils.TimeUtils;
 
 /**
@@ -133,6 +134,10 @@ public class MasterView extends KBaseView {
     Paint mBollDnPaint;
     int mBollDnColor;
 
+    //最大值和最小值
+    Paint mMinMaxPaint;
+    int mMinMaxColor;
+
     //view类型：是分时图还是蜡烛图
     protected KViewType.MasterViewType mViewType = KViewType.MasterViewType.TIMESHARING;
 
@@ -161,6 +166,13 @@ public class MasterView extends KBaseView {
     //持有量图长按，方便监听
     private KViewListener.MinorListener mVolListener;
 
+    //最大值监听
+    private KViewListener.PostionListner mMaxPostionListener;
+    //最小值监听
+    private KViewListener.PostionListner mMinPostionListener;
+    //最后一个数据的位置监听
+    private KViewListener.PostionListner mLastPostionListener;
+
     public void setMinorListener(KViewListener.MinorListener minorListener) {
         mMinorListener = minorListener;
     }
@@ -171,6 +183,33 @@ public class MasterView extends KBaseView {
 
     public MasterView setVolListener(KViewListener.MinorListener volListener) {
         mVolListener = volListener;
+        return this;
+    }
+
+    public KViewListener.PostionListner getMaxPostionListener() {
+        return mMaxPostionListener;
+    }
+
+    public MasterView setMaxPostionListener(KViewListener.PostionListner maxPostionListener) {
+        mMaxPostionListener = maxPostionListener;
+        return this;
+    }
+
+    public KViewListener.PostionListner getMinPostionListener() {
+        return mMinPostionListener;
+    }
+
+    public MasterView setMinPostionListener(KViewListener.PostionListner minPostionListener) {
+        mMinPostionListener = minPostionListener;
+        return this;
+    }
+
+    public KViewListener.PostionListner getLastPostionListener() {
+        return mLastPostionListener;
+    }
+
+    public MasterView setLastPostionListener(KViewListener.PostionListner lastPostionListener) {
+        mLastPostionListener = lastPostionListener;
         return this;
     }
 
@@ -231,6 +270,7 @@ public class MasterView extends KBaseView {
         initCandlePaint();
         initMaPaint();
         initBollPaint();
+        initMinMaxPaint();
 
         //手势
         mScaleGestureDetector = new ScaleGestureDetector(mContext, mOnScaleGestureListener);
@@ -245,6 +285,14 @@ public class MasterView extends KBaseView {
         mBasePaddingBottom = 35;
 
         setMoveType(KViewType.MoveType.STEP);
+    }
+
+    private void initMinMaxPaint() {
+        mMinMaxPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mMinMaxPaint.setColor(mMinMaxColor);
+        mMinMaxPaint.setStyle(Paint.Style.FILL);
+        mMinMaxPaint.setTextSize(16);
+
     }
 
     @Override
@@ -278,6 +326,8 @@ public class MasterView extends KBaseView {
         mBollUpColor = getColor(R.color.color_masterView_bollUpColor);
         mBollMbColor = getColor(R.color.color_masterView_bollMbColor);
         mBollDnColor = getColor(R.color.color_masterView_bollDnColor);
+
+        mMinMaxColor = getColor(R.color.color_minmax);
     }
 
     protected void initDotPaint() {
@@ -424,17 +474,33 @@ public class MasterView extends KBaseView {
         //遍历的点距离按下的距离
         float minXLen = Integer.MAX_VALUE;
 
+        //寻找可视范围内的最大值和最小值
+        double maxClose = Integer.MIN_VALUE;
+        double minClose = Integer.MAX_VALUE;
+        int maxIndex = -1;
+        int minIndex = -1;
         for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes quotes = mQuotesList.get(i);
             //mPerX/2.0f：为了让取点为单个单元的x的中间位置
-            float floatX = mBasePaddingLeft + mPerX / 2.0f + mPerX * (i - mBeginIndex);
-            float floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
-                    mPerY * (quotes.c - mCandleMinY));
+            float floatX = getFloatX(i);
+            float floatY = getFloatY((float) quotes.c);
 
 
             //记录下位置信息
             quotes.floatX = floatX;
             quotes.floatY = floatY;
+
+
+            /**确认最大值和最小值*/
+            if (quotes.h > maxClose) {
+                maxClose = quotes.h;
+                maxIndex = i;
+            }
+            if (quotes.l < minClose) {
+                minClose = quotes.l;
+                minIndex = i;
+            }
+
 
             /**分时图折现的绘制*/
             drawTimSharingProcess(quotes, i, brokenLinePath, brokenLineBgPath);
@@ -459,6 +525,56 @@ public class MasterView extends KBaseView {
         /**长按的绘制*/
         drawLongPress(canvas, finalIndex, finalFundMode);
 
+        /**回调最小值和最大值。注意：在分时图上不显示（为什么？）。*/
+        if (maxIndex != -1 && mViewType == KViewType.MasterViewType.CANDLE) {
+            Quotes quotes = mQuotesList.get(maxIndex);
+            float x = getFloatX(maxIndex);
+            float y = getFloatY((float) quotes.h);
+            if (mMaxPostionListener != null) mMaxPostionListener.postion(quotes, x, y);
+
+
+            y -= ScreenUtils.dip2px(10);
+            float xHeight = ScreenUtils.dip2px(15);
+            float posHalfX = getBaseWidth() / 2.0f;
+            String txt = FormatUtil.numFormat(quotes.h, mDigits);
+            float stopX = x > posHalfX ? x - xHeight : x + xHeight;
+            canvas.drawLine(x, y, stopX, y, mMinMaxPaint);
+            x = stopX;
+            if (x > posHalfX) {
+                x -= mMinMaxPaint.measureText(txt);
+            }
+            y += getFontHeight(mMinMaxPaint.getTextSize(), mMinMaxPaint) / 4.0f;
+            canvas.drawText(txt, x, y, mMinMaxPaint);
+        }
+        if (minIndex != -1 && mViewType == KViewType.MasterViewType.CANDLE) {
+            Quotes quotes = mQuotesList.get(minIndex);
+            float x = getFloatX(minIndex);
+            float y = getFloatY((float) quotes.l);
+            if (mMinPostionListener != null) mMinPostionListener.postion(quotes, x, y);
+
+            y += ScreenUtils.dip2px(10);
+            float xHeight = ScreenUtils.dip2px(15);
+            float posHalfX = getBaseWidth() / 2.0f;
+            String txt = FormatUtil.numFormat(quotes.l, mDigits);
+            float stopX = x > posHalfX ? x - xHeight : x + xHeight;
+            canvas.drawLine(x, y, stopX, y, mMinMaxPaint);
+            x = stopX;
+            if (x > posHalfX) {
+                x -= mMinMaxPaint.measureText(txt);
+            }
+            y += getFontHeight(mMinMaxPaint.getTextSize(), mMinMaxPaint) / 4.0f;
+            canvas.drawText(txt, x, y, mMinMaxPaint);
+        }
+
+    }
+
+    private float getFloatY(float price) {
+        return (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
+                mPerY * (price - mCandleMinY));
+    }
+
+    private float getFloatX(int i) {
+        return mBasePaddingLeft + mPerX / 2.0f + mPerX * (i - mBeginIndex);
     }
 
     private void drawMasterLegend(Canvas canvas) {
@@ -844,8 +960,7 @@ public class MasterView extends KBaseView {
         if (mPullType == KViewType.PullType.PULL_RIGHT_STOP) {
             //这里记录最后一个点的位置
             float floatX = mBaseWidth - mInnerRightBlankPadding - mBasePaddingRight - mPerX / 2.0f;
-            float floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
-                    mPerY * (quotes.c - mCandleMinY));
+            float floatY = getFloatY((float) quotes.c);
             quotes.floatX = floatX;
             quotes.floatY = floatY;
 
@@ -858,9 +973,14 @@ public class MasterView extends KBaseView {
             Quotes endQuotes = mQuotesList.get(mQuotesList.size() - 1);
 
             //蜡烛图
-            quotes.floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
-                    mPerY * (endQuotes.c - mCandleMinY));
+            quotes.floatY = getFloatY((float) endQuotes.c);
         }
+
+        /**
+         * 回调后注意处理边界问题
+         */
+        if (mLastPostionListener != null)
+            mLastPostionListener.postion(quotes, quotes.floatX, quotes.floatY);
 
         //实时数据展示的前提是在指定范围内。不处理对应的异常：实时横线显示在底部横线的下面...
         if (mBasePaddingTop < quotes.floatY && quotes.floatY < mBaseHeight - mBasePaddingBottom) {
