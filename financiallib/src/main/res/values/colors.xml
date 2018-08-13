@@ -67,6 +67,8 @@
     <color name="color_masterView_bollMbColor">#136ad6</color>
     <color name="color_masterView_bollDnColor">#7897b9</color>
 
+    <color name="color_minmax">#f23f09</color>
+
     <!--++++++++++++++++++副图自定义View++++++++++++++++++++-->
 
     <!--共有属性-->

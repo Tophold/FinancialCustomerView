@@ -4,7 +4,13 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.tophold.trade.R;
 
 import java.util.List;
 
@@ -32,6 +38,21 @@ public final class KView extends KLayoutView {
 
     public KView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        initListener();
+    }
+
+
+    private void initListener() {
+        mMasterView.setMaxPostionListener((quotes, x, y) -> {
+            Log.d(TAG, "initListener1: " + x + "," + y);
+        });
+        mMasterView.setMinPostionListener((quotes, x, y) -> {
+            Log.d(TAG, "initListener2: " + x + "," + y);
+
+        });
+        mMasterView.setLastPostionListener((quotes, x, y) -> {
+            Log.d(TAG, "initListener3: " + x + "," + y);
+        });
     }
 
     /**
@@ -47,6 +68,7 @@ public final class KView extends KLayoutView {
         }
         mMasterView.setTimeSharingData(quotesList, masterTouchListener);
         mMinorView.setTimeSharingData(quotesList, masterTouchListener);
+        mVolView.setTimeSharingData(quotesList, masterTouchListener);
     }
 
     /**
@@ -63,6 +85,7 @@ public final class KView extends KLayoutView {
         }
         mMasterView.pushingTimeSharingData(quotes, period);
         mMinorView.pushingTimeSharingData(quotes, period);
+        mVolView.pushingTimeSharingData(quotes, period);
     }
 
     /**
@@ -78,6 +101,7 @@ public final class KView extends KLayoutView {
         }
         mMasterView.loadMoreTimeSharingData(quotesList);
         mMinorView.loadMoreTimeSharingData(quotesList);
+        mVolView.loadMoreTimeSharingData(quotesList);
     }
 
     /**

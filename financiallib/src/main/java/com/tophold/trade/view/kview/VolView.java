@@ -16,10 +16,10 @@ import com.tophold.trade.utils.FormatUtil;
  * ============================================================
  * 作 者 :    wgyscsf@163.com
  * 创建日期 ：2017/12/14 17:56
- * 描 述 ：副图。该view提供各种副图指标。
+ * 描 述 ：量图，从本质上来说基本和副图一致。
  * ============================================================
  **/
-public class MinorView extends KBaseView {
+public class VolView extends KBaseView {
 
 
     /**
@@ -66,17 +66,20 @@ public class MinorView extends KBaseView {
     protected float mCandleDiverWidthRatio = 0.1f;
 
     //监听主图的长按事件
-    private KViewListener.MinorListener mMinorListener;
+    private KViewListener.MinorListener mVolListener;
 
-    public MinorView(Context context) {
+    //是否展示量图
+    private boolean mShowVol = false;
+
+    public VolView(Context context) {
         this(context, null);
     }
 
-    public MinorView(Context context, @Nullable AttributeSet attrs) {
+    public VolView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public MinorView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public VolView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initAttrs();
         initListener();
@@ -180,7 +183,7 @@ public class MinorView extends KBaseView {
     }
 
     private void initListener() {
-        mMinorListener = new KViewListener.MinorListener() {
+        mVolListener = new KViewListener.MinorListener() {
             @Override
             public void masterLongPressListener(int pressIndex, Quotes currQuotes) {
                 mDrawLongPress = true;
@@ -231,15 +234,7 @@ public class MinorView extends KBaseView {
 
     private void drawMinorIndicatrix(Canvas canvas) {
         mMacdPaint.setStyle(Paint.Style.STROKE);
-        mRsiPaint.setStyle(Paint.Style.STROKE);
-        mKdjPaint.setStyle(Paint.Style.STROKE);
-        if (mMinorType == KViewType.MinorIndicatrixType.MACD) {
-            drawMACD(canvas);
-        } else if (mMinorType == KViewType.MinorIndicatrixType.RSI) {
-            drawRSI(canvas);
-        } else if (mMinorType == KViewType.MinorIndicatrixType.KDJ) {
-            drawKDJ(canvas);
-        }
+        drawMACD(canvas);
     }
 
     private void drawLongPress(Canvas canvas) {
@@ -255,83 +250,31 @@ public class MinorView extends KBaseView {
         if (!mDrawLongPress) return;
 
         mMacdPaint.setStyle(Paint.Style.FILL);
-        mRsiPaint.setStyle(Paint.Style.FILL);
-        mKdjPaint.setStyle(Paint.Style.FILL);
-
         float x = (float) (mLegendPaddingLeft + mBasePaddingLeft);
         float y = (float) (mLegendPaddingTop + mBasePaddingTop) + getFontHeight(mLegendTxtSize, mMacdPaint);
 
-        String showTxt;
-        switch (mMinorType) {
-            case MACD:
-                showTxt = "DIFF:" + FormatUtil.numFormat(mCurrLongPressQuotes.dif, mDigits) + " ";
-                mMacdPaint.setColor(mMacdDifColor);
-                canvas.drawText(showTxt, x,
-                        y, mMacdPaint);
+        String showTxt = "VOL:" + FormatUtil.numFormat(mCurrLongPressQuotes.vol, mDigits) + " ";
+        mMacdPaint.setColor(mMacdDifColor);
+        canvas.drawText(showTxt, x,
+                y, mMacdPaint);
 
-                float leftWidth11 = mMacdPaint.measureText(showTxt);
-                showTxt = "DEA:" + FormatUtil.numFormat(mCurrLongPressQuotes.dea, mDigits) + " ";
-                mMacdPaint.setColor(mMacdDeaColor);
-                canvas.drawText(showTxt, x + leftWidth11, y, mMacdPaint);
+        float leftWidth11 = mMacdPaint.measureText(showTxt);
+        showTxt = "MA5:" + FormatUtil.numFormat(mCurrLongPressQuotes.volMa5, mDigits) + " ";
+        mMacdPaint.setColor(mMacdDeaColor);
+        canvas.drawText(showTxt, x + leftWidth11, y, mMacdPaint);
 
-                float leftWidth12 = mMacdPaint.measureText(showTxt);
-                showTxt = "MACD:" + FormatUtil.numFormat(mCurrLongPressQuotes.macd, mDigits) + " ";
-                mMacdPaint.setColor(mMacdMacdColor);
-                canvas.drawText(showTxt, (x + leftWidth11 + leftWidth12),
-                        y, mMacdPaint);
-                break;
-            case RSI:
-                showTxt = "RSI6:" + FormatUtil.numFormat(mCurrLongPressQuotes.rsi6, mDigits) + " ";
-                mRsiPaint.setColor(mRsi6Color);
-                canvas.drawText(showTxt, (x),
-                        y, mRsiPaint);
+        float leftWidth12 = mMacdPaint.measureText(showTxt);
+        showTxt = "MA10:" + FormatUtil.numFormat(mCurrLongPressQuotes.volMa10, mDigits) + " ";
+        mMacdPaint.setColor(mMacdMacdColor);
+        canvas.drawText(showTxt, (x + leftWidth11 + leftWidth12),
+                y, mMacdPaint);
 
-                float leftWidth21 = mRsiPaint.measureText(showTxt);
-                showTxt = "RSI12:" + FormatUtil.numFormat(mCurrLongPressQuotes.rsi12, mDigits) + " ";
-                mRsiPaint.setColor(mRsi12Color);
-                canvas.drawText(showTxt, (x + leftWidth21),
-                        y, mRsiPaint);
-
-                float leftWidth22 = mRsiPaint.measureText(showTxt);
-                showTxt = "RSI24:" + FormatUtil.numFormat(mCurrLongPressQuotes.rsi24, mDigits) + " ";
-                mRsiPaint.setColor(mRsi24Color);
-                canvas.drawText(showTxt, (x + leftWidth21 + leftWidth22),
-                        y, mRsiPaint);
-                break;
-            case KDJ:
-                showTxt = "K:" + FormatUtil.numFormat(mCurrLongPressQuotes.k, mDigits) + " ";
-                mKdjPaint.setColor(mKColor);
-                canvas.drawText(showTxt, (x),
-                        y, mKdjPaint);
-
-                float leftWidth = mKdjPaint.measureText(showTxt);
-                showTxt = "D:" + FormatUtil.numFormat(mCurrLongPressQuotes.d, mDigits) + " ";
-                mKdjPaint.setColor(mDColor);
-                canvas.drawText(showTxt, (x + leftWidth),
-                        y, mKdjPaint);
-
-                float leftWidth2 = mKdjPaint.measureText(showTxt);
-                showTxt = "J:" + FormatUtil.numFormat(mCurrLongPressQuotes.j, mDigits) + " ";
-                mKdjPaint.setColor(mJColor);
-                canvas.drawText(showTxt, (x + leftWidth + leftWidth2),
-                        y, mKdjPaint);
-                break;
-            default:
-                break;
-        }
 
     }
 
     private void drawNoPressLegend(Canvas canvas) {
         if (mDrawLongPress) return;
-        String showTxt = "";
-        if (mMinorType == KViewType.MinorIndicatrixType.MACD) {
-            showTxt = "MACD(12,26,9)";
-        } else if (mMinorType == KViewType.MinorIndicatrixType.RSI) {
-            showTxt = "RSI(6,12,24)";
-        } else if (mMinorType == KViewType.MinorIndicatrixType.KDJ) {
-            showTxt = "KDJ(9,3,3)";
-        }
+        String showTxt = "MA(5，10)";
         canvas.drawText(showTxt,
                 (float) (mBaseWidth - mLegendPaddingRight - mBasePaddingRight - mLegendPaint.measureText(showTxt)),
                 (float) (mLegendPaddingTop + mBasePaddingTop + getFontHeight(mLegendTxtSize, mLegendPaint)), mLegendPaint);
@@ -363,28 +306,28 @@ public class MinorView extends KBaseView {
         //macd
         //首先寻找"0"点，这个点是正负macd的分界点
         float v = mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding;
-        double zeroY = v - mPerY * (0 - mMinY);
         float startX, startY, stopX, stopY;
 
         //dif
         float difX, difY;
         Path difPath = new Path();
-
         //dea
         float deaX, deaY;
         Path deaPath = new Path();
 
+        boolean isFirstMa5 = true;
+        boolean isFirstMa10 = true;
         for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes quotes = mQuotesList.get(i);
 
             /*macd*/
             //找另外一个y点
-            double y = v - mPerY * (quotes.macd - mMinY);
+            double y = v - mPerY * (quotes.vol - mMinY);
             startX = mBasePaddingLeft + (i - mBeginIndex) * mPerX + mCandleDiverWidthRatio * mPerX / 2;
             stopX = mBasePaddingLeft + (i - mBeginIndex + 1) * mPerX - mCandleDiverWidthRatio * mPerX / 2;
-            startY = (float) zeroY;
+            startY = v;
             stopY = (float) y;
-            if (quotes.macd > 0) {
+            if (i > 0 && mQuotesList.get(i - 1).c < quotes.c) {
                 mMacdPaint.setColor(mMacdBuyColor);
             } else {
                 mMacdPaint.setColor(mMacdSellColor);
@@ -398,36 +341,61 @@ public class MinorView extends KBaseView {
 
             /*dif*/
             difX = mBasePaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
-            difY = (float) (v - mPerY * (quotes.dif - mMinY));
-            if (i == mBeginIndex) {
-                difPath.moveTo(difX - mPerX / 2, difY);//第一个点特殊处理
-            } else {
-                if (i == mEndIndex - 1) {
-                    difX += mPerX / 2;//最后一个点特殊处理
+            difY = getMasterDetailFloatY(quotes, KViewType.MaType.volMa5);
+            if (difY != -1) {
+                if (isFirstMa5) {
+                    isFirstMa5 = false;
+                    if (quotes.volMa5 != 0) difX -= mPerX / 2;//第一个点特殊处理
+                    difPath.moveTo(difX, difY);
+                } else {
+                    if (i == mEndIndex - 1) difX += mPerX / 2;//最后一个点特殊处理
+                    difPath.lineTo(difX, difY);
                 }
-                difPath.lineTo(difX, difY);
+                mMacdPaint.setStyle(Paint.Style.STROKE);
+                mMacdPaint.setColor(mMacdDifColor);
+                canvas.drawPath(difPath, mMacdPaint);
             }
-            mMacdPaint.setStyle(Paint.Style.STROKE);
-            mMacdPaint.setColor(mMacdDifColor);
-            canvas.drawPath(difPath, mMacdPaint);
 
 
             /*dea*/
             deaX = mBasePaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
-            deaY = (float) (v - mPerY * (quotes.dea - mMinY));
-            if (i == mBeginIndex) {
-                deaPath.moveTo(deaX - mPerX / 2, deaY);//第一个点特殊处理
-            } else {
-                if (i == mEndIndex - 1) {
-                    deaX += mPerX / 2;//最后一个点特殊处理
+            deaY = getMasterDetailFloatY(quotes, KViewType.MaType.volMa10);
+            if (deaY != -1) {
+                if (isFirstMa10) {
+                    isFirstMa10 = false;
+                    if (quotes.volMa10 != 0) deaX -= mPerX / 2;//第一个点特殊处理
+                    deaPath.moveTo(deaX, deaY);
+                } else {
+                    if (i == mEndIndex - 1) deaX += mPerX / 2;//最后一个点特殊处理
+                    deaPath.lineTo(deaX, deaY);
                 }
-                deaPath.lineTo(deaX, deaY);
+                mMacdPaint.setStyle(Paint.Style.STROKE);
+                mMacdPaint.setColor(mMacdDeaColor);
+                canvas.drawPath(deaPath, mMacdPaint);
             }
-            mMacdPaint.setStyle(Paint.Style.STROKE);
-            mMacdPaint.setColor(mMacdDeaColor);
-            canvas.drawPath(deaPath, mMacdPaint);
         }
 
+    }
+
+    private float getMasterDetailFloatY(Quotes quotes, KViewType.MaType maType) {
+        double v = 0;
+        //ma
+        if (maType == KViewType.MaType.volMa5) {
+            v = quotes.volMa5 - mMinY;
+        } else if (maType == KViewType.MaType.volMa10) {
+            v = quotes.volMa10 - mMinY;
+        }
+        //异常，当不存在ma值时的处理.也就是up、mb、dn为0时，这样判断其实有问题，比如算出来的值就是0？？？
+        if (v + mMinY == 0) return -1;
+
+        double h = v * mPerY;
+        float y = (float) (mBaseHeight - h - mBasePaddingBottom - mInnerBottomBlankPadding);
+
+        //这里的y,存在一种情况，y超过了View的上边界或者超过了下边界，当出现这一种情况时，不显示，当作异常情况
+        if (y < mBasePaddingTop || y > mBaseHeight - mBasePaddingBottom)
+            return -1;
+
+        return y;
     }
 
     private void drawRSI(Canvas canvas) {
@@ -479,7 +447,7 @@ public class MinorView extends KBaseView {
             mRsiPaint.setColor(mRsi12Color);
             canvas.drawPath(rsi12Path, mRsiPaint);
 
-             /*rsi24*/
+            /*rsi24*/
             //为什么这里重复再赋一遍值？因为下面有一个"rsiX +="操作
             rsiX = mBasePaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
             rsi24Y = (float) (v - mPerY * (quotes.rsi24 - mMinY));
@@ -545,7 +513,7 @@ public class MinorView extends KBaseView {
             mKdjPaint.setColor(mDColor);
             canvas.drawPath(dPath, mKdjPaint);
 
-             /*j*/
+            /*j*/
             kdjX = mBasePaddingLeft + (i - mBeginIndex) * mPerX + mPerX / 2;
             jY = (float) (v - mPerY * (quotes.j - mMinY));
             if (i == mBeginIndex) {
@@ -565,14 +533,11 @@ public class MinorView extends KBaseView {
     @Override
     protected void seekAndCalculateCellData() {
         if (mQuotesList == null || mQuotesList.isEmpty()) return;
+        if (!isShowVol()) return;
 
-        if (mMinorType == KViewType.MinorIndicatrixType.MACD) {
-            FinancialAlgorithm.calculateMACD(mQuotesList);
-        } else if (mMinorType == KViewType.MinorIndicatrixType.RSI) {
-            FinancialAlgorithm.calculateRSI(mQuotesList);
-        } else if (mMinorType == KViewType.MinorIndicatrixType.KDJ) {
-            FinancialAlgorithm.calculateKDJ(mQuotesList);
-        }
+        FinancialAlgorithm.calculateMA(mQuotesList, 5, KViewType.MaType.volMa5);
+        FinancialAlgorithm.calculateMA(mQuotesList, 10, KViewType.MaType.volMa10);
+
 
         //找到close最大值和最小值
         mMinY = Integer.MAX_VALUE;
@@ -587,8 +552,8 @@ public class MinorView extends KBaseView {
             if (i == mEndIndex - 1) {
                 mEndQuotes = quotes;
             }
-            double min = FinancialAlgorithm.getMinorMinY(quotes, mMinorType);
-            double max = FinancialAlgorithm.getMinorMaxY(quotes, mMinorType);
+            double min = FinancialAlgorithm.getVolMinY(quotes);
+            double max = FinancialAlgorithm.getVolMaxY(quotes);
 
             if (min <= mMinY) {
                 mMinY = min;
@@ -653,7 +618,7 @@ public class MinorView extends KBaseView {
         return mOuterStrokeColor;
     }
 
-    public MinorView setOuterStrokeColor(int outerStrokeColor) {
+    public VolView setOuterStrokeColor(int outerStrokeColor) {
         mOuterStrokeColor = outerStrokeColor;
         return this;
     }
@@ -662,7 +627,7 @@ public class MinorView extends KBaseView {
         return mInnerXyDashColor;
     }
 
-    public MinorView setInnerXyDashColor(int innerXyDashColor) {
+    public VolView setInnerXyDashColor(int innerXyDashColor) {
         mInnerXyDashColor = innerXyDashColor;
         return this;
     }
@@ -671,7 +636,7 @@ public class MinorView extends KBaseView {
         return mXyTxtColor;
     }
 
-    public MinorView setXyTxtColor(int xyTxtColor) {
+    public VolView setXyTxtColor(int xyTxtColor) {
         mXyTxtColor = xyTxtColor;
         return this;
     }
@@ -680,7 +645,7 @@ public class MinorView extends KBaseView {
         return mLegendTxtColor;
     }
 
-    public MinorView setLegendTxtColor(int legendTxtColor) {
+    public VolView setLegendTxtColor(int legendTxtColor) {
         mLegendTxtColor = legendTxtColor;
         return this;
     }
@@ -689,7 +654,7 @@ public class MinorView extends KBaseView {
         return mLongPressTxtColor;
     }
 
-    public MinorView setLongPressTxtColor(int longPressTxtColor) {
+    public VolView setLongPressTxtColor(int longPressTxtColor) {
         mLongPressTxtColor = longPressTxtColor;
         return this;
     }
@@ -698,7 +663,7 @@ public class MinorView extends KBaseView {
         return mMacdBuyColor;
     }
 
-    public MinorView setMacdBuyColor(int macdBuyColor) {
+    public VolView setMacdBuyColor(int macdBuyColor) {
         mMacdBuyColor = macdBuyColor;
         return this;
     }
@@ -707,7 +672,7 @@ public class MinorView extends KBaseView {
         return mMacdSellColor;
     }
 
-    public MinorView setMacdSellColor(int macdSellColor) {
+    public VolView setMacdSellColor(int macdSellColor) {
         mMacdSellColor = macdSellColor;
         return this;
     }
@@ -716,7 +681,7 @@ public class MinorView extends KBaseView {
         return mMacdDifColor;
     }
 
-    public MinorView setMacdDifColor(int macdDifColor) {
+    public VolView setMacdDifColor(int macdDifColor) {
         mMacdDifColor = macdDifColor;
         return this;
     }
@@ -725,7 +690,7 @@ public class MinorView extends KBaseView {
         return mMacdDeaColor;
     }
 
-    public MinorView setMacdDeaColor(int macdDeaColor) {
+    public VolView setMacdDeaColor(int macdDeaColor) {
         mMacdDeaColor = macdDeaColor;
         return this;
     }
@@ -734,7 +699,7 @@ public class MinorView extends KBaseView {
         return mMacdMacdColor;
     }
 
-    public MinorView setMacdMacdColor(int macdMacdColor) {
+    public VolView setMacdMacdColor(int macdMacdColor) {
         mMacdMacdColor = macdMacdColor;
         return this;
     }
@@ -743,7 +708,7 @@ public class MinorView extends KBaseView {
         return mMacdPaint;
     }
 
-    public MinorView setMacdPaint(Paint macdPaint) {
+    public VolView setMacdPaint(Paint macdPaint) {
         mMacdPaint = macdPaint;
         return this;
     }
@@ -752,7 +717,7 @@ public class MinorView extends KBaseView {
         return mMacdLineWidth;
     }
 
-    public MinorView setMacdLineWidth(float macdLineWidth) {
+    public VolView setMacdLineWidth(float macdLineWidth) {
         mMacdLineWidth = macdLineWidth;
         return this;
     }
@@ -761,7 +726,7 @@ public class MinorView extends KBaseView {
         return mRsi6Color;
     }
 
-    public MinorView setRsi6Color(int rsi6Color) {
+    public VolView setRsi6Color(int rsi6Color) {
         mRsi6Color = rsi6Color;
         return this;
     }
@@ -770,7 +735,7 @@ public class MinorView extends KBaseView {
         return mRsi12Color;
     }
 
-    public MinorView setRsi12Color(int rsi12Color) {
+    public VolView setRsi12Color(int rsi12Color) {
         mRsi12Color = rsi12Color;
         return this;
     }
@@ -779,7 +744,7 @@ public class MinorView extends KBaseView {
         return mRsi24Color;
     }
 
-    public MinorView setRsi24Color(int rsi24Color) {
+    public VolView setRsi24Color(int rsi24Color) {
         mRsi24Color = rsi24Color;
         return this;
     }
@@ -788,7 +753,7 @@ public class MinorView extends KBaseView {
         return mRsiPaint;
     }
 
-    public MinorView setRsiPaint(Paint rsiPaint) {
+    public VolView setRsiPaint(Paint rsiPaint) {
         mRsiPaint = rsiPaint;
         return this;
     }
@@ -797,7 +762,7 @@ public class MinorView extends KBaseView {
         return mRsiLineWidth;
     }
 
-    public MinorView setRsiLineWidth(float rsiLineWidth) {
+    public VolView setRsiLineWidth(float rsiLineWidth) {
         mRsiLineWidth = rsiLineWidth;
         return this;
     }
@@ -806,7 +771,7 @@ public class MinorView extends KBaseView {
         return mKColor;
     }
 
-    public MinorView setKColor(int KColor) {
+    public VolView setKColor(int KColor) {
         mKColor = KColor;
         return this;
     }
@@ -815,7 +780,7 @@ public class MinorView extends KBaseView {
         return mDColor;
     }
 
-    public MinorView setDColor(int DColor) {
+    public VolView setDColor(int DColor) {
         mDColor = DColor;
         return this;
     }
@@ -824,7 +789,7 @@ public class MinorView extends KBaseView {
         return mJColor;
     }
 
-    public MinorView setJColor(int JColor) {
+    public VolView setJColor(int JColor) {
         mJColor = JColor;
         return this;
     }
@@ -833,7 +798,7 @@ public class MinorView extends KBaseView {
         return mKdjPaint;
     }
 
-    public MinorView setKdjPaint(Paint kdjPaint) {
+    public VolView setKdjPaint(Paint kdjPaint) {
         mKdjPaint = kdjPaint;
         return this;
     }
@@ -842,7 +807,7 @@ public class MinorView extends KBaseView {
         return mKdjLineWidth;
     }
 
-    public MinorView setKdjLineWidth(float kdjLineWidth) {
+    public VolView setKdjLineWidth(float kdjLineWidth) {
         mKdjLineWidth = kdjLineWidth;
         return this;
     }
@@ -855,7 +820,7 @@ public class MinorView extends KBaseView {
         return mMinY;
     }
 
-    public MinorView setMinY(double minY) {
+    public VolView setMinY(double minY) {
         mMinY = minY;
         return this;
     }
@@ -864,7 +829,7 @@ public class MinorView extends KBaseView {
         return mMaxY;
     }
 
-    public MinorView setMaxY(double maxY) {
+    public VolView setMaxY(double maxY) {
         mMaxY = maxY;
         return this;
     }
@@ -873,17 +838,26 @@ public class MinorView extends KBaseView {
         return mCandleDiverWidthRatio;
     }
 
-    public MinorView setCandleDiverWidthRatio(float candleDiverWidthRatio) {
+    public VolView setCandleDiverWidthRatio(float candleDiverWidthRatio) {
         mCandleDiverWidthRatio = candleDiverWidthRatio;
         return this;
     }
 
-    public MinorView setMinorListener(KViewListener.MinorListener minorListener) {
-        mMinorListener = minorListener;
+    public VolView setVolListener(KViewListener.MinorListener volListener) {
+        mVolListener = volListener;
         return this;
     }
 
-    public KViewListener.MinorListener getMinorListener() {
-        return mMinorListener;
+    public KViewListener.MinorListener getVolListener() {
+        return mVolListener;
+    }
+
+    public boolean isShowVol() {
+        return mShowVol;
+    }
+
+    public VolView setShowVol(boolean showVol) {
+        mShowVol = showVol;
+        return this;
     }
 }

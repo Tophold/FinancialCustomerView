@@ -22,11 +22,11 @@ public class KViewListener {
     /**
      * 主图的监听，主要供副图使用，把这些数据回调给副图，避免副图再做复杂重复的操作。
      */
-    public interface MasterListener {
+    public interface MinorListener {
         /**
          * 长按操作
          *
-         * @param pressIndex          按下所对应的索引
+         * @param pressIndex 按下所对应的索引
          * @param currQuotes 按下所对应的点
          */
         void masterLongPressListener(int pressIndex, Quotes currQuotes);
@@ -55,5 +55,12 @@ public class KViewListener {
          */
         void mastelPullmNewIndex(int beginIndex, int endIndex, KViewType.PullType currPullType, int shownMaxCount);
 
+    }
+
+    /**
+     * 关键点的监听：可视范围内最大值点、可视范围内最小值点、最后一个点监听（数据集合的最后一个点）
+     */
+    public interface PostionListner {
+        void postion(Quotes quotes, float x, float y);
     }
 }

@@ -17,6 +17,7 @@ import java.util.Map;
 
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
+
 import com.tophold.example.BaseFragment;
 import com.tophold.example.R;
 import com.tophold.example.demo.btc.api.HuobiService;
@@ -109,8 +110,10 @@ public class HuobiFragment extends BaseFragment {
 
         if (((HuobiActivity) getActivity()).isHorizontal()) {
             mFkKvKview.setShowMinor(true);
+            mFkKvKview.setShowVol(true);
         } else {
             mFkKvKview.setShowMinor(false);
+            mFkKvKview.setShowVol(false);
         }
     }
 
@@ -200,7 +203,7 @@ public class HuobiFragment extends BaseFragment {
 
         List<Quotes> quotesList = new ArrayList<>();
         for (HuobiQuote huobiQuote : huobiQuoteList) {
-            Quotes quotes = new Quotes(huobiQuote.open, huobiQuote.high, huobiQuote.low, huobiQuote.close, huobiQuote.id * 1000);
+            Quotes quotes = new Quotes(huobiQuote.open, huobiQuote.high, huobiQuote.low, huobiQuote.close, huobiQuote.id * 1000, huobiQuote.amount);
             quotesList.add(quotes);
         }
         mQuotesList.addAll(0, quotesList);//注意时序问题

@@ -171,25 +171,23 @@ public class KViewHorizontalActivityActivity extends BaseActivity {
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        data -> {
-                            mAkvKvKview.setKViewData(mQuotesList, new KViewListener.MasterTouchListener() {
-                                @Override
-                                public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
-                                    showContanier(preQuotes, currentQuotes);
-                                }
+                        data -> mAkvKvKview.setKViewData(mQuotesList, new KViewListener.MasterTouchListener() {
+                            @Override
+                            public void onLongTouch(Quotes preQuotes, Quotes currentQuotes) {
+                                showContanier(preQuotes, currentQuotes);
+                            }
 
-                                @Override
-                                public void onUnLongTouch() {
-                                    mAkvLlContainer.setVisibility(View.INVISIBLE);
-                                }
+                            @Override
+                            public void onUnLongTouch() {
+                                mAkvLlContainer.setVisibility(View.INVISIBLE);
+                            }
 
-                                @Override
-                                public void needLoadMore() {
-                                    loadMore();
-                                }
-                            });
-                        },
-                        throwable -> throwable.printStackTrace()
+                            @Override
+                            public void needLoadMore() {
+                                loadMore();
+                            }
+                        }),
+                        Throwable::printStackTrace
                 );
         unSubscription(disposable);
     }

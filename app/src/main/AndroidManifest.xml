@@ -41,6 +41,13 @@
         </activity>
         <activity android:name=".demo.pie.PieChartActivity">
         </activity>
+        <activity android:name=".VolDemoActivity">
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN"/>-->
+
+                <!--<category android:name="android.intent.category.LAUNCHER"/>-->
+            <!--</intent-filter>-->
+        </activity>
     </application>
 
 </manifest>

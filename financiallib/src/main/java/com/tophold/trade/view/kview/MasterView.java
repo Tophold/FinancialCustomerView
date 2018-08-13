@@ -21,6 +21,7 @@ import java.util.Locale;
 import com.tophold.trade.Constant;
 import com.tophold.trade.R;
 import com.tophold.trade.utils.FormatUtil;
+import com.tophold.trade.utils.ScreenUtils;
 import com.tophold.trade.utils.TimeUtils;
 
 /**
@@ -133,6 +134,10 @@ public class MasterView extends KBaseView {
     Paint mBollDnPaint;
     int mBollDnColor;
 
+    //最大值和最小值
+    Paint mMinMaxPaint;
+    int mMinMaxColor;
+
     //view类型：是分时图还是蜡烛图
     protected KViewType.MasterViewType mViewType = KViewType.MasterViewType.TIMESHARING;
 
@@ -157,10 +162,55 @@ public class MasterView extends KBaseView {
     protected float mCandleDiverWidthRatio = 0.1f;
 
     //持有副图长按，方便监听
-    private KViewListener.MasterListener mMasterListener;
+    private KViewListener.MinorListener mMinorListener;
+    //持有量图长按，方便监听
+    private KViewListener.MinorListener mVolListener;
 
-    public void setMasterListener(KViewListener.MasterListener masterListener) {
-        mMasterListener = masterListener;
+    //最大值监听
+    private KViewListener.PostionListner mMaxPostionListener;
+    //最小值监听
+    private KViewListener.PostionListner mMinPostionListener;
+    //最后一个数据的位置监听
+    private KViewListener.PostionListner mLastPostionListener;
+
+    public void setMinorListener(KViewListener.MinorListener minorListener) {
+        mMinorListener = minorListener;
+    }
+
+    public KViewListener.MinorListener getVolListener() {
+        return mVolListener;
+    }
+
+    public MasterView setVolListener(KViewListener.MinorListener volListener) {
+        mVolListener = volListener;
+        return this;
+    }
+
+    public KViewListener.PostionListner getMaxPostionListener() {
+        return mMaxPostionListener;
+    }
+
+    public MasterView setMaxPostionListener(KViewListener.PostionListner maxPostionListener) {
+        mMaxPostionListener = maxPostionListener;
+        return this;
+    }
+
+    public KViewListener.PostionListner getMinPostionListener() {
+        return mMinPostionListener;
+    }
+
+    public MasterView setMinPostionListener(KViewListener.PostionListner minPostionListener) {
+        mMinPostionListener = minPostionListener;
+        return this;
+    }
+
+    public KViewListener.PostionListner getLastPostionListener() {
+        return mLastPostionListener;
+    }
+
+    public MasterView setLastPostionListener(KViewListener.PostionListner lastPostionListener) {
+        mLastPostionListener = lastPostionListener;
+        return this;
     }
 
     public MasterView(Context context) {
@@ -220,6 +270,7 @@ public class MasterView extends KBaseView {
         initCandlePaint();
         initMaPaint();
         initBollPaint();
+        initMinMaxPaint();
 
         //手势
         mScaleGestureDetector = new ScaleGestureDetector(mContext, mOnScaleGestureListener);
@@ -233,7 +284,15 @@ public class MasterView extends KBaseView {
         //底部距离
         mBasePaddingBottom = 35;
 
-        setMoveType(KViewType.MoveType.ONFLING);
+        setMoveType(KViewType.MoveType.STEP);
+    }
+
+    private void initMinMaxPaint() {
+        mMinMaxPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mMinMaxPaint.setColor(mMinMaxColor);
+        mMinMaxPaint.setStyle(Paint.Style.FILL);
+        mMinMaxPaint.setTextSize(16);
+
     }
 
     @Override
@@ -267,6 +326,8 @@ public class MasterView extends KBaseView {
         mBollUpColor = getColor(R.color.color_masterView_bollUpColor);
         mBollMbColor = getColor(R.color.color_masterView_bollMbColor);
         mBollDnColor = getColor(R.color.color_masterView_bollDnColor);
+
+        mMinMaxColor = getColor(R.color.color_minmax);
     }
 
     protected void initDotPaint() {
@@ -413,17 +474,33 @@ public class MasterView extends KBaseView {
         //遍历的点距离按下的距离
         float minXLen = Integer.MAX_VALUE;
 
+        //寻找可视范围内的最大值和最小值
+        double maxClose = Integer.MIN_VALUE;
+        double minClose = Integer.MAX_VALUE;
+        int maxIndex = -1;
+        int minIndex = -1;
         for (int i = mBeginIndex; i < mEndIndex; i++) {
             Quotes quotes = mQuotesList.get(i);
             //mPerX/2.0f：为了让取点为单个单元的x的中间位置
-            float floatX = mBasePaddingLeft + mPerX / 2.0f + mPerX * (i - mBeginIndex);
-            float floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
-                    mPerY * (quotes.c - mCandleMinY));
+            float floatX = getFloatX(i);
+            float floatY = getFloatY((float) quotes.c);
 
 
             //记录下位置信息
             quotes.floatX = floatX;
             quotes.floatY = floatY;
+
+
+            /**确认最大值和最小值*/
+            if (quotes.h > maxClose) {
+                maxClose = quotes.h;
+                maxIndex = i;
+            }
+            if (quotes.l < minClose) {
+                minClose = quotes.l;
+                minIndex = i;
+            }
+
 
             /**分时图折现的绘制*/
             drawTimSharingProcess(quotes, i, brokenLinePath, brokenLineBgPath);
@@ -448,6 +525,56 @@ public class MasterView extends KBaseView {
         /**长按的绘制*/
         drawLongPress(canvas, finalIndex, finalFundMode);
 
+        /**回调最小值和最大值。注意：在分时图上不显示（为什么？）。*/
+        if (maxIndex != -1 && mViewType == KViewType.MasterViewType.CANDLE) {
+            Quotes quotes = mQuotesList.get(maxIndex);
+            float x = getFloatX(maxIndex);
+            float y = getFloatY((float) quotes.h);
+            if (mMaxPostionListener != null) mMaxPostionListener.postion(quotes, x, y);
+
+
+            y -= ScreenUtils.dip2px(10);
+            float xHeight = ScreenUtils.dip2px(15);
+            float posHalfX = getBaseWidth() / 2.0f;
+            String txt = FormatUtil.numFormat(quotes.h, mDigits);
+            float stopX = x > posHalfX ? x - xHeight : x + xHeight;
+            canvas.drawLine(x, y, stopX, y, mMinMaxPaint);
+            x = stopX;
+            if (x > posHalfX) {
+                x -= mMinMaxPaint.measureText(txt);
+            }
+            y += getFontHeight(mMinMaxPaint.getTextSize(), mMinMaxPaint) / 4.0f;
+            canvas.drawText(txt, x, y, mMinMaxPaint);
+        }
+        if (minIndex != -1 && mViewType == KViewType.MasterViewType.CANDLE) {
+            Quotes quotes = mQuotesList.get(minIndex);
+            float x = getFloatX(minIndex);
+            float y = getFloatY((float) quotes.l);
+            if (mMinPostionListener != null) mMinPostionListener.postion(quotes, x, y);
+
+            y += ScreenUtils.dip2px(10);
+            float xHeight = ScreenUtils.dip2px(15);
+            float posHalfX = getBaseWidth() / 2.0f;
+            String txt = FormatUtil.numFormat(quotes.l, mDigits);
+            float stopX = x > posHalfX ? x - xHeight : x + xHeight;
+            canvas.drawLine(x, y, stopX, y, mMinMaxPaint);
+            x = stopX;
+            if (x > posHalfX) {
+                x -= mMinMaxPaint.measureText(txt);
+            }
+            y += getFontHeight(mMinMaxPaint.getTextSize(), mMinMaxPaint) / 4.0f;
+            canvas.drawText(txt, x, y, mMinMaxPaint);
+        }
+
+    }
+
+    private float getFloatY(float price) {
+        return (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
+                mPerY * (price - mCandleMinY));
+    }
+
+    private float getFloatX(int i) {
+        return mBasePaddingLeft + mPerX / 2.0f + mPerX * (i - mBeginIndex);
     }
 
     private void drawMasterLegend(Canvas canvas) {
@@ -635,7 +762,7 @@ public class MasterView extends KBaseView {
         } else if (maType == KViewType.MasterIndicatrixDetailType.BOLLDN) {
             v = quotes.dn - mCandleMinY;
         }
-        //异常，当不存在ma值时的处理
+        //异常，当不存在ma值时的处理.也就是up、mb、dn为0时，这样判断其实有问题，比如算出来的值就是0？？？
         if (v + mCandleMinY == 0) return -1;
 
         double h = v * mPerY;
@@ -766,8 +893,11 @@ public class MasterView extends KBaseView {
                 mBaseHeight - mBasePaddingBottom, mLongPressPaint);
 
         //将长按信息回调给副图，方便副图处理长按信息
-        if (mMasterListener != null)
-            mMasterListener.masterLongPressListener(finalIndex, finalFundMode);
+        if (mMinorListener != null)
+            mMinorListener.masterLongPressListener(finalIndex, finalFundMode);
+
+        if (mVolListener != null)
+            mVolListener.masterLongPressListener(finalIndex, finalFundMode);
 
 
         //接着绘制长按上方和右侧文字信息背景
@@ -830,8 +960,7 @@ public class MasterView extends KBaseView {
         if (mPullType == KViewType.PullType.PULL_RIGHT_STOP) {
             //这里记录最后一个点的位置
             float floatX = mBaseWidth - mInnerRightBlankPadding - mBasePaddingRight - mPerX / 2.0f;
-            float floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
-                    mPerY * (quotes.c - mCandleMinY));
+            float floatY = getFloatY((float) quotes.c);
             quotes.floatX = floatX;
             quotes.floatY = floatY;
 
@@ -844,9 +973,14 @@ public class MasterView extends KBaseView {
             Quotes endQuotes = mQuotesList.get(mQuotesList.size() - 1);
 
             //蜡烛图
-            quotes.floatY = (float) (mBaseHeight - mBasePaddingBottom - mInnerBottomBlankPadding -
-                    mPerY * (endQuotes.c - mCandleMinY));
+            quotes.floatY = getFloatY((float) endQuotes.c);
         }
+
+        /**
+         * 回调后注意处理边界问题
+         */
+        if (mLastPostionListener != null)
+            mLastPostionListener.postion(quotes, quotes.floatX, quotes.floatY);
 
         //实时数据展示的前提是在指定范围内。不处理对应的异常：实时横线显示在底部横线的下面...
         if (mBasePaddingTop < quotes.floatY && quotes.floatY < mBaseHeight - mBasePaddingBottom) {
@@ -876,7 +1010,7 @@ public class MasterView extends KBaseView {
         if (i == mBeginIndex) {
             path.moveTo((float) (quotes.floatX - mPerX / 2.0), quotes.floatY);
             path2.moveTo((float) (quotes.floatX - mPerX / 2.0), quotes.floatY);
-        } else if (i == mEndIndex-1) {
+        } else if (i == mEndIndex - 1) {
             //在这里把path圈起来，添加阴影。特别注意，这里处理下方阴影和折线边框。采用两个画笔和两个Path处理的，
             // 貌似没有一个Paint可以同时绘制边框和填充色。
             float bootomY = mBaseHeight - mBasePaddingBottom;
@@ -1002,9 +1136,9 @@ public class MasterView extends KBaseView {
         //对于蜡烛图，需要计算以下指标。
         if (mViewType == KViewType.MasterViewType.CANDLE) {
             //ma
-            FinancialAlgorithm.calculateMA(mQuotesList, 5);
-            FinancialAlgorithm.calculateMA(mQuotesList, 10);
-            FinancialAlgorithm.calculateMA(mQuotesList, 20);
+            FinancialAlgorithm.calculateMA(mQuotesList, 5, KViewType.MaType.ma5);
+            FinancialAlgorithm.calculateMA(mQuotesList, 10, KViewType.MaType.ma10);
+            FinancialAlgorithm.calculateMA(mQuotesList, 20, KViewType.MaType.ma20);
             //boll
             FinancialAlgorithm.calculateBOLL(mQuotesList);
 
@@ -1096,7 +1230,8 @@ public class MasterView extends KBaseView {
                     int tempCount = isBigger ? mShownMaxCount - changeNum : mShownMaxCount + changeNum;
 
                     //缩小大到最小了或者放大到很大了
-                    if (tempCount > def_scale_maxnum || tempCount < def_scale_minnum) return true;
+                    if (tempCount > def_scale_maxnum || tempCount < def_scale_minnum)
+                        return true;
 
                     mShownMaxCount = tempCount;
 
@@ -1112,8 +1247,10 @@ public class MasterView extends KBaseView {
                     mEndIndex = mBeginIndex + mShownMaxCount;
 
                     //将新的索引回调给副图
-                    if (mMasterListener != null)
-                        mMasterListener.masteZoomlNewIndex(mBeginIndex, mEndIndex, mShownMaxCount);
+                    if (mMinorListener != null)
+                        mMinorListener.masteZoomlNewIndex(mBeginIndex, mEndIndex, mShownMaxCount);
+                    if (mVolListener != null)
+                        mVolListener.masteZoomlNewIndex(mBeginIndex, mEndIndex, mShownMaxCount);
 
                     //只要找好起始点和结束点就可以交给处理重绘的方法就好啦~
                     seekAndCalculateCellData();
@@ -1216,8 +1353,11 @@ public class MasterView extends KBaseView {
         }
 
         //回调给副图
-        if (mMasterListener != null)
-            mMasterListener.mastelPullmNewIndex(mBeginIndex, mEndIndex, mPullType, mShownMaxCount);
+        if (mMinorListener != null)
+            mMinorListener.mastelPullmNewIndex(mBeginIndex, mEndIndex, mPullType, mShownMaxCount);
+
+        if (mVolListener != null)
+            mVolListener.mastelPullmNewIndex(mBeginIndex, mEndIndex, mPullType, mShownMaxCount);
 
         //开始位置和结束位置确认好，就可以重绘啦~
         Log.d(TAG, "moveKView: mBeginIndex:" + mBeginIndex + ",mEndIndex:" + mEndIndex);
@@ -1256,7 +1396,8 @@ public class MasterView extends KBaseView {
         mDrawLongPress = false;
         invalidate();
         if (mMasterTouchListener != null) mMasterTouchListener.onUnLongTouch();
-        if (mMasterListener != null) mMasterListener.masterNoLongPressListener();
+        if (mMinorListener != null) mMinorListener.masterNoLongPressListener();
+        if (mVolListener != null) mVolListener.masterNoLongPressListener();
     }
 
     @Override
@@ -1668,15 +1809,16 @@ public class MasterView extends KBaseView {
         return this;
     }
 
-    public KViewListener.MasterListener getMasterListener() {
-        return mMasterListener;
+    public KViewListener.MinorListener getMinorListener() {
+        return mMinorListener;
     }
 
     public ScaleGestureDetector.OnScaleGestureListener getOnScaleGestureListener() {
         return mOnScaleGestureListener;
     }
 
-    public MasterView setOnScaleGestureListener(ScaleGestureDetector.OnScaleGestureListener onScaleGestureListener) {
+    public MasterView setOnScaleGestureListener(ScaleGestureDetector.OnScaleGestureListener
+                                                        onScaleGestureListener) {
         mOnScaleGestureListener = onScaleGestureListener;
         return this;
     }
