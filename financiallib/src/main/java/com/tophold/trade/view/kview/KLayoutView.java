@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.LinearLayout;
 
 /**
@@ -27,7 +28,7 @@ public class KLayoutView extends LinearLayout {
     //是否展示副图
     protected boolean isShowMinor = true;
     //是否展示量图
-    protected boolean isShowVol = true;
+    protected boolean isShowVol = false;
 
     public KLayoutView(Context context) {
         this(context, null);
@@ -58,6 +59,7 @@ public class KLayoutView extends LinearLayout {
 
     private void initDefAttrs() {
         setShowMinor(true);
+        setShowVol(false);
     }
 
     private void layoutViews() {
@@ -154,19 +156,6 @@ public class KLayoutView extends LinearLayout {
         return isShowVol;
     }
 
-    public KLayoutView setShowVol(boolean showVol) {
-        isShowVol = showVol;
-        if (!isShowVol) {
-            mVolHRatio = 0;
-        } else {
-            mMinorHRatio = DEF_VOLHRATIO;
-        }
-        mVolView.setShowVol(isShowVol);
-        return reloadHeight();
-
-
-    }
-
     @NonNull
     private KLayoutView reloadHeight() {
         //为什么要这样刷新？先重新测量主图和副图的高度，然后再去测量各自的seekAndCalculateCellData
@@ -197,5 +186,19 @@ public class KLayoutView extends LinearLayout {
             mMinorHRatio = DEF_MINORHRATIO;
         }
         return reloadHeight();
+    }
+
+    public KLayoutView setShowVol(boolean showVol) {
+        isShowVol = showVol;
+        if (!isShowVol) {
+            mVolHRatio = 0;
+        } else {
+            mVolHRatio = DEF_VOLHRATIO;
+        }
+        Log.d(TAG, "setShowVol: " + isShowVol);
+        mVolView.setShowVol(isShowVol);
+        return reloadHeight();
+
+
     }
 }

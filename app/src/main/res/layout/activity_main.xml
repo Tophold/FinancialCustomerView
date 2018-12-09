@@ -20,31 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
         android:onClick="fundView"
-        android:text="去自定义基金页面"
-        />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:onClick="kViewVertical"
-        android:text="去K线图（竖屏）"
-        />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:onClick="kViewHorizontal"
-        android:text="去K线图（横屏）"
-        />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:onClick="kViewEvaluation"
-        android:text="KView数据校验(外汇demo)"
+        android:text="去看自定义基金View Demo"
         android:textAllCaps="false"
         />
 
@@ -52,9 +28,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:onClick="btnDemo"
-        android:text="去看数字货币demo"
         android:textAllCaps="false"
+        android:onClick="kViewDemo"
+        android:text="去看KView Demo"
         />
 
     <Button
@@ -62,8 +38,16 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:onClick="onPieTest"
-        android:text="去看PieChart"
+        android:text="去看PieChart饼图 Demo"
         android:textAllCaps="false"
         />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:onClick="onSeekBarTest"
+        android:text="去看DoubleThumbSeekBar Demo"
+        android:textAllCaps="false" />
 
 </LinearLayout>  

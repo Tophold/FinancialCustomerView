@@ -180,7 +180,7 @@
         android:layout_height="0.5dp"
         android:background="#8f8d8d"/>
 
-    <com.tophold.example.NoScrollViewPager
+    <com.tophold.example.utils.NoScrollViewPager
         android:id="@+id/af_vp_viewpager"
         android:layout_width="match_parent"
         android:layout_height="300dp"/>

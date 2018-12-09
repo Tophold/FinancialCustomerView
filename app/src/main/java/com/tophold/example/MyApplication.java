@@ -3,8 +3,8 @@ package com.tophold.example;
 import android.app.Application;
 import android.content.Context;
 
-import com.tophold.example.demo.btc.api.HuobiWebSocket;
-import com.tophold.example.demo.forex.api.ForexWebSocket;
+import com.tophold.example.demo.kview.btc.api.HuobiWebSocket;
+import com.tophold.example.demo.kview.forex.api.ForexWebSocket;
 
 /**
  * ============================================================

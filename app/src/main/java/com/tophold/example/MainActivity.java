@@ -4,13 +4,15 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import com.tophold.example.demo.beginner.ui.FundActivity;
-import com.tophold.example.demo.beginner.ui.KViewHorizontalActivityActivity;
-import com.tophold.example.demo.beginner.ui.KViewVerticalActivity;
-import com.tophold.example.demo.btc.ui.HuobiActivity;
-import com.tophold.example.demo.btc.ui.HuobiListActivity;
-import com.tophold.example.demo.forex.ui.ForexListActivity;
+import com.tophold.example.base.BaseActivity;
+import com.tophold.example.demo.fund.FundActivity;
+import com.tophold.example.demo.kview.KViewActivity;
+import com.tophold.example.demo.kview.beginner.ui.KViewHorizontalActivityActivity;
+import com.tophold.example.demo.kview.beginner.ui.KViewVerticalActivity;
+import com.tophold.example.demo.kview.btc.ui.HuobiListActivity;
+import com.tophold.example.demo.kview.forex.ui.ForexListActivity;
 import com.tophold.example.demo.pie.PieChartActivity;
+import com.tophold.example.demo.seekbar.DoubleThumbSeekBarActivity;
 
 public class MainActivity extends BaseActivity {
     TextView mTextView;
@@ -23,22 +25,6 @@ public class MainActivity extends BaseActivity {
         mTextView.setText(getVersionStr());
     }
 
-    public void fundView(View view) {
-        go(FundActivity.class);
-    }
-
-    public void kViewVertical(View view) {
-        go(KViewVerticalActivity.class);
-    }
-
-    public void kViewHorizontal(View view) {
-        go(KViewHorizontalActivityActivity.class);
-    }
-
-    public void kViewEvaluation(View view) {
-        go(ForexListActivity.class);
-    }
-
     public String getVersionStr() {
         String version = "verisonName:";
         version += BuildConfig.VERSION_NAME;
@@ -46,13 +32,20 @@ public class MainActivity extends BaseActivity {
 
         return version;
     }
-
-    public void btnDemo(View view) {
-        go(HuobiListActivity.class);
+    public void fundView(View view) {
+        go(FundActivity.class);
     }
 
-
+    public void kViewDemo(View view) {
+        go(KViewActivity.class);
+    }
     public void onPieTest(View view) {
         go(PieChartActivity.class);
     }
+
+    public void onSeekBarTest(View view) {
+        go(DoubleThumbSeekBarActivity.class);
+    }
+
+
 }

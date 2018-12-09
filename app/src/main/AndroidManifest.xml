@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.tophold.example"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.tophold.example">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:name=".MyApplication"
@@ -12,42 +13,35 @@
         android:label="${app_names}"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".demo.beginner.ui.FundActivity">
-        </activity>
-        <activity android:name=".demo.beginner.ui.KViewVerticalActivity">
-        </activity>
+        <activity android:name=".demo.fund.FundActivity" />
+        <activity android:name=".demo.kview.beginner.ui.KViewVerticalActivity" />
         <activity
-            android:name=".demo.beginner.ui.KViewHorizontalActivityActivity"
+            android:name=".demo.kview.beginner.ui.KViewHorizontalActivityActivity"
             android:screenOrientation="landscape"
-            android:theme="@style/AppTheme_Fullscreen">
-        </activity>
-        <activity android:name=".demo.forex.ui.ForexListActivity">
-        </activity>
-        <activity android:name=".demo.forex.ui.ForexActivity">
-        </activity>
-        <activity android:name=".demo.btc.ui.HuobiListActivity">
-        </activity>
-        <activity android:name=".demo.btc.ui.HuobiActivity">
-        </activity>
-        <activity android:name=".FlingActivity">
-        </activity>
-        <activity android:name=".demo.pie.PieChartActivity">
-        </activity>
-        <activity android:name=".VolDemoActivity">
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN"/>-->
+            android:theme="@style/AppTheme_Fullscreen" />
+        <activity android:name=".demo.kview.forex.ui.ForexListActivity" />
+        <activity android:name=".demo.kview.forex.ui.ForexActivity" />
+        <activity android:name=".demo.kview.btc.ui.HuobiListActivity" />
+        <activity android:name=".demo.kview.btc.ui.HuobiActivity" />
+        <activity android:name=".demo.pie.PieChartActivity" />
 
-                <!--<category android:name="android.intent.category.LAUNCHER"/>-->
-            <!--</intent-filter>-->
-        </activity>
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.intent.action.MAIN"/> -->
+
+
+        <!-- <category android:name="android.intent.category.LAUNCHER"/> -->
+        <!-- </intent-filter> -->
+        <activity android:name=".demo.seekbar.DoubleThumbSeekBarActivity" />
+        <activity android:name=".demo.kview.KViewActivity"></activity>
     </application>
 
 </manifest>

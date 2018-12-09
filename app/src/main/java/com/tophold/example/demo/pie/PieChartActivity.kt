@@ -3,7 +3,7 @@ package com.tophold.example.demo.pie
 import android.os.Bundle
 import android.support.annotation.ColorInt
 import android.support.v4.content.ContextCompat
-import com.tophold.example.BaseActivity
+import com.tophold.example.base.BaseActivity
 import com.tophold.example.R
 import com.tophold.trade.view.pie.PieEntrys
 import kotlinx.android.synthetic.main.activity_pie_chart.*
