@@ -7,7 +7,7 @@
 *  [参考文档](https://github.com/Tophold/FinancialCustomerView/tree/master/%E8%B5%84%E6%96%99%E4%B8%8E%E6%96%87%E6%A1%A3)
 
 #### 目录
-*  ``com.tophold.trade.view.fund.FundView`` 仿蚂蚁金服基金走势图
+1. ``com.tophold.trade.view.fund.FundView`` 仿蚂蚁金服基金走势图
 2. ``com.tophold.trade.view.kview.KView`` k线走势图
 3. ``com.tophold.trade.view.pie.PieChartView`` 饼图
 4. ``com.tophold.trade.view.seekbar.DoubleThumbSeekBar``  双Thumb自定义进度条
