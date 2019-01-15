@@ -112,6 +112,7 @@ public class MasterView extends KBaseView {
     Paint mCandlePaint;
     int mRedCandleColor;
     int mGreenCandleColor;
+    int mEqualCandleColor;//y轴开盘价和收盘价一致时设置的颜色
     //单个蜡烛最大值最小值对应的y轴方向的线宽度
     int mCanldeHighLowWidth = 1;
     //指标类型
@@ -318,6 +319,7 @@ public class MasterView extends KBaseView {
         mLongPressTxtBgColor = getColor(R.color.color_timeSharing_longPressTxtBgColor);
         mRedCandleColor = getColor(R.color.color_timeSharing_candleRed);
         mGreenCandleColor = getColor(R.color.color_timeSharing_candleGreen);
+        mEqualCandleColor = getColor(R.color.color_timeSharing_candleEqual);
 
         mMa5Color = getColor(R.color.color_masterView_ma5Color);
         mMa10Color = getColor(R.color.color_masterView_ma10Color);
@@ -870,12 +872,21 @@ public class MasterView extends KBaseView {
 
         RectF rectF = new RectF();
 
-        //上下边界一样，设置一个偏移值
-        if (topRectY == bottomRectY) bottomRectY += 1;
+        int renderColor;
+        //细化渲染值
+        if (quotes.c > quotes.o) {
+            renderColor = mRedCandleColor;
+        } else if (quotes.c < quotes.o) {
+            renderColor = mGreenCandleColor;
+        } else {
+            //上下边界一样，设置一个偏移值
+            if (topRectY == bottomRectY) bottomRectY += dp2px(1f);
+            renderColor = mEqualCandleColor;
+        }
 
         rectF.set(leftRectX, topRectY, rightRectX, bottomRectY);
         //设置颜色
-        mCandlePaint.setColor(quotes.c > quotes.o ? mRedCandleColor : mGreenCandleColor);
+        mCandlePaint.setColor(renderColor);
         canvas.drawRect(rectF, mCandlePaint);
 
         //开始画low、high线

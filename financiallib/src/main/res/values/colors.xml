@@ -52,6 +52,7 @@
     <!--蜡烛图的颜色-->
     <color name="color_timeSharing_candleRed">#ec210f</color>
     <color name="color_timeSharing_candleGreen">#12ec3a</color>
+    <color name="color_timeSharing_candleEqual">#5d5dec</color>
 
     <!--主图指标-->
     <color name="color_masterView_legendColor">#8f8a8a</color>
