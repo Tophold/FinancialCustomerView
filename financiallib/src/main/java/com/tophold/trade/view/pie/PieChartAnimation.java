@@ -32,6 +32,9 @@ public class PieChartAnimation extends Animation {
         super.applyTransformation(interpolatedTime, t);
         if (StringUtils.isEmpty(mPieEntrysList) || mSumValue <= 0 || mView == null) return;
         Log.d(TAG, "applyTransformation1: " + interpolatedTime);
+        if (interpolatedTime == 1.0f) {
+            mView.setDrawLine(true);
+        }
         for (int i = 0; i < mPieEntrysList.size(); i++) {
             PieEntrys data = mPieEntrysList.get(i);
             //通过总和来计算百分比

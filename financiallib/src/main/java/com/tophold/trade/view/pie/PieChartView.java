@@ -2,9 +2,11 @@ package com.tophold.trade.view.pie;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -40,8 +42,8 @@ public class PieChartView extends BaseView {
     float basePaddingLeft;
     float basePaddingRight;
 
-    //圆环宽度
-    float roundWidth = 30;
+    //内部圆洞的半径
+    float holdRadius = 40;
     //高亮环的宽度
     float highLightWidth = 4;
     //高亮环距离圆环的距离
@@ -71,7 +73,7 @@ public class PieChartView extends BaseView {
     //文字大小
     float textSize = 12;
     //饼图item最小的占比。0~1，定义最小的item,防止积压在一起。初始值设置小一点，为了动画好看。
-    float minPartsThreshold = 0.1f;
+    float minPartsThreshold = DEF_PARTSTHRESHOLD;
 
 
     //没有数据显示
@@ -90,6 +92,9 @@ public class PieChartView extends BaseView {
     private float centerX;
     private float centerY;
     private boolean firstCome = true;
+
+    boolean mDrawLine = false;
+
 
     public PieChartView(Context context) {
         this(context, null);
@@ -127,7 +132,7 @@ public class PieChartView extends BaseView {
         basePaddingBottom = ScreenUtils.dip2px(basePaddingBottom);
         highLightWidth = ScreenUtils.dip2px(highLightWidth);
         highLightPadding = ScreenUtils.dip2px(highLightPadding);
-        roundWidth = ScreenUtils.dip2px(roundWidth);
+        holdRadius = ScreenUtils.dip2px(holdRadius);
         lineLength = ScreenUtils.dip2px(lineLength);
         lineWidth = ScreenUtils.dip2px(lineWidth);
         dotRadius = ScreenUtils.dip2px(dotRadius);
@@ -145,13 +150,9 @@ public class PieChartView extends BaseView {
 
         allDp2Px();
 
-        float w = getBaseWidth() - basePaddingLeft - basePaddingRight;
-        float h = getBaseHeight() - basePaddingTop - basePaddingBottom;
         centerX = getBaseWidth() / 2.0f;
         centerY = getBaseHeight() / 2.0f;
-        if (roundWidth <= 0) {
-            roundWidth = Math.min(w, h) / 2.0f;
-        }
+
 
         drawCircle(canvas);
     }
@@ -204,7 +205,7 @@ public class PieChartView extends BaseView {
         float valueW = getBaseWidth() - basePaddingLeft - basePaddingRight;
         float valueH = getBaseHeight() - basePaddingTop - basePaddingBottom;
         float radius = Math.min(valueW,
-                valueH) / 2.0f - roundWidth / 2.0f;//这个地方比较难理解，定义圆环的外边界。边框其实是在中间。
+                valueH) / 2.0f;
         float lX = centerX - radius;
         float tY = centerY - radius;
         float rX = centerX + radius;
@@ -230,10 +231,10 @@ public class PieChartView extends BaseView {
             }
 
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(roundWidth);
+            paint.setStyle(Paint.Style.FILL);
+            //paint.setStrokeWidth(roundWidth);
             paint.setColor(pieEntry.colorBg);
-            canvas.drawArc(rectF, beginAngle, sweepAngle, false, paint);
+            canvas.drawArc(rectF, beginAngle, sweepAngle, true, paint);
             //高亮逻辑
             if (pieEntry.highLight) {
                 float radius2 = Math.min(
@@ -253,104 +254,111 @@ public class PieChartView extends BaseView {
                 canvas.drawArc(rectF2, beginAngle, sweepAngle, false, paint2);
             }
 
-            /**
-             * 指示文字，重要逻辑
-             * 思路：取该模块的度数的中间值向外延伸一定距离。如果该度数在[-90,90]之间，在右边显示；否则在左边显示。
-             */
-            //真实的角度
-            float coreAngle = beginAngle + sweepAngle / 2.0f;//因为从-90开始的
-            float r = radius + roundWidth / 2.0f;//圆的半径
+            if (mDrawLine) {
+                /**
+                 * 指示文字，重要逻辑
+                 * 思路：取该模块的度数的中间值向外延伸一定距离。如果该度数在[-90,90]之间，在右边显示；否则在左边显示。
+                 */
+                //真实的角度
+                float coreAngle = beginAngle + sweepAngle / 2.0f;//因为从-90开始的
+                float r = radius;//圆的半径
 
-            Paint linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            linePaint.setColor(pieEntry.colorBg);
-            linePaint.setStrokeWidth(lineWidth);
+                Paint linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                linePaint.setColor(pieEntry.colorBg);
+                linePaint.setStrokeWidth(lineWidth);
 
-            Paint ratePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            ratePaint.setColor(pieEntry.highLight ? getColor(R.color.color_pie_chart_red) : getColor(R.color.color_pie_chart_gray));
-            ratePaint.setTextSize(textSize);
+                Paint ratePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                ratePaint.setColor(pieEntry.highLight ? getColor(R.color.color_pie_chart_red) : getColor(R.color.color_pie_chart_gray));
+                ratePaint.setTextSize(textSize);
 
-            Paint symbolPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            symbolPaint.setColor(getColor(R.color.color_pie_chart_gray));
-            symbolPaint.setTextSize(textSize);
+                Paint symbolPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                symbolPaint.setColor(getColor(R.color.color_pie_chart_gray));
+                symbolPaint.setTextSize(textSize);
 
 
-            float yPos;
-            //右边
-            Log.d(TAG, "drawCircle: " + coreAngle);
-            float textPdding = getFontHeight(textSize, ratePaint);
-            if (coreAngle >= -90 && coreAngle <= 90) {
-                float circleX = centerX + radius + roundWidth / 2.0f + highLightPadding + highLightWidth;
-                float xPos = circleX + lineLengthMargin;//x的坐标
-                boolean isThreshold = false;
-                if (coreAngle <= 0) {
-                    yPos = (float) (centerY - Math.cos(getAreaAngle(90 + coreAngle)) * r);//y的左边
-                    //在上边界或者下边界x方向延伸长一点
-                    if (r - (centerY - yPos) < lineThreshold) {
-                        xPos -= lineThresholdLength;
-                        isThreshold = true;
+                float yPos;
+                //右边
+                //Log.d(TAG, "drawCircle: " + coreAngle);
+                float textPdding = getFontHeight(textSize, ratePaint);
+                if (coreAngle >= -90 && coreAngle <= 90) {
+                    float circleX = centerX + radius + highLightPadding + highLightWidth;
+                    float xPos = circleX + lineLengthMargin;//x的坐标
+                    boolean isThreshold = false;
+                    if (coreAngle <= 0) {
+                        yPos = (float) (centerY - Math.cos(getAreaAngle(90 + coreAngle)) * r);//y的左边
+                        //在上边界或者下边界x方向延伸长一点
+                        if (r - (centerY - yPos) < lineThreshold) {
+                            xPos -= lineThresholdLength;
+                            isThreshold = true;
+                        }
+                    } else {
+                        yPos = (float) (centerY + Math.cos(getAreaAngle(90 - coreAngle)) * r);//y的左边
+                        //在上边界或者下边界x方向延伸长一点
+                        if (r - (yPos - centerY) < lineThreshold) {
+                            xPos -= lineThresholdLength;
+                            isThreshold = true;
+                        }
                     }
+
+                    //又一个边界问题
+                    if (preYpos != 0 && yPos - preYpos < txtThreshold) {
+                        yPos += txtThresholdmargin;
+                    }
+                    preYpos = yPos;
+
+                    //Log.d(TAG, "drawCircle: " + xPos + "," + yPos);
+                    float lineLeft = !isThreshold ? xPos + lineLength : xPos + lineLength + lineThresholdLength;
+                    float txtLeft = !isThreshold ? xPos : xPos + lineThresholdLength;
+                    canvas.drawLine(xPos, yPos, lineLeft, yPos, linePaint);
+                    canvas.drawCircle(xPos, yPos, dotRadius, linePaint);
+                    float labelLen = lineLength - ratePaint.measureText(pieEntry.label);
+                    canvas.drawText(pieEntry.label, txtLeft + labelLen, yPos - textPaddingBottom, ratePaint);
+                    float symbolLen = lineLength - symbolPaint.measureText(pieEntry.symbol);
+                    canvas.drawText(pieEntry.symbol, txtLeft + symbolLen, yPos + textPaddingBottom + textPdding / 2.0f, symbolPaint);
                 } else {
-                    yPos = (float) (centerY + Math.cos(getAreaAngle(90 - coreAngle)) * r);//y的左边
-                    //在上边界或者下边界x方向延伸长一点
-                    if (r - (yPos - centerY) < lineThreshold) {
-                        xPos -= lineThresholdLength;
-                        isThreshold = true;
+                    float circleX = centerX - radius - highLightPadding - highLightWidth;
+                    float xPos = circleX + lineLengthMargin;//x的坐标
+                    boolean isThreshold = false;
+                    //左边
+                    if (coreAngle <= 180) {
+                        yPos = (float) (centerY + Math.cos(getAreaAngle(coreAngle - 90)) * r);//y的左边
+                        //在上边界或者下边界x方向延伸长一点
+                        if (r - (yPos - centerY) < lineThreshold) {
+                            xPos += lineThresholdLength;
+                            isThreshold = true;
+                        }
+                    } else {
+                        yPos = (float) (centerY - Math.cos(getAreaAngle(270 - coreAngle)) * r);//y的左边
+                        if (r - (centerY - yPos) < lineThreshold) {
+                            xPos += lineThresholdLength;
+                            isThreshold = true;
+                        }
                     }
-                }
 
-                //又一个边界问题
-                if (preYpos != 0 && yPos - preYpos < txtThreshold) {
-                    yPos += txtThresholdmargin;
-                }
-                preYpos = yPos;
-
-                Log.d(TAG, "drawCircle: " + xPos + "," + yPos);
-                float lineLeft = !isThreshold ? xPos + lineLength : xPos + lineLength + lineThresholdLength;
-                float txtLeft = !isThreshold ? xPos : xPos + lineThresholdLength;
-                canvas.drawLine(xPos, yPos, lineLeft, yPos, linePaint);
-                canvas.drawCircle(xPos, yPos, dotRadius, linePaint);
-                float labelLen = lineLength - ratePaint.measureText(pieEntry.label);
-                canvas.drawText(pieEntry.label, txtLeft + labelLen, yPos - textPaddingBottom, ratePaint);
-                float symbolLen = lineLength - symbolPaint.measureText(pieEntry.symbol);
-                canvas.drawText(pieEntry.symbol, txtLeft + symbolLen, yPos + textPaddingBottom + textPdding / 2.0f, symbolPaint);
-            } else {
-                float circleX = centerX - radius - roundWidth / 2.0f - highLightPadding - highLightWidth;
-                float xPos = circleX + lineLengthMargin;//x的坐标
-                boolean isThreshold = false;
-                //左边
-                if (coreAngle <= 180) {
-                    yPos = (float) (centerY + Math.cos(getAreaAngle(coreAngle - 90)) * r);//y的左边
-                    //在上边界或者下边界x方向延伸长一点
-                    if (r - (yPos - centerY) < lineThreshold) {
-                        xPos += lineThresholdLength;
-                        isThreshold = true;
+                    //又一个边界问题
+                    if (preYpos != 0 && preYpos - yPos < txtThreshold) {
+                        yPos -= txtThresholdmargin;
                     }
-                } else {
-                    yPos = (float) (centerY - Math.cos(getAreaAngle(270 - coreAngle)) * r);//y的左边
-                    if (r - (centerY - yPos) < lineThreshold) {
-                        xPos += lineThresholdLength;
-                        isThreshold = true;
-                    }
+                    preYpos = yPos;
+
+                    //Log.d(TAG, "drawCircle: " + xPos + "," + yPos);
+                    float lineLeft = !isThreshold ? xPos - lineLength : xPos - lineLength - lineThresholdLength;
+                    float txtLeft = !isThreshold ? xPos - lineLength : xPos - lineLength - lineThresholdLength;
+
+                    canvas.drawLine(xPos, yPos, lineLeft, yPos, linePaint);
+                    canvas.drawCircle(xPos, yPos, dotRadius, linePaint);
+                    canvas.drawText(pieEntry.label, txtLeft, yPos - textPaddingBottom, ratePaint);
+                    canvas.drawText(pieEntry.symbol, txtLeft, yPos + textPaddingBottom + textPdding / 2.0f, symbolPaint);
                 }
-
-                //又一个边界问题
-                if (preYpos != 0 && preYpos - yPos < txtThreshold) {
-                    yPos -= txtThresholdmargin;
-                }
-                preYpos = yPos;
-
-                Log.d(TAG, "drawCircle: " + xPos + "," + yPos);
-                float lineLeft = !isThreshold ? xPos - lineLength : xPos - lineLength - lineThresholdLength;
-                float txtLeft = !isThreshold ? xPos - lineLength : xPos - lineLength - lineThresholdLength;
-
-                canvas.drawLine(xPos, yPos, lineLeft, yPos, linePaint);
-                canvas.drawCircle(xPos, yPos, dotRadius, linePaint);
-                canvas.drawText(pieEntry.label, txtLeft, yPos - textPaddingBottom, ratePaint);
-                canvas.drawText(pieEntry.symbol, txtLeft, yPos + textPaddingBottom + textPdding / 2.0f, symbolPaint);
             }
-
             beginAngle += sweepAngle;
         }
+
+        //最后绘制中间的圆洞
+        Paint holdPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        holdPaint.setColor(ContextCompat.getColor(getContext(), R.color.color_minorView_longPressTxtColor));
+        canvas.drawCircle(centerX, centerY, holdRadius, holdPaint);
+
     }
 
     private float getAreaAngle(float angle) {
@@ -408,15 +416,6 @@ public class PieChartView extends BaseView {
 
     public PieChartView setBasePaddingRight(float basePaddingRight) {
         this.basePaddingRight = basePaddingRight;
-        return this;
-    }
-
-    public float getRoundWidth() {
-        return roundWidth;
-    }
-
-    public PieChartView setRoundWidth(float roundWidth) {
-        this.roundWidth = roundWidth;
         return this;
     }
 
@@ -543,6 +542,11 @@ public class PieChartView extends BaseView {
 
     public PieChartView setEmptyTxt(String emptyTxt) {
         mEmptyTxt = emptyTxt;
+        return this;
+    }
+
+    public PieChartView setDrawLine(boolean drawLine) {
+        mDrawLine = drawLine;
         return this;
     }
 }
