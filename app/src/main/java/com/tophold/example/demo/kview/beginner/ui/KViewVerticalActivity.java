@@ -116,7 +116,7 @@ public class KViewVerticalActivity extends BaseActivity {
     }
 
     private void initPushData() {
-        String originalFundData = KViewSimulateNetAPI.getOriginalFundData(mContext, 2);
+        String originalFundData = KViewSimulateNetAPI.getOriginalFundData(mContext, 3);
         if (originalFundData == null) {
             Log.e(TAG, "loadData: 从网络获取到的数据为空");
             return;
@@ -135,7 +135,7 @@ public class KViewVerticalActivity extends BaseActivity {
     }
 
     private void initLoadMoreData() {
-        String originalFundData = KViewSimulateNetAPI.getOriginalFundData(mContext, 0);
+        String originalFundData = KViewSimulateNetAPI.getOriginalFundData(mContext, 3);
         if (originalFundData == null) {
             Log.e(TAG, "loadData: 从网络获取到的数据为空");
             return;
@@ -156,7 +156,7 @@ public class KViewVerticalActivity extends BaseActivity {
         Disposable disposable = Observable.timer(StringUtils.getRadomNum(500, 2000),
                 TimeUnit.MILLISECONDS)
                 .doOnNext(data -> {
-                    String originalData = KViewSimulateNetAPI.getOriginalFundData(mContext, 2);
+                    String originalData = KViewSimulateNetAPI.getOriginalFundData(mContext, 3);
                     if (originalData == null) {
                         Log.e(TAG, "loadData: 从网络获取到的数据为空");
                         return;

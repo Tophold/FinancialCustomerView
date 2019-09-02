@@ -1198,9 +1198,13 @@ public class MasterView extends KBaseView {
 
         mPerX = (mBaseWidth - mBasePaddingLeft - mBasePaddingRight - mInnerRightBlankPadding)
                 / (mShownMaxCount);
+        double len = mCandleMaxY - mCandleMinY;
+        if (len == 0) {
+            len = Math.pow(10, -getDigits());
+        }
         //不要忘了减去内部的上下Padding
         mPerY = (float) ((mBaseHeight - mBasePaddingTop - mBasePaddingBottom - mInnerTopBlankPadding
-                - mInnerBottomBlankPadding) / (mCandleMaxY - mCandleMinY));
+                - mInnerBottomBlankPadding) / (len));
 
         Log.d(Constant.ESPECIAL_TAG, "seekAndCalculateCellData,mPerY:" + mPerY);
 
