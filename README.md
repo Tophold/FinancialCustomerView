@@ -6,6 +6,11 @@
 * 提供完整Demo
 *  [参考文档](https://github.com/Tophold/FinancialCustomerView/tree/master/%E8%B5%84%E6%96%99%E4%B8%8E%E6%96%87%E6%A1%A3)
 
+## 号外
+1. [MPAndroidChartWrapper](https://github.com/scsfwgy/MPAndroidChartWrapper)【开发完善中...】高度封装MPAndroidChart,提供开箱即用的MPAndroidChart。
+两大原则：1.不修改MPAndroidChart源码，只继承封装原有功能实现扩展。2. 开箱即用。目标：可商用。
+2. 商用k线图**推荐**使用[MPAndroidChartWrapper](https://github.com/scsfwgy/MPAndroidChartWrapper)，让您几行代码实现一个商用级别k线图。
+
 #### 目录
 1. ``com.tophold.trade.view.fund.FundView`` 仿蚂蚁金服基金走势图
 2. ``com.tophold.trade.view.kview.KView`` k线走势图
